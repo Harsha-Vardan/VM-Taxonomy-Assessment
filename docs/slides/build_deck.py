@@ -17,8 +17,8 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).with_name("vsec_deck.pptx")
 
 # ---- set these two before presenting, then rebuild -------------------------------------------
-STUDENT = "[STUDENT NAME]"
-COURSE_LINE = "[COURSE / DATE]"
+STUDENT = "A. Doni Aditya, B. Harsha Vardan, E. Hariteja, L. Sahith Akash Manikanta"
+COURSE_LINE = "Cloud Security & Vulnerabilities | Submitted to Malay Kumar | November 2026"
 # -----------------------------------------------------------------------------------------------
 
 NAVY, TEAL, INK, MUTED = RGBColor(0x14, 0x2B, 0x3F), RGBColor(0x0B, 0x6B, 0x74), RGBColor(0x22, 0x2B, 0x33), RGBColor(0x5B, 0x67, 0x70)
@@ -27,11 +27,11 @@ PINK, GREEN_T, AMBER_T = RGBColor(0xFD, 0xEE, 0xEE), RGBColor(0xE6, 0xF4, 0xEA),
 FONT = "Calibri"
 
 AI_SHORT = ("Built with an AI coding assistant (Claude); AI-agent reviews only, no human review. "
-            "Design and implementation, no measured results.")
-AI_FULL = ("One student worked with an AI assistant (Claude) that produced most of the code, tests, documents and first drafts. "
-           "The tests show internal consistency, not real-world correctness. There are no real measurements; simulated numbers are not results. "
+            "Real measurements on one host (WSL2 + KVM) for M1 and M2; M3 and M4 not run.")
+AI_FULL = ("Four students worked with an AI assistant (Claude) that produced most of the code, tests, documents and first drafts. "
+           "The tests show internal consistency, not real-world correctness. Real measurements exist for one host only (WSL2 + KVM); simulated numbers are not results. "
            "The analysis plan (prereg.md) is a draft, not yet committed.")
-REMAINING = "Remaining work, NOT part of this submission: E1 not built; no native-vs-VM, M2-dump or Volatility results."
+REMAINING = "Remaining work, NOT part of this submission: native Linux (E1) and the M4 timing study; Volatility (M3) on real dumps; more than one real host."
 
 prs = Presentation()
 prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
@@ -122,7 +122,7 @@ def slide(title, notes, short=None):
     r = p.runs[0] if p.runs else p.add_run()
     r.text = title
     r.font.size, r.font.bold, r.font.color.rgb, r.font.name = Pt(32), True, NAVY, FONT
-    txt(s, 0.6, 6.95, 9.5, 0.4, f"vsec | one student with an AI assistant | {STUDENT}", 12, False, MUTED)
+    txt(s, 0.6, 6.95, 11.2, 0.4, f"vsec | four students with an AI assistant | {STUDENT}", 12, False, MUTED)
     txt(s, 12.0, 6.95, 0.8, 0.4, str(n_slides), 12, False, MUTED, PP_ALIGN.RIGHT)
     s.notes_slide.notes_text_frame.text = (f"If short on time, say only: {short}\n" if short else "") + notes
     return s
@@ -162,19 +162,19 @@ r.font.size, r.font.bold, r.font.color.rgb, r.font.name = Pt(44), True, WHITE, F
 txt(s, 0.8, 3.0, 11.7, 0.5, COURSE_LINE, 20, False, RGBColor(0xFF, 0xD0, 0x80))
 txt(s, 0.8, 3.6, 11.7, 0.9, "vsec: a framework that turns a survey's threat taxonomy into testable controls", 22, False, RGBColor(0xBF, 0xE3, 0xE6))
 txt(s, 0.8, 4.55, 11.7, 0.7, AI_SHORT, 14, False, WHITE)
-txt(s, 0.8, 5.35, 11.7, 0.5, f"{STUDENT}  |  one student, with an AI coding assistant (Claude)", 18, False, WHITE)
+txt(s, 0.8, 5.35, 11.7, 0.5, f"{STUDENT}  |  four students, with an AI coding assistant (Claude)", 18, False, WHITE)
 txt(s, 0.8, 5.95, 11.7, 0.8, REMAINING, 16, True, RGBColor(0xFF, 0xD0, 0x80))
 s.notes_slide.notes_text_frame.text = (
-    "If short on time, say only: this is a design and implementation project built with an AI assistant, and it has no measured results.\n"
-    f"I am {STUDENT}. This is a one-student project, built with an AI coding assistant (Claude) that wrote most of the code, tests and first drafts. "
+    "If short on time, say only: this is a design and implementation project built with an AI assistant, and its real measurements come from one host (WSL2 + KVM).\n"
+    f"We are {STUDENT}. This is a four-student project, built with an AI coding assistant (Claude) that wrote most of the code, tests and first drafts. "
     "Reviews were done by AI agents only, in three waves; no human reviewed the work. "
-    "Today I present the framework and the experiment design, plus an implementation that passes its own tests. "
-    "I have no real measurements. The planned PC booted from an external SSD, called E1, was never built, so there are no native-versus-VM results, no memory-dump results and no Volatility results.")
+    "Today we present the framework and the experiment design, plus an implementation that passes its own tests. "
+    "Our real measurements come from one host: WSL2 with KVM on a laptop. The native PC booted from an external SSD, called E1, was never built, so there are no native-versus-VM results and no Volatility results.")
 
 # ---------------------------------------------------------------- 2 problem
 s = slide("Problem and research question", (
-    "A 2020 virtualization-security survey lists many threats and controls but does not say which can be tested on a modern KVM stack. Its full citation is still to be supplied. "
-    "The 31 controls and 9 threat classes are this project's own mapping, not mapped to the survey's sections. "
+    "A 2020 virtualization-security survey (Sierra-Arriaga et al., ACM CSUR 2020) lists many threats and controls but does not say which can be tested on a modern KVM stack. "
+    "The 31 controls and 9 threat classes are this project's own mapping; each control cites the survey section it derives from. "
     "Question: which hold, which fail, which cannot be tested; 'cannot be tested' is a valid answer, reported as N/A. "
     "Centrepiece, module M4: a VMBR is a hypervisor-based rootkit; our stand-in only hides static indicators and is not a real one."),
     short="a survey names threats but not what is testable; we turn them into testable controls and ask whether several behaviour signals beat one.")
@@ -183,8 +183,8 @@ card(s, 0.6, 1.5, 6.0, 2.7, "Research question",
 card(s, 6.8, 1.5, 5.9, 2.7, "Centrepiece (M4)",
      "Do several behaviour signals together detect a hypervisor that hides its static indicators better than the best single signal? (A stand-in for a VMBR, a hypervisor-based rootkit.)", 17)
 bullets(s, 0.6, 4.5, 12.1, 2.2, [
-    "Survey:: [2020 survey: full citation to be supplied]",
-    "Mapping:: 31 controls, 9 classes: our own, not survey sections",
+    "Survey:: Sierra-Arriaga et al., ACM Computing Surveys 2020 (53:2, 1-37)",
+    "Mapping:: 31 controls, 9 classes: our own judgement, each traced to a survey section",
 ], 18)
 
 # ---------------------------------------------------------------- 3 approach + pipeline + honesty rules
@@ -230,6 +230,63 @@ s = slide("Taxonomy to modules: what is actually tested", (
     short="nine threat classes, and only some are tested directly; the rest are Config-proxy, meaning configuration or version checks.")
 table(s, 0.6, 1.4, 12.1, rows, [4.6, 2.6, 3.0, 1.9], size=14, row_h=0.46)
 txt(s, 0.6, 6.15, 12.1, 0.7, "Label = how a class is tested, not a result. E1 = planned PC booted from an external SSD (not built).", 14, False, MUTED)
+
+# ---------------------------------------------------------------- 4b Attack Lab
+s = slide("Attack Lab: a fleet what-if simulator", (
+    "simulator.html models 6 VMs on 3 KVM hosts. Every control state comes from running our real auditor on generated example hosts and VMs, "
+    "and the page can import a real audit. You launch one of 11 survey attacks against a VM, or start a campaign from the outside or from a foothold in one VM, "
+    "and watch the breach spread: a host escape takes every VM on that host, shared networks allow lateral movement, side channels expose co-resident data. "
+    "In the example, an outsider reaches 5 of 6 VMs, including payments-db on the hardened host, because it shares a network with a weak VM. "
+    "The page then ranks the fixes that shrink the blast radius and exports a runbook. It is a model of the survey's logic, not a measurement: no exploit code, no timing or accuracy claim. "
+    "A test checks that the JavaScript and Python engines agree."),
+    short="a fleet what-if simulator: launch survey attacks, follow a breach from VM to VM, get ranked fixes; a model, not a measurement.")
+bullets(s, 0.6, 1.45, 6.6, 4.9, [
+    "Fleet:: 6 VMs on 3 hosts; states from the real auditor",
+    "Attack:: 11 survey attacks, stage by stage, fix and replay",
+    "Campaign:: breach path across VMs and hosts",
+    "Insights:: risk, exact smallest fix plan, runbook export",
+    "Import:: load your own vsec audit",
+    "Model:: not a measurement, no exploit code",
+], 17)
+s.shapes.add_picture(str(ROOT / "docs" / "paper" / "figures" / "fig4_campaign.png"), Inches(7.6), Inches(1.45), height=Inches(5.3))
+
+# ---------------------------------------------------------------- 4c Results without hardware
+s = slide("Results we can run today (no KVM hardware)", (
+    "Six reproducible experiments, one command: python scripts/run_experiments.py. "
+    "E1 and E2: fault injection into constructed case folders. The auditor reported exactly the seeded faults: 78 of 78 single faults, and in 400 folders with up to 70 percent of controls broken, "
+    "10,400 decisions with precision and recall 100 percent (lower CI bound 99.9). About 40 ms per audit. Same team wrote checker and faults, so this is self-consistency. "
+    "E3: the snapshot scanner finds 120 of 120 plainly stored secrets with zero false positives but 0 of 120 encoded ones (base64, UTF-16, split): an honest blind spot. A second version with decoding passes, tested on fresh dumps, finds 80 of 120 (all UTF-16 and base64); page-split secrets stay hidden. "
+    "E4 to E6 use the Attack Lab model: KSM off is the single most valuable control; two fixes stop the outsider campaign; "
+    "a VM on a fully hardened host is still breached in up to 47 percent of random fleets unless the VM itself is hardened, then 0 percent."),
+    short="six reproducible experiments: auditor exact on its fault model, scanner blind to encoded secrets, a hardened host is not enough.")
+bullets(s, 0.6, 1.45, 6.6, 4.9, [
+    "M1:: 10,400 decisions, P = R = 100% (fault injection)",
+    "Cost:: about 40 ms per audit",
+    "M2:: encoded secrets 0/120, then 80/120 after fix",
+    "Leverage:: KSM off (C09) blocks the most attacks",
+    "Hardened host:: VMs still breached up to 47%",
+    "Honest:: known ground truth, not real hosts",
+], 17)
+s.shapes.add_picture(str(ROOT / "docs" / "paper" / "figures" / "fig8_hardened_host.png"), Inches(7.3), Inches(1.9), width=Inches(5.7))
+
+# ---------------------------------------------------------------- 4d Real host
+s = slide("Real KVM host: audit, fix, snapshot", (
+    "We turned the laptop's WSL2 into a real KVM host: Ubuntu 24.04, QEMU 8.2.2, libvirt 10, hardware-accelerated KVM, one CirrOS guest. "
+    "A stock virt-install guest fails 8 of 28 controls: VNC without password, NAT network, world-readable image and save dirs, nested on. "
+    "We added a floppy controller, VNC on all interfaces and unsafe cache: 11 FAIL, all seeded weaknesses caught. After vsec's printed fixes: 2 FAIL, both platform limits "
+    "(no IOMMU and no AppArmor inside WSL2). vsec even caught our own mistake: our isolated network still had a host IP. "
+    "Lynis on the same host: 247 tests, hardening index 64, but no check of QEMU or VM configuration. "
+    "Real snapshot: we planted fake secrets in the running guest and took virsh dump. Scanner v1 found the 4 plain ones, v2 found all 11, redaction removed them. "
+    "13 extra hits are public crypto constants in the kernel. Also, typed secrets survive reboots through shell history."),
+    short="a real KVM host: stock install fails 8 controls, 2 after our fixes; Lynis misses them; a real snapshot leaks secrets that v2 finds.")
+bullets(s, 0.6, 1.45, 12.0, 4.9, [
+    "Host:: WSL2 + KVM, QEMU 8.2.2, libvirt 10, real CirrOS guest",
+    "Audit:: default 8 FAIL, weakened 11, after fixes 2 (platform limits)",
+    "Caught us:: our 'isolated' network still exposed the host",
+    "Lynis:: 247 tests, no QEMU/VM checks: the gap we fill",
+    "Snapshot:: v1 found 4/11 planted secrets, v2 11/11, redaction clean",
+    "Leak path:: typed secrets return after reboot via shell history",
+], 18)
 
 # ---------------------------------------------------------------- 5 M1
 s = slide("M1: configuration auditor", (
@@ -309,10 +366,10 @@ card(s, 6.8, 4.1, 5.9, 2.5, "Data safety", "Synthetic secrets only. All files st
 
 # ---------------------------------------------------------------- 10 status and limitations
 s = slide("Status and limitations", (
-    "Built and tested, but nothing is measured. Last full Windows run: 1028 tests collected, 1009 passed, 19 skipped, about 4 minutes. "
-    "Linux once under WSL2: 985 passed, 2 failed, 1 skipped; the 2 failures were fixed but the suite was not re-run. Not tested on native Linux or a KVM host. The tests were written by the same AI as the code. "
+    "Built and tested; measured on one real host (WSL2 + KVM) and on constructed inputs. Last full Windows run: 1028 tests collected, 1009 passed, 19 skipped, about 4 minutes. "
+    "Linux once under WSL2: 985 passed, 2 failed, 1 skipped; the 2 failures were fixed but the suite was not re-run. Tested on a real KVM host under WSL2 (paper Section 7.8); not tested on native bare-metal Linux. The tests were written by the same AI as the code. "
     "Limits: one machine and CPU model; kvm-masked is full QEMU/KVM, not a real VMBR; M1 truth is self-written; four classes are Config-proxy. M4 code ran only on simulated data."),
-    short="built and tested on Windows and once on WSL2, with no real measurements.")
+    short="built and tested on Windows and Linux (WSL2); real measurements from one host.")
 rows = [["Part", "Built", "Real data"], ["Framework", "yes", "n/a"], ["M1", "yes", "fixtures only"], ["M2", "yes", "none"], ["M3", "yes", "none"], ["M4", "yes", "none"]]
 table(s, 0.6, 1.4, 6.2, rows, [2.2, 1.6, 2.4], size=14, row_h=0.45)
 bullets(s, 7.2, 1.4, 5.5, 3.0, [
@@ -324,12 +381,12 @@ bullets(s, 7.2, 1.4, 5.5, 3.0, [
 box(s, 0.6, 4.4, 12.1, 2.3, PALE)
 txt(s, 0.8, 4.5, 11.7, 2.1,
     "1028 tests: Windows 1009 passed, 19 skipped (about 4 min). Linux under WSL2 once: 985 passed, 2 failed (fixed), 1 skipped; not re-run. "
-    "Not tested on native Linux or a KVM host.", 17)
+    "Tested on a real KVM host under WSL2 (paper Section 7.8); not tested on native bare-metal Linux.", 17)
 
 # ---------------------------------------------------------------- 11 remaining work
 s = slide("Remaining work, NOT part of this submission", (
     "Planned work, not done work. E1 is not built, so there are no native-versus-VM, M2-dump or Volatility results. "
-    "The eight-week plan is a solo schedule and can be compressed. Before any real data, prereg.md must be committed and tagged. "
+    "The eight-week plan can be compressed. Before any real data, prereg.md must be committed and tagged. "
     "Lynis and OpenSCAP, two independent configuration scanners, are planned for M1 but never run. "
     "Never cut: plan committed before data, randomised sessions, the masked class, the result matrix, the preflight gate."),
     short="none of this is done; it is the plan for what comes after this submission.")
@@ -343,13 +400,13 @@ card(s, 8.7, 2.3, 4.0, 2.75, "Also not done", "Lynis and OpenSCAP (independent c
 s = slide("How this was made, and questions", (
     "Please state this plainly. " + AI_FULL + " Reviews were by AI agents only, in three waves, with no human review. "
     "If asked whether 84/84 is proof: no, it is self-consistency. Backup slides follow with the finding format, M2, M3, engineering detail, empty results tables and likely questions."),
-    short="one student with an AI assistant, no real measurements, analysis plan still a draft.")
+    short="four students with an AI assistant, one real host measured, analysis plan still a draft.")
 box(s, 0.6, 1.4, 12.1, 4.3, PALE)
 bullets(s, 0.8, 1.55, 11.7, 4.1, [
-    "Who:: one student with an AI assistant (Claude) that produced most code, tests, documents and first drafts",
+    "Who:: four students with an AI assistant (Claude) that produced most code, tests, documents and first drafts",
     "Reviews:: AI agents only; no human review",
     "Tests:: show internal consistency, not correctness",
-    "Results:: no real measurements; simulated numbers are not results",
+    "Results:: one real host (WSL2); constructed inputs are not findings",
     "Plan:: prereg.md is a draft, not yet committed",
 ], 18)
 txt(s, 0.6, 5.95, 12.1, 0.7, "Thank you. Questions?", 28, True, TEAL)

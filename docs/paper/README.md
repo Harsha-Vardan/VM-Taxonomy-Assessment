@@ -5,7 +5,7 @@ This directory contains the draft paper (`paper.md`) and instructions for conver
 ## Overview
 
 - **`paper.md`**: The main paper draft with 10 chapters, abstract, and references.
-- **`references.md`**: Placeholder citations that only the student can complete.
+- **`references.md`**: Placeholder citations that only the team can complete.
 - **`make_paper_tables.py`** (in `scripts/`): Script to generate result tables from `out/report.json`.
 
 ## Step 1: Fill the Placeholders
@@ -87,7 +87,7 @@ Before submitting, check:
 1. **All [PENDING REAL DATA: ...] placeholders are filled** with actual tables from step 1.
 2. **All [SURVEY-2020] and citation references are resolved** in Chapters 2 and References.
 3. **All [CHECK] markers are reviewed and addressed.**
-4. **Solo authorship is clear**: Check Section 10.4 (Conclusion) states your name.
+4. **Authorship is clear**: Check that the title block and Section 10.4 name all four authors.
 5. **Limitations are honest**: Chapter 9 explains what was and was not tested.
 
 ## Step 3: Convert to Word or PDF
@@ -205,7 +205,7 @@ The following sections are outlines, placeholders, or contain claims that requir
 The following issues were found and corrected during the 2026-10-04 audit:
 
 1. **H3 definition:** Fixed from "F1 drop" to "AUROC drop" (primary).
-2. **Code reviews claim:** Changed from "peers and supervisors" to "automated agents only" (solo project).
+2. **Code reviews claim:** Changed from "peers and supervisors" to "automated agents only" (team project).
 3. **Pre-registration status:** Changed from "is committed" to "will be committed and tagged before."
 4. **Invented citations:** Removed fabricated author/title from [SURVEY-2020]; kept as TODO placeholder. Fixed OpenSCAP attribution.
 5. **Hard-coded test counts:** Changed "954 tests (as of Round 5)" to "several hundred tests."
@@ -225,7 +225,7 @@ Before final submission:
 - [ ] **Placeholders filled**: All `[PENDING REAL DATA: ...]` replaced with actual tables; no missing placeholders remain.
 - [ ] **Citations completed**: `references.md` has full citations; `[SURVEY-2020]`, `[CITE]` markers resolved.
 - [ ] **[CHECK] items reviewed**: Each `[CHECK]` is verified or removed.
-- [ ] **Solo authorship stated**: Your name is in the paper (Section 1.5 and 10.4).
+- [ ] **Authorship stated**: all four authors are named in the paper (Section 1.5 and 10.4).
 - [ ] **Honest limitations**: Chapter 9 explains what was/wasn't tested; no overclaiming.
 - [ ] **PDF/Word generated**: Document is in the required submission format.
 - [ ] **Formatting clean**: No Markdown symbols remain (headers are # not rendered).
@@ -241,11 +241,11 @@ The `make_paper_tables.py` script generates **numerical tables only**. The follo
 4. **Prose around tables**: context and commentary linking tables to claims.
 5. **Proofreading**: grammar, style, clarity.
 
-The student is responsible for all narrative content and interpretation.
+The team is responsible for all narrative content and interpretation.
 
 ## Contact
 
-If the student has questions:
+If the team has questions:
 
 1. Check the comments in `paper.md` (marked `[CHECK]` or `[PENDING ...]`).
 2. Refer to `FINAL_PROJECT_PLAN.md` for the overall structure and goals.

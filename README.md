@@ -1,6 +1,6 @@
 # vsec: taxonomy-driven security assessment for KVM virtualization
 
-**Scope and AI assistance.** This project was built by one student using an AI coding assistant (Claude). The assistant produced most of the code, tests, documentation and first drafts of this paper and the slides under the student's direction. Code review was done by automated AI reviewers only; no person has independently reviewed or reproduced the work. The tests were written by the same assistant, so they show internal consistency, not correctness. No real measurements exist: the multi-signal hypervisor-detection experiment (M4), the secret scanner on real memory dumps (M2) and the forensics module (M3) have not been run on real hardware. Anything from simulated or synthetic data is a pipeline check and is not a result.
+**Scope and AI assistance.** This project was built by four students using an AI coding assistant (Claude). The assistant produced most of the code, tests, documentation and first drafts of this paper and the slides under the team's direction. Code review was done by automated AI reviewers only; no person has independently reviewed or reproduced the work. The tests were written by the same assistant, so they show internal consistency, not correctness. Real measurements exist for one host only (WSL2 + KVM: M1 and M2, paper Section 7.8); the multi-signal hypervisor-detection experiment (M4) and the forensics module on real dumps (M3) have not been run on real hardware. Anything from simulated or synthetic data is a pipeline check and is not a result.
 
 Plan: `FINAL_PROJECT_PLAN.md`. Pre-registration: `prereg.md`. `PASS` means "this control passed its test", not "the system is secure".
 
@@ -16,6 +16,15 @@ Plan: `FINAL_PROJECT_PLAN.md`. Pre-registration: `prereg.md`. `PASS` means "this
 | E1 (native machine), real VMs, real data | scripts only | no |
 
 **Change log and what comes next:** see `FINAL_PROJECT_PLAN.md` section 12 (what was done, round by round) and section 13 (planned changes). Short version: Rounds 2, 4 and 5 were AI-agent review waves, all fixed. Built on Windows and checked once on Linux under WSL2. After that, everything depends on real hardware, listed step by step in `docs/YOUR_TASKS.md`. Treat all numbers from `--simulate` and synthetic dumps as not citable.
+
+## Attack Lab (start here for the demo)
+Open `simulator.html` in a browser (no install). It is a fleet what-if simulator: 6 VMs on 3 KVM hosts, 11 attacks from the survey,
+a campaign view that follows a breach from VM to VM, ranked fixes, an exportable runbook, and import of your own `vsec audit`.
+Control states come from the real auditor; it is a model of the survey's logic, not a measurement. Full explanation: `PROJECT.md`.
+```
+python scripts/make_demo_cases.py      # hand-built weak / hardened / weak-fixed targets in demo_cases/
+python scripts/build_simulator.py      # rebuild simulator.html after editing vsec/attacks.yaml or vsec/fleet.yaml
+```
 
 ## Setup (project-local)
 ```

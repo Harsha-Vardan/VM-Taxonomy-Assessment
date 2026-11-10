@@ -80,14 +80,7 @@ Raffetseder, T., Kruegel, C., & Kirda, E. (2007). Detecting System Emulators. In
 
 ## Security Hardening and Virtualization
 
-TODO: Add citations for:
-- QEMU seccomp sandbox (configuration and effectiveness)
-- SELinux and AppArmor confinement of QEMU processes
-- KVM nested virtualization security implications
-- Kernel samepage merging (KSM) side channels
-- IOMMU and DMA isolation (VT-d, AMD-Vi)
-- Memory forensics and hidden process detection
-- Snapshot privacy and secret leakage in memory
+Resolved 2026-11-08: the authoritative list is the References section of `paper.md` (libvirt and kernel documentation, plus works taken from the survey's and the case study's reference lists). Check that each documentation link opens before submission.
 
 ## Machine Learning and Statistics
 

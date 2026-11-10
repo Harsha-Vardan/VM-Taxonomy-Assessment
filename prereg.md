@@ -1,6 +1,6 @@
-# M4 Pre-Registration (SOLO, DRAFT: commit before any W3 data is collected)
+# M4 Pre-Registration (DRAFT: commit before any W3 data is collected)
 
-**This is a DRAFT analysis plan by one student (with an AI assistant). It is NOT yet a pre-registration: it has no commit or tag, and the project folder is not a git repository yet.** You fill the `PILOT` values from the W1 pilot (pilot data only), then commit **before collecting any real data**. After the commit, nothing below changes without a dated amendment at the end of this file.
+**This is a DRAFT analysis plan by four students (with an AI assistant). It is NOT yet a pre-registration: it has no commit or tag, and the project folder is not a git repository yet.** You fill the `PILOT` values from the W1 pilot (pilot data only), then commit **before collecting any real data**. After the commit, nothing below changes without a dated amendment at the end of this file.
 
 **Date committed:** (to be filled on W2)
 **Researcher:** (your name/email)

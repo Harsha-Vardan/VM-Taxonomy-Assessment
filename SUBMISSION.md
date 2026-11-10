@@ -2,7 +2,7 @@
 
 ## Scope and AI Assistance
 
-This project was done by one student using an AI coding assistant (Claude). The assistant produced most of the code, tests, documentation and first drafts of the paper and slides under the student's direction. Code review was done by automated AI reviewers only; no person has independently reviewed or reproduced the work. The tests show internal consistency, not correctness against real systems. No real measurements exist: M4, M2, and M3 have not been run on real hardware. This submission presents a design, implementation, and test suite, not findings.
+This project was done by four students using an AI coding assistant (Claude). The assistant produced most of the code, tests, documentation and first drafts of the paper and slides under the team's direction. Code review was done by automated AI reviewers only; no person has independently reviewed or reproduced the work. The tests show internal consistency, not correctness against real systems. Real measurements exist for one host only (WSL2 + KVM; M1 and M2, paper Section 7.8); M4 and M3 have not been run on real hardware.
 
 ## What Is Included
 

@@ -2,7 +2,7 @@
 
 This script is for you to follow while screen-recording. Everything in Part 1 uses simulated or synthetic data from Windows. Part 2 requires the E1 machine and real data.
 
-**Say this once, at the start and in the video description:** "This project was built by one student using an AI assistant. Everything in Part 1 uses simulated or synthetic data. It checks that the pipeline works. It is not a result."
+**Say this once, at the start and in the video description:** "This project was built by four students using an AI assistant. Everything in Part 1 uses simulated or synthetic data. It checks that the pipeline works. It is not a result."
 
 Run all commands from the project root (`D:\malay case study`). Windows PowerShell shown; on E1 use `.local/venv/bin/python`.
 
@@ -10,6 +10,48 @@ Run all commands from the project root (`D:\malay case study`). Windows PowerShe
 $env:TMP = "$PWD\.local\tmp"; $env:TEMP = "$PWD\.local\tmp"     # keep scratch inside the project
 $PY = ".local\venv\Scripts\python"
 ```
+
+## Main demo: the Attack Lab (about 7 minutes)
+
+Open `simulator.html` (double-click, or `run_simulation.bat` option 3). Say first: "This is a what-if model of the survey's
+attack logic, driven by our real controls. The control states come from our real auditor on generated example hosts. It is not
+a measurement and it has no exploit code."
+
+0. **Simulate (the opening tab, about 3 minutes):** a 4-step guided simulation. (1) Pick `legacy-erp`. (2) Pick
+   "Floppy-controller escape". (3) Watch the environment diagram: the attacker marker moves from the guest into the virtual
+   devices and the host, and every defence check is shown as it happens; the whole host turns red. (4) Read "How the attack
+   happened" and "How to protect it", press "Apply the earliest fix (C14) and re-run": a green shield stops it at stage 2.
+   Then "Undo my fixes", "Try another attack", "Neighbour VM pivot": `payments-db` on the hardened host turns red.
+1. **Fleet:** 6 VMs on 3 hosts, a risk score each, and the heatmap of every VM against every attack. Point at `payments-db`
+   (low risk, on the hardened host) and `dev-sandbox` (highest risk).
+2. **Attack Lab:** click a red cell, or pick "Floppy-controller escape" for `legacy-erp`, and press Launch. It ends COMPROMISED.
+   Press a Fix button; the replay is BLOCKED. Note the HOST tag: a host control protects every VM on that host.
+3. **Campaign:** choose "Outsider", press Run. Watch the breach spread and reach `payments-db` on the hardened host through the
+   shared network. Then read the containment advice: one console password on `dev-sandbox` cuts the breach from 5 VMs to 2.
+   Press "Auto-harden (greedy)": the breach drops to 0.
+4. **VM Insights:** pick a VM. Show the exposure table, the exact smallest fix plan, the single points of failure, and
+   "Export runbook".
+5. **Import:** paste the output of `python -m vsec audit <case> --env E1`, or load a `report.json` from `python -m vsec run`.
+   Your own audit becomes a VM in the fleet. (Use only audits you really ran.)
+6. **Hardening Challenge:** Start; par is the exact minimum number of fixes. Then read the survey map and the box
+   "What the model does not claim" aloud.
+
+Rebuild after editing `vsec/attacks.yaml` or `vsec/fleet.yaml`: `python scripts/build_simulator.py`. A test fails if
+`simulator.html` is stale.
+
+## Quick demo (recommended): weak vs hardened vs fixed
+
+Three hand-built targets (constructed, NOT captured from a real machine; say so out loud):
+
+```powershell
+python scripts/make_demo_cases.py
+python -m vsec audit demo_cases/weak --env E1          # 26 FAIL, each with evidence
+python -m vsec run --fast --simulate --env E1 --vm weak=demo_cases/weak --vm hardened=demo_cases/hardened --vm weak-fixed=demo_cases/weak-fixed --out .local/work/out
+start .local\work\out\report.html
+```
+Story: weak is 0% passed; apply the fix commands from the "How to fix" column; weak-fixed is 96% with one item left
+(C25, a CPU vulnerability, needs a microcode update, not a config edit); hardened is 100%. C23/C24 stay NA because the
+CVE list is unverified. The M2/M4 notes in the report say those parts are simulated: do not quote their numbers.
 
 ## Part 1: what works today (simulated and synthetic only)
 
@@ -23,7 +65,7 @@ $PY = ".local\venv\Scripts\python"
 | 7:45-8:00 | Close |
 
 ### 0:00 Intro (no command)
-Say: "This is vsec, a solo university project. It maps the threat taxonomy of a 2020 virtualization-security survey onto four modules and tests them on KVM. PASS means a control passed its defined test, never that the system is secure. NA is never PASS. Anything simulated is not citable. What you will see now is the pipeline running on simulated and synthetic data. Real measurements are pending the E1 machine."
+Say: "This is vsec, our university project. It maps the threat taxonomy of a 2020 virtualization-security survey onto four modules and tests them on KVM. PASS means a control passed its defined test, never that the system is secure. NA is never PASS. Anything simulated is not citable. What you will see now is the pipeline running on simulated and synthetic data. Real measurements are pending the E1 machine."
 
 ### 0:45 Tests (about 1.5 min on screen; the run itself is longer)
 ```powershell
