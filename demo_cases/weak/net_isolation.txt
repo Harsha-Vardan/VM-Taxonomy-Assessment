@@ -1,0 +1,1 @@
+not-isolated: network default has <forward mode='nat'>

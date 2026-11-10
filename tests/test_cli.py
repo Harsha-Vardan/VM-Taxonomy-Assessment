@@ -700,7 +700,7 @@ def test_run_end_to_end_simulated(sandbox_dirs, monkeypatch, capsys):
     assert "FAST mode: 200 bootstrap reps, 1 CV repeat: not citable" in rep["notes"]
     c31 = [f for f in rep["findings"] if f["id"] == "C31"]
     assert c31 and {f["status"] for f in c31} == {"NA"}
-    assert any("self-consistency" in n and "solo project" in n for n in rep["notes"])
+    assert any("self-consistency" in n and "same team" in n for n in rep["notes"])
     assert "not real results" in capsys.readouterr().err
 
 

@@ -1,0 +1,1 @@
+<domain type='kvm'><name>vm</name><devices><disk type='file' device='disk'><driver name='qemu' type='qcow2' cache='none'/></disk><graphics type='vnc' listen='127.0.0.1' passwd='secret'/><interface type='network'><source network='isolated'/></interface></devices></domain>

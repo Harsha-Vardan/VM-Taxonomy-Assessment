@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>vsec Attack Lab</title>
+<style>
+:root{--bg:#f3f5f9;--card:#fff;--ink:#16202e;--mute:#5b6778;--line:#dbe1ea;--accent:#1d4ed8;--accent2:#0f2a5c;
+--pass:#15803d;--passbg:#dcf5e5;--fail:#b91c1c;--failbg:#fde4e2;--na:#92600a;--nabg:#fdf0c8;
+--guest:#2563eb;--device:#7c3aed;--host:#ea580c;--network:#0d9488;--shadow:0 1px 2px rgba(15,23,42,.06),0 4px 14px rgba(15,23,42,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#0d121a;--card:#161d28;--ink:#e7ecf3;--mute:#9aa7b8;--line:#263142;--accent:#6ea0ff;--accent2:#a9c4ff;
+--pass:#5fd39a;--passbg:#12301f;--fail:#ff8f86;--failbg:#3d1d1a;--na:#f0c14f;--nabg:#392e10;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,"Segoe UI",sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header{background:linear-gradient(120deg,var(--accent2),#1d4ed8);color:#fff;padding:18px 20px 0}
+.wrap{max-width:1380px;margin:0 auto}
+h1{margin:0;font-size:26px}.tag{opacity:.88;margin:2px 0 10px}
+.honest{background:rgba(255,255,255,.14);border-radius:8px;padding:8px 12px;font-size:13.5px;margin-bottom:12px}
+.honest b{color:#ffe08a}.honest code{background:rgba(0,0,0,.25);border-color:rgba(255,255,255,.3);color:#fff}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:transparent;border:0;color:#fff;padding:10px 16px;border-radius:10px 10px 0 0;font-weight:600;opacity:.8}
+nav button[aria-selected=true]{background:var(--bg);color:var(--ink);opacity:1}
+.layout{display:grid;grid-template-columns:350px 1fr;gap:18px;padding:18px 20px 60px;max-width:1380px;margin:0 auto}
+@media (max-width:980px){.layout{grid-template-columns:1fr}}
+.layout>*{min-width:0}
+aside{align-self:start;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto}
+@media (max-width:980px){aside{position:static;max-height:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px}
+.card h2{margin:0 0 8px;font-size:17px}.card h3{margin:10px 0 4px;font-size:14px}
+.mute{color:var(--mute);font-size:13px}
+.vmlist{display:grid;gap:6px;margin:8px 0}
+.vmbtn{display:flex;align-items:center;gap:8px;text-align:left;border:2px solid var(--line);background:var(--bg);border-radius:10px;padding:6px 10px}
+.vmbtn[aria-pressed=true]{border-color:var(--accent);background:var(--card)}
+.vmbtn .n{flex:1;font-weight:700;font-size:14px}.vmbtn .h{font-size:11.5px;color:var(--mute)}
+.risk{border-radius:99px;padding:1px 9px;font-size:12px;font-weight:800;color:#fff}
+.r0{background:#15803d}.r1{background:#ca8a04}.r2{background:#ea580c}.r3{background:#b91c1c}
+.grp{margin:12px 0 4px;font-weight:700;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--mute)}
+.ctl{border:1px solid var(--line);border-radius:10px;margin:4px 0;background:var(--bg)}
+.ctl summary{list-style:none;display:flex;align-items:center;gap:8px;padding:6px 8px;cursor:pointer}
+.ctl summary::-webkit-details-marker{display:none}
+.ctl .nm{flex:1;font-size:13.5px}.ctl .id{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--mute)}
+.ctl .body{padding:2px 10px 10px;font-size:12.5px;color:var(--mute)}.ctl.dim{opacity:.6}
+.scope{font-size:10.5px;font-weight:800;border-radius:5px;padding:0 5px;background:var(--line);color:var(--mute)}
+.scope.host{background:#fde7d6;color:#9a3412}.scope.vm{background:#dbeafe;color:#1e40af}
+.pill{border:0;border-radius:99px;padding:2px 11px;font-weight:700;font-size:12px;min-width:48px}
+.pill.PASS{background:var(--passbg);color:var(--pass)}.pill.FAIL{background:var(--failbg);color:var(--fail)}.pill.NA{background:var(--nabg);color:var(--na)}
+code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:12px;word-break:break-word}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.acard{text-align:left;border:2px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px;position:relative}
+.acard[aria-pressed=true]{border-color:var(--accent)}.acard .t{font-weight:700;font-size:14px;margin:4px 0 2px}
+.chip{display:inline-block;border-radius:99px;padding:1px 9px;font-size:11.5px;font-weight:700;background:var(--bg);border:1px solid var(--line);color:var(--mute)}
+.badge{position:absolute;top:10px;right:10px;border-radius:99px;font-size:11px;font-weight:800;padding:2px 9px}
+.badge.B{background:var(--passbg);color:var(--pass)}.badge.C{background:var(--failbg);color:var(--fail)}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:700}
+.btn.sec{background:var(--bg);color:var(--ink);border:1px solid var(--line)}.btn.sm{padding:4px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chain{margin:12px 0 4px}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:10px 0;position:relative;opacity:.55;transition:opacity .35s}
+.step::before{content:"";position:absolute;left:16px;top:44px;bottom:-10px;width:2px;background:var(--line)}.step:last-child::before{display:none}
+.num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:var(--mute);transition:all .3s}
+.step.guest .num{background:var(--guest)}.step.device .num{background:var(--device)}.step.host .num{background:var(--host)}.step.network .num{background:var(--network)}
+.step.reached{opacity:1}.step.reached .num{transform:scale(1.12)}
+.step.blocked{opacity:1}.step.blocked .num{background:var(--pass);transform:scale(1.2);box-shadow:0 0 0 6px var(--passbg)}
+.step.skipped{opacity:.28}.step.preview{opacity:1}
+.lane{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#fff;border-radius:6px;padding:1px 7px;margin-right:6px}
+.lane.guest{background:var(--guest)}.lane.device{background:var(--device)}.lane.host{background:var(--host)}.lane.network{background:var(--network)}
+.st{font-weight:700}.sx{color:var(--mute);font-size:13.5px}
+.gates{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.gate{border:1px dashed var(--line);border-radius:8px;padding:3px 9px;font-size:12.5px;background:var(--bg)}
+.gate.PASS{border:1px solid var(--pass);background:var(--passbg);color:var(--pass)}
+.gate.FAIL{border:1px solid var(--fail);background:var(--failbg);color:var(--fail)}
+.gate.NA{border:1px solid var(--na);background:var(--nabg);color:var(--na)}
+.why{margin-top:6px;font-size:13px;background:var(--passbg);border-left:4px solid var(--pass);border-radius:6px;padding:6px 10px}
+.verdict{border-radius:12px;padding:12px 14px;margin-top:10px;font-weight:600}
+.verdict.B{background:var(--passbg);border:1px solid var(--pass)}.verdict.C{background:var(--failbg);border:1px solid var(--fail)}
+.verdict.N{background:var(--bg);border:1px dashed var(--line);color:var(--mute);font-weight:500}
+.fixrow{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-weight:400;font-size:13.5px}
+.ring{width:130px;height:130px}.ring circle{fill:none;stroke-width:14}
+.ring .bg{stroke:var(--line)}.ring .fg{stroke-linecap:round;transition:stroke-dashoffset .8s;transform:rotate(-90deg);transform-origin:50% 50%}
+.ring text{font-size:28px;font-weight:800;fill:var(--ink);text-anchor:middle}.ring .sub{font-size:10.5px;font-weight:500;fill:var(--mute)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--mute)}.tw{overflow-x:auto}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 10px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 14px;min-width:120px}.stat b{display:block;font-size:24px}
+.stars{font-size:28px;letter-spacing:4px;color:#e0a800}
+.hosts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.host{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
+.host h3{margin:0}.host .vm{display:flex;align-items:center;gap:8px;margin-top:6px;padding:6px 8px;background:var(--card);border:1px solid var(--line);border-radius:8px;width:100%;text-align:left}
+.host .vm .n{flex:1;font-weight:700;font-size:13.5px}
+.heat td,.heat th{text-align:center;padding:4px 3px}.heat td.l,.heat th.l{text-align:left;white-space:nowrap}
+.cell{border:0;border-radius:6px;width:34px;height:26px;font-weight:800;font-size:13px}
+.cell.O{background:var(--failbg);color:var(--fail)}.cell.B{background:var(--passbg);color:var(--pass)}
+.graph{width:100%;height:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.graph .node rect{stroke-width:2.5;transition:fill .4s,stroke .4s}
+.graph .safe rect{fill:var(--passbg);stroke:var(--pass)}.graph .comp rect{fill:var(--failbg);stroke:var(--fail)}
+.graph .expo rect{fill:var(--nabg);stroke:var(--na)}.graph .foot rect{stroke-width:5}
+.graph text{fill:var(--ink);font-size:13px;font-weight:700}.graph .sm{font-size:10.5px;font-weight:500;fill:var(--mute)}
+.graph .hostbox{fill:none;stroke:var(--line);stroke-width:2;stroke-dasharray:6 5}.graph .hostlbl{font-size:12px;fill:var(--mute)}
+.graph .edge{fill:none;stroke-width:2.5}.graph .edge.comp{stroke:var(--fail)}.graph .edge.expo{stroke:var(--na);stroke-dasharray:5 4}
+.graph .elbl{font-size:11px;font-weight:800;paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);max-width:640px;width:92vw}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+textarea,input[type=text]{width:100%;font:13px ui-monospace,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+.sr{position:absolute;left:-9999px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.layout.full{grid-template-columns:1fr}.layout.full aside{display:none}
+.stepper{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.stp{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 14px 5px 5px;font-weight:600}
+.stp .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--line);font-size:13px}
+.stp.on{border-color:var(--accent)}.stp.on .n{background:var(--accent);color:#fff}.stp.done .n{background:var(--pass);color:#fff}
+.stp:disabled{opacity:.5;cursor:default}
+.vmcard .post{font-size:12.5px;margin-top:6px}.rk{position:absolute;top:10px;right:10px;color:#fff;border-radius:99px;font-size:11px;font-weight:800;padding:2px 9px}
+.simgrid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:14px}@media (max-width:1100px){.simgrid{grid-template-columns:1fr}}
+.env{width:100%;height:auto;display:block}
+.env .z{fill:var(--card);stroke:var(--line);stroke-width:2;transition:fill .4s,stroke .4s}
+.env .z.hot{stroke:#f59e0b;stroke-width:4}
+.env .z.comp{fill:var(--failbg);stroke:var(--fail)}.env .z.expo{fill:var(--nabg);stroke:var(--na)}.env .z.safe{fill:var(--passbg);stroke:var(--pass)}
+.env .hb{fill:none;stroke:var(--mute);stroke-dasharray:6 5;stroke-width:1.5}
+.env .wire{stroke:var(--mute);stroke-width:2;stroke-dasharray:4 4}
+.env text{fill:var(--ink);font-size:15px}.env .s{fill:var(--mute);font-size:13px}.env .stl{font-size:13px;font-weight:800}.env .stl.comp{fill:var(--fail)}.env .stl.expo{fill:var(--na)}.env .stl.safe{fill:var(--pass)}
+.env .z.comp,.env .z.expo,.env .z.safe{stroke-width:3.5}.env .lbl{font-weight:700}
+#simtok{transition:transform .8s ease}@media (prefers-reduced-motion:reduce){#simtok{transition:none}}
+.env .tok circle{fill:var(--fail);stroke:#fff;stroke-width:3}.env .tok.blk circle{fill:#64748b}
+.env .tok text{fill:#fff;font-weight:800;font-size:13px}
+.env .shield path{fill:var(--pass);stroke:#fff;stroke-width:2}.env .shield text{fill:#fff;font-weight:800}
+.simlog{list-style:none;margin:0;padding:0;max-height:470px;overflow:auto}
+.simlog li{border-left:4px solid var(--line);padding:7px 10px;margin-bottom:8px;background:var(--bg);border-radius:6px;font-size:14px}
+.simlog li.guest{border-color:var(--guest)}.simlog li.device{border-color:var(--device)}.simlog li.host{border-color:var(--host)}.simlog li.network{border-color:var(--network)}
+.chk{font-size:13px;margin-top:4px;font-weight:600}.chk.PASS{color:var(--pass)}.chk.FAIL{color:var(--fail)}.chk.NA{color:var(--na)}
+.why{margin-top:6px;padding:6px 8px;background:var(--passbg);border-radius:6px;font-size:13.5px}
+.protect{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}.pc{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.pc code{display:block;margin-top:6px;white-space:pre-wrap;word-break:break-word;font-size:12.5px}
+.how li{margin-bottom:6px}
+
+/* ===================== design system (overrides the rules above) ===================== */
+:root{--bg:#f6f7f9;--card:#ffffff;--ink:#0f172a;--ink2:#334155;--mute:#64748b;--line:#e2e8f0;--line2:#cbd5e1;
+--accent:#2563eb;--accent-ink:#ffffff;--accent-soft:#eff6ff;--accent2:#1e3a8a;
+--pass:#047857;--passbg:#ecfdf5;--fail:#b91c1c;--failbg:#fef2f2;--na:#a16207;--nabg:#fefce8;
+--guest:#2563eb;--device:#7c3aed;--host:#c2410c;--network:#0f766e;
+--r:8px;--r-lg:10px;--shadow:0 1px 2px rgba(15,23,42,.05);--mono:ui-monospace,SFMono-Regular,"Cascadia Mono",Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#0b0f14;--card:#11161d;--ink:#e6edf3;--ink2:#c9d1d9;--mute:#8b949e;--line:#21262d;--line2:#30363d;
+--accent:#4c8dff;--accent-ink:#ffffff;--accent-soft:#0f1d33;--accent2:#9ec1ff;
+--pass:#3fb950;--passbg:#0f2418;--fail:#f85149;--failbg:#2a1214;--na:#d29922;--nabg:#2a2110;--shadow:none}}
+body{font:14px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+h1,h2,h3{letter-spacing:-.01em}
+button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* app bar */
+header{background:var(--card);color:var(--ink);padding:0;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.wrap{max-width:1360px;padding:0 24px}
+.appbar{display:flex;align-items:center;gap:14px;height:56px}
+.logo{width:28px;height:28px;border-radius:7px;background:var(--ink);color:var(--card);display:grid;place-items:center;font:700 12px/1 var(--mono)}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+h1{font-size:16px;font-weight:650;margin:0;white-space:nowrap}
+.tag{margin:0;color:var(--mute);font-size:13px;opacity:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appmeta{margin-left:auto;display:flex;gap:8px;align-items:center}
+.kv{font-size:12px;color:var(--mute);border:1px solid var(--line);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.kv b{color:var(--ink);font-weight:600}
+@media (max-width:900px){.tag,.appmeta{display:none}}
+nav{gap:0;margin:0 -2px}
+nav button{color:var(--mute);background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;padding:10px 14px 11px;font-weight:550;opacity:1}
+nav button:hover{color:var(--ink)}
+nav button[aria-selected=true]{background:transparent;color:var(--ink);border-bottom-color:var(--accent)}
+.notice{max-width:1360px;margin:16px auto 0;padding:0 24px}
+.notice details{border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--card);border-radius:var(--r);padding:9px 14px;font-size:13px;color:var(--ink2)}
+.notice summary{cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center}
+.notice summary::-webkit-details-marker{display:none}
+.notice summary::after{content:"Details";margin-left:auto;color:var(--accent);font-size:12.5px;font-weight:600}
+.notice details[open] summary::after{content:"Hide"}
+.notice .lbl{font-weight:650;color:var(--ink)}
+.notice p{margin:8px 0 2px}
+.honest{display:none}
+
+/* layout + surfaces */
+.layout{max-width:1360px;padding:16px 24px 48px;gap:16px;grid-template-columns:320px 1fr}
+.card{border-radius:var(--r-lg);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px}
+.card h2{font-size:15px;font-weight:650;margin:0 0 4px}
+.card h3{font-size:13px;font-weight:650;margin:16px 0 6px;color:var(--ink)}
+.mute{color:var(--mute);font-size:13px}
+p.mute{margin:2px 0 14px}
+
+/* controls */
+.btn{background:var(--accent);color:var(--accent-ink);border:1px solid transparent;border-radius:6px;padding:7px 14px;font-weight:600;font-size:13.5px;line-height:1.3}
+.btn:hover{filter:brightness(1.07)}
+.btn.sec{background:var(--card);color:var(--ink);border:1px solid var(--line2)}
+.btn.sec:hover{background:var(--bg);filter:none}
+.btn.sm{padding:4px 10px;font-size:12.5px}
+.chip{border-radius:4px;padding:1px 7px;font-size:11.5px;font-weight:600;background:var(--bg);border:1px solid var(--line);color:var(--ink2)}
+.badge,.rk{border-radius:4px;font-size:11px;font-weight:650;padding:1px 7px;letter-spacing:.02em}
+.badge.B{background:var(--passbg);color:var(--pass);border:1px solid color-mix(in srgb,var(--pass) 30%,transparent)}
+.badge.C{background:var(--failbg);color:var(--fail);border:1px solid color-mix(in srgb,var(--fail) 30%,transparent)}
+.risk,.rk{border-radius:4px;font-weight:650;font-size:11.5px;padding:1px 7px}
+.r0{background:#047857}.r1{background:#a16207}.r2{background:#c2410c}.r3{background:#b91c1c}
+.pill{border-radius:4px;font-size:11.5px;font-weight:650;padding:2px 8px;min-width:44px;border:1px solid transparent}
+.pill.PASS{border-color:color-mix(in srgb,var(--pass) 30%,transparent)}.pill.FAIL{border-color:color-mix(in srgb,var(--fail) 30%,transparent)}.pill.NA{border-color:color-mix(in srgb,var(--na) 30%,transparent)}
+.scope{border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.04em;padding:0 5px;border:1px solid var(--line)}
+.scope.host{background:transparent;color:var(--host);border-color:color-mix(in srgb,var(--host) 35%,transparent)}
+.scope.vm{background:transparent;color:var(--guest);border-color:color-mix(in srgb,var(--guest) 35%,transparent)}
+code{font-family:var(--mono);font-size:12px;border-radius:4px}
+.grp{font-size:11px;letter-spacing:.06em;font-weight:650}
+
+/* lists and cards */
+.vmbtn{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:8px 10px}
+.vmbtn:hover{border-color:var(--line2)}
+.vmbtn[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.vmbtn .n{font-weight:600}
+.ctl{border-radius:6px;background:var(--card)}
+.grid{gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.acard{border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;transition:border-color .15s,box-shadow .15s}
+.acard:hover{border-color:var(--line2);box-shadow:0 2px 8px rgba(15,23,42,.06)}
+.acard[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.acard .t{font-weight:650;font-size:14px;margin:8px 0 4px;color:var(--ink)}
+.vmcard .post{margin-top:4px}
+.verdict{border-radius:var(--r);padding:12px 16px;font-weight:600;border-left-width:3px!important}
+.verdict.B{background:var(--passbg);border:1px solid color-mix(in srgb,var(--pass) 35%,transparent);color:var(--ink)}
+.verdict.C{background:var(--failbg);border:1px solid color-mix(in srgb,var(--fail) 35%,transparent);color:var(--ink)}
+.verdict.B{border-left:3px solid var(--pass)}.verdict.C{border-left:3px solid var(--fail)}
+.why{border-left:3px solid var(--pass);border-radius:4px}
+table{font-size:13px}th{font-size:11px;font-weight:650;letter-spacing:.05em;background:var(--bg)}
+th,td{padding:8px 10px}
+.stat{border-radius:var(--r);background:var(--card)}.stat b{font-size:22px;font-weight:650}
+.host,.graph{border-radius:var(--r-lg)}
+.cell{border-radius:4px;width:30px;height:24px;font-size:12px}
+.stars{font-size:15px;letter-spacing:0;color:var(--ink);font-weight:650}
+dialog{border-radius:var(--r-lg);padding:20px 22px}
+
+/* guided simulation */
+.stepper{gap:0;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--card);padding:4px;margin-bottom:16px;display:grid;grid-template-columns:repeat(4,1fr)}
+@media (max-width:700px){.stepper{grid-template-columns:1fr 1fr}}
+.stp{border:0;border-radius:6px;background:transparent;padding:8px 12px;font-weight:550;font-size:13px;color:var(--mute);justify-content:flex-start}
+.stp .n{width:22px;height:22px;font-size:11.5px;font-weight:700;background:var(--bg);border:1px solid var(--line2);color:var(--mute)}
+.stp.on{background:var(--accent-soft);color:var(--ink)}.stp.on .n{background:var(--accent);border-color:var(--accent);color:#fff}
+.stp.done{color:var(--ink2)}.stp.done .n{background:var(--pass);border-color:var(--pass);color:#fff}
+.simlog li{background:var(--card);border:1px solid var(--line);border-left-width:3px;border-radius:6px;font-size:13.5px}
+.chk{font-size:12.5px;font-weight:550}
+.pc{border-radius:var(--r);background:var(--card)}
+.pc code{background:var(--bg)}
+.env .z{stroke-width:1.5}.env .z.hot{stroke:var(--accent);stroke-width:3}
+.env .z.comp,.env .z.expo,.env .z.safe{stroke-width:2.5}
+.env text{font-family:inherit}.env .stl{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em}
+.env .tok circle{fill:var(--fail);stroke:var(--card);stroke-width:3}
+
+footer{max-width:1360px;margin:0 auto;padding:18px 24px 32px;border-top:1px solid var(--line);color:var(--mute);font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px 20px}
+footer b{color:var(--ink2);font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="appbar">
+      <div class="logo" aria-hidden="true">vs</div>
+      <div class="brand"><h1>vsec Attack Lab</h1><p class="tag">Taxonomy-driven security assessment for KVM virtualization</p></div>
+      <div class="appmeta"><span class="kv"><b>31</b> controls</span><span class="kv"><b>11</b> attack classes</span><span class="kv">Model, not measurement</span></div>
+    </div>
+    <div class="honest"><b>What this is:</b> a what-if model of the survey's attack logic. Attack stages are stopped only by real controls from the project's taxonomy, and every control state comes from a real <code>vsec audit</code> run on generated example hosts and VMs (an invented scenario, not captured machines). <b>It is not a measurement and contains no exploit code.</b> M2, M3 and M4 are not run on real hardware yet. You can import your own audit.</div>
+    <nav role="tablist" id="tabs"></nav>
+  </div>
+</header>
+<div class="notice"><details><summary><span class="lbl">About this tool.</span> A what-if model of the survey's attack logic, driven by real audit results. It is not a measurement and contains no exploit code.</summary>
+<p>Attack stages are stopped only by controls from the project's taxonomy. Every control state comes from a real <code>vsec audit</code> run on generated example hosts and VMs (an invented scenario, not captured machines). M2, M3 and M4 are not run on real hardware yet. Use <b>Import real audit</b> in the Fleet panel to load your own results; nothing leaves your browser.</p></details></div>
+<div class="layout"><aside id="side"></aside><main id="main"></main></div>
+<footer><span><b>vsec</b> &middot; Taxonomy-Driven Security Assessment Framework for KVM Virtualization</span><span>Course: Cloud Security &amp; Vulnerabilities</span><span>Engine parity-tested against the Python implementation (vsec/sim.py)</span><span>Rules: vsec/attacks.yaml &middot; fleet: vsec/fleet.yaml</span></footer>
+<dialog id="dlg"></dialog>
+<div class="sr" role="status" aria-live="polite" id="live"></div>
+<script>
+const D = {"controls":{"C01":{"id":"C01","control":"iommu_cmdline","threat":"DMA/IOMMU","severity":3,"expected":"iommu enabled on kernel command line","fix":"add intel_iommu=on (or amd_iommu=on) to GRUB_CMDLINE_LINUX and run update-grub","survey":"S5.1, S5.3 (IOMMU needs OS/firmware config, Thunderclap); CS T4, T9-DMA"},"C02":{"id":"C02","control":"iommu_groups","threat":"DMA/IOMMU","severity":3,"expected":"IOMMU groups exist","fix":"enable VT-d/AMD-Vi in BIOS and the IOMMU kernel option","survey":"S5.1, S5.3; CS T4, T9-DMA"},"C03":{"id":"C03","control":"qemu_seccomp_config","threat":"Guest->Host","severity":3,"expected":"seccomp_sandbox not disabled","fix":"set seccomp_sandbox = 1 in /etc/libvirt/qemu.conf","survey":"S4.1 (device model runs with VMM privilege), S5.2 (VMM attack surface); CS T3, T9-escape"},"C04":{"id":"C04","control":"qemu_seccomp_live","threat":"Guest->Host","severity":3,"expected":"QEMU process runs under seccomp filter","fix":"enable seccomp_sandbox and restart the VM","survey":"S4.1, S5.2; CS T3, T9-escape"},"C05":{"id":"C05","control":"svirt_config","threat":"Guest->Host","severity":3,"expected":"security driver selinux or apparmor","fix":"set security_driver = \"apparmor\" (or selinux)","survey":"S4.1, S6.8 (privilege separation); CS T9-escape"},"C06":{"id":"C06","control":"svirt_live","threat":"Guest->Host","severity":3,"expected":"QEMU process confined by a per-VM label","fix":"enable AppArmor/SELinux and restart libvirtd and the VM","survey":"S4.1, S6.8; CS T9-escape"},"C07":{"id":"C07","control":"qemu_not_root","threat":"Guest->Host","severity":4,"expected":"QEMU runs as an unprivileged user","fix":"remove user = \"root\" from qemu.conf","survey":"S4.1, S6.8; CS T9-escape"},"C08":{"id":"C08","control":"clear_capabilities","threat":"Guest->Host","severity":2,"expected":"emulator capabilities cleared","fix":"set clear_emulator_capabilities = 1","survey":"S4.1, S6.8; CS T9-escape"},"C09":{"id":"C09","control":"ksm_off","threat":"Side channels","severity":2,"expected":"KSM disabled","fix":"echo 0 > /sys/kernel/mm/ksm/run","survey":"S4.2 (rowhammer + dedup), S5.4.3 (dedup timing); CS T3, T5, T9-sidechannel"},"C10":{"id":"C10","control":"nested_off","threat":"Guest->Host","severity":2,"expected":"nested virtualization off","fix":"options kvm_intel nested=0 in /etc/modprobe.d","survey":"S2 (nested virtualization), S7.1.2 (Blue Pill uses HW virtualization)"},"C11":{"id":"C11","control":"graphics_password","threat":"Guest->Host","severity":3,"expected":"VNC/SPICE console needs a password","fix":"add passwd to <graphics> or use a Unix socket","survey":"S2.1 (VMM administration function), S5.2 (management software as vector)"},"C12":{"id":"C12","control":"graphics_listen","threat":"Guest->Host","severity":3,"expected":"console listens on localhost only","fix":"set listen='127.0.0.1'","survey":"S2.1, S5.2"},"C13":{"id":"C13","control":"no_usb_redirect","threat":"Guest->Host","severity":2,"expected":"no USB redirection","fix":"remove <redirdev> from the VM XML","survey":"S2.1 (device emulation), S4.1; CS 5.1"},"C14":{"id":"C14","control":"unused_devices","threat":"Guest->Host","severity":1,"expected":"no sound, parallel or floppy device","fix":"remove the unused devices","survey":"S4.1 (VENOM floppy, NE2000, Cirrus VGA); CS T3, 5.1, T9-escape"},"C15":{"id":"C15","control":"network_mode","threat":"Guest->Guest","severity":3,"expected":"VM not on a shared default network","fix":"move the VM to an isolated libvirt network","survey":"S3.1 (Guest to Guest), S4.2"},"C16":{"id":"C16","control":"guest_reachability","threat":"Guest->Guest","severity":3,"expected":"second VM unreachable","fix":"isolated network or nwfilter rules","survey":"S3.1 (Guest to Guest), S4.2"},"C17":{"id":"C17","control":"image_permissions","threat":"Host->VMM","severity":3,"expected":"disk images not readable by others","fix":"chmod o-rwx on the image","survey":"S3.1 (Host to VMM), S6.1.1 (snapshot/image data exposure); CS T9-data"},"C18":{"id":"C18","control":"socket_permissions","threat":"Host->VMM","severity":3,"expected":"libvirt sockets not world-writable","fix":"chmod 0660 on the libvirt socket","survey":"S3.1 (Host to VMM), S5.2 (VM management software)"},"C19":{"id":"C19","control":"libvirtd_sock_perms","threat":"Host->VMM","severity":3,"expected":"unix_sock_rw_perms is restrictive","fix":"set unix_sock_rw_perms = \"0770\"","survey":"S3.1 (Host to VMM), S5.2"},"C20":{"id":"C20","control":"libvirt_tcp","threat":"Host->VMM","severity":4,"expected":"no unauthenticated TCP libvirt","fix":"disable listen_tcp or use TLS/SASL","survey":"S3.1 (Host to VMM), S5.2"},"C21":{"id":"C21","control":"savedir_permissions","threat":"Host->VMM","severity":3,"expected":"saved-state directory private","fix":"chmod 0700 on the save directory","survey":"S6.1.1 (PPVM: snapshots leak secrets), S6.3.3; CS T9-data"},"C22":{"id":"C22","control":"disk_cache","threat":"Guest->Host","severity":1,"expected":"disk cache mode not unsafe","fix":"use cache='none' or 'writethrough'","survey":"none direct (project addition: guest data integrity hygiene)"},"C23":{"id":"C23","control":"qemu_cve","threat":"VMM vulnerabilities","severity":4,"expected":"QEMU not older than a listed fix","fix":"upgrade QEMU","survey":"S4.1, S5.2; CS T3"},"C24":{"id":"C24","control":"kernel_cve","threat":"VMM vulnerabilities","severity":4,"expected":"kernel not older than a listed fix","fix":"upgrade the kernel","survey":"S2 (KVM is a kernel module), S4.1, S5.2"},"C25":{"id":"C25","control":"cpu_vulnerabilities","threat":"Side channels","severity":3,"expected":"no CPU vulnerability reported as Vulnerable","fix":"update microcode and kernel, boot with mitigations=auto","survey":"S5.4.5 (Spectre, L1TF/Foreshadow); CS T5, T6, T9-sidechannel"},"C26":{"id":"C26","control":"smt_state","threat":"Side channels","severity":2,"expected":"SMT off where a vulnerability needs it","fix":"nosmt on kernel command line","survey":"S5.4.1, S5.4.5; CS T6, T9-sidechannel"},"C27":{"id":"C27","control":"no_shared_memory","threat":"Guest->Guest","severity":3,"expected":"no memory shared between guests","fix":"remove <shmem> devices","survey":"S3.1 (Guest to Guest), S4.2"},"C28":{"id":"C28","control":"default_confined","threat":"Host->VMM","severity":2,"expected":"VMs confined by default","fix":"remove security_default_confined = 0","survey":"S6.8 (privilege separation)"}},"order":["C01","C02","C03","C04","C05","C06","C07","C08","C09","C10","C11","C12","C13","C14","C15","C16","C17","C18","C19","C20","C21","C22","C23","C24","C25","C26","C27","C28"],"attacks":[{"id":"A01","severity":4,"origin":"guest","scope":"host","name":"Floppy-controller escape (VENOM-style)","class":"Guest->Host","survey":"S4.1","case":"CS Table 3 (QEMU floppy controller); T9 'guest escape'","module":"M1 (C14, C03/C04, C05/C06, C07/C08)","real":"A queue-position flaw in QEMU's emulated floppy controller sat unnoticed from 2004 to 2015 (survey S4.1).","impact":"Code execution on the host: every VM on the machine is exposed.","steps":[{"lane":"guest","title":"Probe the virtual hardware","text":"An attacker with root inside the guest lists the emulated devices and finds a legacy floppy controller.","gates":[]},{"lane":"device","title":"Send oversized FIFO command sequences","text":"Crafted commands drive the emulated controller into its vulnerable code path.","gates":["C14"],"why":"Unused virtual hardware is attack surface that buys nothing. With no floppy device defined, the vulnerable code cannot be reached."},{"lane":"device","title":"The overflow corrupts device-model memory","text":"The device model runs with VMM privilege, so this memory belongs to the trusted computing base.","gates":[]},{"lane":"host","title":"Attacker code runs inside the QEMU process","text":"The shellcode tries to spawn a shell and open sockets.","gates":["C04","C03"],"why":"A seccomp filter restricts which system calls QEMU may make, so the shellcode cannot freely exec or connect."},{"lane":"host","title":"Read other VMs' disks and host files","text":"The compromised process walks the file system as the QEMU user.","gates":["C06","C05"],"why":"sVirt (AppArmor or SELinux) labels each QEMU process so it can only touch its own VM's files."},{"lane":"host","title":"Escalate to host root","text":"The attacker looks for a path from the QEMU user to root.","gates":["C07","C08"],"why":"QEMU running as an unprivileged user with emulator capabilities cleared has no direct path to root."}]},{"id":"A02","severity":3,"origin":"network","scope":"vm","name":"Open VNC/SPICE console takeover","class":"Guest->Host","survey":"S2.1 (VMM administration), S5.2","case":"CS S3.2 (administration function); T9 'guest escape'","module":"M1 (C11, C12)","real":"Administration interfaces are listed by the survey as an attack vector of the VMM.","impact":"Full takeover of the guest: screen, keyboard and any data on it.","steps":[{"lane":"network","title":"Scan the network for console ports","text":"The attacker sweeps the LAN for VNC/SPICE ports (5900 and up).","gates":["C12"],"why":"A console bound to 127.0.0.1 (or a Unix socket) is not visible from the network."},{"lane":"network","title":"Connect to the guest console","text":"The attacker opens the console in any VNC client.","gates":["C11"],"why":"A console password stops a connection even when the port is reachable."},{"lane":"guest","title":"Take over the guest","text":"Screen, keyboard and clipboard are under the attacker's control.","gates":[]}]},{"id":"A03","severity":4,"origin":"network","scope":"host","name":"Unauthenticated libvirt over TCP","class":"Host->VMM","survey":"S3.1 (Host to VMM), S5.2 (VM management software)","case":"CS Table 2; T9 'guest escape'","module":"M1 (C20)","real":"VM management software is named by the survey as part of the VMM attack surface.","impact":"Remote control of the hypervisor: create VMs that mount host disks, read host secrets.","steps":[{"lane":"network","title":"Find libvirtd listening on TCP","text":"libvirtd with listen_tcp enabled and auth_tcp = none accepts any connection.","gates":["C20"],"why":"Disabling plain TCP, or requiring TLS or SASL, closes the remote door."},{"lane":"host","title":"Define a VM that mounts the host's disk","text":"The management API lets the attacker define any VM.","gates":[]},{"lane":"host","title":"Start it and read host secrets","text":"Keys, configs and images on the host are readable.","gates":[]}]},{"id":"A04","severity":4,"origin":"local","scope":"host","name":"World-writable libvirt socket (local privilege escalation)","class":"Host->VMM","survey":"S3.1 (Host to VMM), S5.2","case":"CS Table 2","module":"M1 (C18, C19)","real":"A host process attacking the VMM is the survey's Host to VMM class.","impact":"A local unprivileged user obtains root-equivalent control of the host through libvirt.","steps":[{"lane":"host","title":"An unprivileged local user finds the libvirt socket","text":"The attacker has an ordinary account on the host.","gates":[]},{"lane":"host","title":"Write to the socket","text":"The socket mode allows 'other' to write.","gates":["C18","C19"],"why":"Socket permissions of 0660/0770 restrict access to the libvirt group."},{"lane":"host","title":"Create a privileged VM through the socket","text":"The attacker mounts the host file system into a VM and edits it.","gates":[]}]},{"id":"A05","severity":2,"origin":"guest","scope":"leak","name":"Memory-deduplication timing side channel","class":"Side channels","survey":"S5.4.3","case":"CS Table 5; T9 'cross-VM side channels'","module":"M1 (C09)","real":"The survey reports that merged-page copy-on-write delays reveal applications and library addresses in a co-resident guest.","impact":"Information leak between tenants (installed software, ASLR bypass).","steps":[{"lane":"network","title":"Become co-resident with the victim","text":"Co-residency on popular clouds has been demonstrated (survey S5.4).","gates":[]},{"lane":"host","title":"Kernel same-page merging merges identical pages","text":"KSM scans memory and merges pages with identical content across VMs.","gates":["C09"],"why":"With KSM off, no pages are merged and there is nothing to time. The cost is lower memory density."},{"lane":"guest","title":"Measure write latency","text":"A write to a merged page is slower (copy-on-write).","gates":[]},{"lane":"guest","title":"Infer the victim's applications or library addresses","text":"This defeats ASLR and eases later exploitation.","gates":[]}]},{"id":"A06","severity":3,"origin":"guest","scope":"leak","name":"Rowhammer + deduplication (Flip Feng Shui)","class":"Side channels","survey":"S4.2","case":"CS Table 3 (rowhammer with deduplication); T9 'cross-VM side channels'","module":"M1 (C09)","real":"A few bit flips in a co-resident guest's executable were turned into an authentication bypass (survey S4.2).","impact":"Integrity break: the attacker modifies a neighbour's code or keys.","steps":[{"lane":"network","title":"Become co-resident with the victim","text":"The attacker VM shares the physical host.","gates":[]},{"lane":"host","title":"Get the victim's page merged with the attacker's crafted copy","text":"Deduplication places the victim's data in a page the attacker can neighbour in DRAM.","gates":["C09"],"why":"Switching deduplication off between untrusted guests is the mitigation the survey names."},{"lane":"guest","title":"Hammer the DRAM rows next to the shared page","text":"Repeated access causes bit flips (DRAM disturbance errors).","gates":[]},{"lane":"guest","title":"Flipped bits corrupt the victim's executable or key","text":"Chosen bits turn a limited primitive into a real compromise.","gates":[]}]},{"id":"A07","severity":3,"origin":"guest","scope":"leak","name":"Transient-execution read (Spectre / L1TF-style)","class":"Side channels","survey":"S5.4.5","case":"CS Table 5, Table 6; T9 'cross-VM side channels'","module":"M1 (C25, C26)","real":"A guest was shown reading KVM host memory; Foreshadow-NG reads co-resident VMs or the VMM (survey S5.4.5).","impact":"Cross-VM or guest-to-host memory read, including keys.","steps":[{"lane":"guest","title":"Trigger speculative execution","text":"The attacker trains the predictor or faults a page so the CPU speculates.","gates":[]},{"lane":"host","title":"Transient reads leave cache traces","text":"Secret-dependent cache state is created.","gates":["C25"],"why":"Microcode and kernel mitigations (reported as 'Mitigation' not 'Vulnerable') stop the transient access from leaking."},{"lane":"host","title":"A sibling hyper-thread shares the core's caches","text":"On SMT cores the attacker's thread shares L1 with the victim's.","gates":["C26"],"why":"Where a vulnerability needs it, disabling SMT removes the shared core."},{"lane":"guest","title":"Recover memory with Flush+Reload","text":"The attacker reads the cache timing to rebuild the data.","gates":[]}]},{"id":"A08","severity":4,"origin":"guest","scope":"host","name":"Malicious DMA from a device (Thunderclap-style)","class":"DMA/IOMMU","survey":"S5.1, S5.3","case":"CS Table 4; T9 'DMA and device pass-through'","module":"M1 (C01, C02; live on E1)","real":"Project Thunderclap found IOMMU weaknesses in Windows, macOS, Linux and FreeBSD (survey S5.3).","impact":"Read or modify host memory below the OS, bypassing all software checks.","steps":[{"lane":"device","title":"Control a DMA-capable device","text":"A passed-through or malicious PCIe device.","gates":[]},{"lane":"device","title":"Issue DMA to arbitrary physical addresses","text":"Without remapping the device sees all of memory.","gates":["C01","C02"],"why":"An enabled IOMMU confines each device to the memory domain assigned to it. The survey stresses it must be configured correctly in OS and firmware."},{"lane":"host","title":"Read or modify host kernel memory","text":"Kernel structures and keys are exposed.","gates":[]}]},{"id":"A09","severity":3,"origin":"local","scope":"vm","name":"Secret theft from VM snapshots","class":"Snapshot privacy","survey":"S6.1.1 (PPVM)","case":"CS Table 7 (PPVM); T9 'data exposure to host or snapshots'","module":"M1 (C21, C17) + M2 scanner","real":"The survey notes an attacker can access confidential data simply by copying a snapshot.","impact":"Keys, tokens and passwords in the VM's memory leak. (Second line of defence: redact or encrypt saved images, tested by M2.)","steps":[{"lane":"host","title":"Gain access as another local user","text":"Any ordinary account, or a compromised service.","gates":[]},{"lane":"host","title":"List the saved-state and dump directory","text":"Saved VM state sits on disk.","gates":["C21"],"why":"A private (0700) save directory hides saved state from other users."},{"lane":"host","title":"Read the VM disk or memory image","text":"The image is copied out.","gates":["C17"],"why":"Images without 'other' permission bits cannot be read by unrelated users."},{"lane":"host","title":"Search the image for keys and tokens","text":"Pattern matching and entropy scans find secrets.","gates":[]}]},{"id":"A10","severity":3,"origin":"guest","scope":"neighbour","name":"Neighbour VM pivot over a shared network","class":"Guest->Guest","survey":"S3.1 (Guest to Guest), S4.2","case":"CS Table 2; T9 'guest escape'","module":"M1 (C15, C16)","real":"Guest to Guest breaks tenant separation in multi-tenant clouds (survey S3.1).","impact":"Tenant isolation broken: the attacker reaches another VM's services.","steps":[{"lane":"network","title":"Scan other VMs on the shared network","text":"On libvirt's default NAT network all guests share one bridge.","gates":["C15"],"why":"An isolated network (no forward, no shared bridge) removes the neighbours from view."},{"lane":"network","title":"Reach the neighbour's open services","text":"SSH, databases or web admin pages are reachable.","gates":["C16"],"why":"A host-side check that guests cannot reach each other shows the isolation actually works."},{"lane":"guest","title":"Exploit the neighbour","text":"Weak credentials or a service bug give access.","gates":[]}]},{"id":"A11","severity":3,"origin":"guest","scope":"vm","name":"Rogue hypervisor inside a guest (VMBR-style)","class":"Hypervisor/VMBR presence","survey":"S7.1, S7.2","case":"CS S8; T8; T9 'rogue hypervisor (VMBR)'","module":"M1 (C10); detection is the M4 research question","real":"SubVirt, Blue Pill and Vitriol show a hypervisor placed beneath an OS (survey S7.1). Here the idea is applied to a guest that is allowed to use nested virtualization.","impact":"Stealthy persistence under the guest OS. Whether it can be detected is the survey's open question and our M4 experiment (not yet run on real hardware).","steps":[{"lane":"guest","title":"Gain root in the guest","text":"Any foothold with administrative rights.","gates":[]},{"lane":"guest","title":"Start a hypervisor using nested VT-x","text":"The guest needs hardware virtualization exposed to it.","gates":["C10"],"why":"With nested virtualization off, the guest cannot run its own hypervisor."},{"lane":"device","title":"The rogue hypervisor runs the guest OS beneath it","text":"The OS now runs deprivileged and cannot see the layer below.","gates":[]},{"lane":"guest","title":"Hide from in-guest checks","text":"CPUID, DMI strings and device models can be masked.","gates":[]}]}],"fleet":{"vm_level":["C11","C12","C13","C14","C15","C16","C22","C27"],"hosts":[{"id":"host-a","name":"kvm-host-a","note":"libvirt reachable over plain TCP; KSM and nested virtualization left on","state":{"C01":"PASS","C02":"PASS","C03":"PASS","C04":"PASS","C05":"PASS","C06":"PASS","C07":"PASS","C08":"PASS","C09":"FAIL","C10":"FAIL","C17":"FAIL","C18":"PASS","C19":"PASS","C20":"FAIL","C21":"FAIL","C23":"NA","C24":"NA","C25":"PASS","C26":"PASS","C28":"PASS"}},{"id":"host-b","name":"kvm-host-b","note":"older host, most hardening never applied","state":{"C01":"FAIL","C02":"FAIL","C03":"FAIL","C04":"FAIL","C05":"FAIL","C06":"FAIL","C07":"FAIL","C08":"FAIL","C09":"FAIL","C10":"PASS","C17":"PASS","C18":"FAIL","C19":"FAIL","C20":"PASS","C21":"PASS","C23":"NA","C24":"NA","C25":"FAIL","C26":"PASS","C28":"PASS"}},{"id":"host-c","name":"kvm-host-c","note":"hardened host","state":{"C01":"PASS","C02":"PASS","C03":"PASS","C04":"PASS","C05":"PASS","C06":"PASS","C07":"PASS","C08":"PASS","C09":"PASS","C10":"PASS","C17":"PASS","C18":"PASS","C19":"PASS","C20":"PASS","C21":"PASS","C23":"NA","C24":"NA","C25":"PASS","C26":"PASS","C28":"PASS"}}],"vms":[{"id":"web-frontend","name":"web-frontend","role":"public website","host":"host-a","segment":"dmz","criticality":2,"state":{"C11":"FAIL","C12":"FAIL","C13":"PASS","C14":"FAIL","C15":"FAIL","C16":"FAIL","C22":"PASS","C27":"PASS"}},{"id":"ci-runner","name":"ci-runner","role":"builds untrusted code","host":"host-a","segment":"dmz","criticality":1,"state":{"C11":"PASS","C12":"PASS","C13":"FAIL","C14":"PASS","C15":"FAIL","C16":"FAIL","C22":"PASS","C27":"FAIL"}},{"id":"dev-sandbox","name":"dev-sandbox","role":"developer playground","host":"host-b","segment":"dev","criticality":1,"state":{"C11":"FAIL","C12":"FAIL","C13":"FAIL","C14":"FAIL","C15":"FAIL","C16":"FAIL","C22":"FAIL","C27":"FAIL"}},{"id":"legacy-erp","name":"legacy-erp","role":"legacy business app","host":"host-b","segment":"internal","criticality":3,"state":{"C11":"FAIL","C12":"PASS","C13":"PASS","C14":"FAIL","C15":"FAIL","C16":"FAIL","C22":"FAIL","C27":"PASS"}},{"id":"payments-db","name":"payments-db","role":"card data store","host":"host-c","segment":"internal","criticality":3,"state":{"C11":"PASS","C12":"PASS","C13":"PASS","C14":"PASS","C15":"FAIL","C16":"FAIL","C22":"PASS","C27":"PASS"}},{"id":"monitoring","name":"monitoring","role":"metrics and logs","host":"host-c","segment":"mgmt","criticality":2,"state":{"C11":"PASS","C12":"PASS","C13":"PASS","C14":"PASS","C15":"PASS","C16":"PASS","C22":"PASS","C27":"PASS"}}]}};
+const NAME = id => D.controls[id] ? D.controls[id].control.replace(/_/g, ' ') : id;
+const VML = new Set(D.fleet.vm_level);
+
+/*ENGINE-START*/
+function evaluate(a, st) {
+  const layers = new Set();
+  for (const s of a.steps) for (const g of s.gates) if (st[g] === 'PASS') layers.add(g);
+  for (let i = 0; i < a.steps.length; i++) for (const g of a.steps[i].gates) if (st[g] === 'PASS') return { blocked: true, stage: i, by: g, layers: layers.size };
+  return { blocked: false, stage: null, by: null, layers: 0 };
+}
+function posture(st) {
+  const r = {}; let n = 0, depth = 0;
+  for (const a of D.attacks) { r[a.id] = evaluate(a, st); if (r[a.id].blocked) { n++; if (r[a.id].layers >= 2) depth++; } }
+  return { r, n, depth };
+}
+function riskOf(st) {
+  const total = D.attacks.reduce((s, a) => s + a.severity, 0);
+  const open = D.attacks.reduce((s, a) => s + (evaluate(a, st).blocked ? 0 : a.severity), 0);
+  return Math.round(100 * open / total);
+}
+function gateControls() { return [...new Set(D.attacks.flatMap(a => a.steps.flatMap(s => s.gates)))].sort(); }
+function minimalFix(st) {
+  const needs = [];
+  for (const a of D.attacks) {
+    const gates = [...new Set(a.steps.flatMap(s => s.gates))].sort();
+    if (gates.some(g => st[g] === 'PASS')) continue;
+    needs.push(gates.filter(g => st[g] !== 'NA'));
+  }
+  let best = null;
+  (function solve(chosen, open) {
+    if (best !== null && chosen.length >= best.length) return;
+    if (!open.length) { best = chosen.slice(); return; }
+    const first = open.reduce((m, n) => n.length < m.length ? n : m);
+    for (const g of first) solve(chosen.concat([g]), open.filter(n => !n.includes(g)));
+  })([], needs);
+  return best === null ? null : best.sort();
+}
+function mergedOf(fl, hs, vs, id) { const v = fl.vms.find(x => x.id === id); return { ...hs[v.host], ...vs[id] }; }
+function campaignOf(fl, hs, vs, start) {
+  const vms = {}; fl.vms.forEach(v => { vms[v.id] = v; });
+  const states = {}; fl.vms.forEach(v => { states[v.id] = mergedOf(fl, hs, vs, v.id); });
+  const open = (a, i) => !evaluate(a, states[i]).blocked;
+  const comp = [], exposed = [], persist = [], edges = [], seen = new Set();
+  const addEdge = (f, t, a, k) => { const key = [f, t, a.id, k].join('|'); if (!seen.has(key)) { seen.add(key); edges.push([f, t, a.id, k]); } };
+  const compromise = (i, f, a) => { if (!comp.includes(i)) comp.push(i); addEdge(f, i, a, 'compromised'); };
+  const ids = fl.vms.map(v => v.id);
+  const guest = D.attacks.filter(a => a.origin === 'guest');
+  if (start === null) {
+    for (const a of D.attacks.filter(x => x.origin === 'network')) for (const t of ids) {
+      if (!open(a, t)) continue;
+      if (a.scope === 'host') { for (const y of ids) if (vms[y].host === vms[t].host) compromise(y, 'outside', a); }
+      else compromise(t, 'outside', a);
+    }
+  } else comp.push(start);
+  for (let k = 0; k < comp.length; k++) {
+    const x = comp[k];
+    for (const a of guest) {
+      if (!open(a, x)) continue;
+      if (a.scope === 'host') { for (const y of ids) if (vms[y].host === vms[x].host && y !== x) compromise(y, x, a); }
+      else if (a.scope === 'vm') { if (!persist.includes(x)) persist.push(x); }
+      else if (a.scope === 'neighbour') { for (const y of ids) if (y !== x && vms[y].segment === vms[x].segment && open(a, y)) compromise(y, x, a); }
+      else if (a.scope === 'leak') { for (const y of ids) if (y !== x && vms[y].host === vms[x].host && open(a, y)) { if (!exposed.includes(y)) exposed.push(y); addEdge(x, y, a, 'exposed'); } }
+    }
+  }
+  return { compromised: comp, exposed: exposed.filter(i => !comp.includes(i)), persistent: persist, edges };
+}
+function blastOf(fl, r) {
+  const total = fl.vms.reduce((s, v) => s + v.criticality, 0);
+  const w = fl.vms.filter(v => r.compromised.includes(v.id)).reduce((s, v) => s + v.criticality, 0);
+  return [Math.round(100 * w / total), r.compromised.length, r.exposed.length];
+}
+function candidatesOf(fl, hs, vs) {
+  const out = [];
+  for (const h of fl.hosts) for (const c of gateControls()) if (!VML.has(c) && !['PASS', 'NA'].includes(hs[h.id][c])) out.push(['host', h.id, c]);
+  for (const v of fl.vms) for (const c of gateControls()) if (VML.has(c) && !['PASS', 'NA'].includes(vs[v.id][c])) out.push(['vm', v.id, c]);
+  return out;
+}
+function applyFixes(hs, vs, fixes) {
+  const h2 = {}, v2 = {};
+  for (const k of Object.keys(hs)) h2[k] = { ...hs[k] };
+  for (const k of Object.keys(vs)) v2[k] = { ...vs[k] };
+  for (const [kind, ent, c] of fixes) (kind === 'host' ? h2 : v2)[ent][c] = 'PASS';
+  return [h2, v2];
+}
+function cmpFixes(a, b) {
+  for (let i = 0; i < Math.min(a.length, b.length); i++) for (let j = 0; j < 3; j++) { if (a[i][j] < b[i][j]) return -1; if (a[i][j] > b[i][j]) return 1; }
+  return a.length - b.length;
+}
+function containmentOf(fl, hs, vs, start, limit) {
+  const base = blastOf(fl, campaignOf(fl, hs, vs, start));
+  const cands = candidatesOf(fl, hs, vs);
+  const rank = groups => {
+    const out = [];
+    for (const fixes of groups) {
+      const [h2, v2] = applyFixes(hs, vs, fixes);
+      const b = blastOf(fl, campaignOf(fl, h2, v2, start));
+      const gain = [base[0] - b[0], base[1] - b[1], base[2] - b[2]];
+      if (gain.some(g => g > 0)) out.push({ fixes, before: base, after: b, gain });
+    }
+    out.sort((x, y) => (y.gain[0] - x.gain[0]) || (y.gain[1] - x.gain[1]) || (y.gain[2] - x.gain[2]) || cmpFixes(x.fixes, y.fixes));
+    return out.slice(0, limit);
+  };
+  let ranked = rank(cands.map(c => [c]));
+  if (!ranked.length) { const pairs = []; for (let i = 0; i < cands.length; i++) for (let j = i + 1; j < cands.length; j++) pairs.push([cands[i], cands[j]]); ranked = rank(pairs); }
+  return ranked;
+}
+/*ENGINE-END*/
+
+/* ---------- helpers ---------- */
+function el(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (k === 'class') e.className = v;
+    else if (k === 'on') for (const [ev, fn] of Object.entries(v)) e.addEventListener(ev, fn);
+    else if (v === true) e.setAttribute(k, '');
+    else if (v !== false && v != null) e.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) { if (kid == null || kid === false) continue; e.append(kid.nodeType ? kid : document.createTextNode(String(kid))); }
+  return e;
+}
+const svgEl = (tag, at, ...kids) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const [k, v] of Object.entries(at || {})) e.setAttribute(k, v); kids.flat().forEach(k => e.append(k.nodeType ? k : document.createTextNode(String(k)))); return e; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const live = t => { document.getElementById('live').textContent = t; };
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = el('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+const riskClass = r => r === 0 ? 'r0' : r < 30 ? 'r1' : r < 60 ? 'r2' : 'r3';
+function effort(c) { const f = D.controls[c].fix; return /reboot|BIOS/i.test(f) ? 'reboot or firmware' : /restart/i.test(f) ? 'service or VM restart' : 'config edit'; }
+
+/* ---------- fleet state ---------- */
+let FL, hostS, vmS, origH, origV;
+let tab = 'sim', sel = null, selAtt = D.attacks[0].id, run = null, token = 0, camp = { start: null, shown: -1, done: false }, challenge = null;
+const expanded = new Set();
+function loadFleet() {
+  FL = { hosts: D.fleet.hosts.map(h => ({ id: h.id, name: h.name, note: h.note })),
+         vms: D.fleet.vms.map(v => ({ id: v.id, name: v.name, role: v.role, host: v.host, segment: v.segment, criticality: v.criticality })) };
+  hostS = {}; vmS = {}; origH = {}; origV = {};
+  D.fleet.hosts.forEach(h => { hostS[h.id] = { ...h.state }; origH[h.id] = { ...h.state }; });
+  D.fleet.vms.forEach(v => { vmS[v.id] = { ...v.state }; origV[v.id] = { ...v.state }; });
+  sel = FL.vms[0].id; token++; run = null; camp = { start: null, shown: -1, done: false }; challenge = null;
+}
+const vmOf = id => FL.vms.find(v => v.id === id);
+const hostOf = id => FL.hosts.find(h => h.id === id);
+const stOf = id => mergedOf(FL, hostS, vmS, id);
+const vmsOnHost = h => FL.vms.filter(v => v.host === h);
+function resetViews() { token++; run = null; camp = { start: camp.start, shown: -1, done: false }; }
+function setControl(vmId, c, v) {
+  if (VML.has(c)) vmS[vmId][c] = v; else hostS[vmOf(vmId).host][c] = v;
+  resetViews(); render();
+}
+function applyList(fixes) { for (const [kind, ent, c] of fixes) (kind === 'host' ? hostS : vmS)[ent][c] = 'PASS'; resetViews(); render(); }
+function fixLabel([kind, ent, c]) { return `${c} ${NAME(c)} on ${kind === 'host' ? hostOf(ent).name : vmOf(ent).name}`; }
+
+/* ---------- import ---------- */
+function openImport() {
+  const dlg = document.getElementById('dlg'); dlg.replaceChildren();
+  const ta = el('textarea', { rows: 9, placeholder: 'Paste report.json from `python -m vsec run`, or the output of `python -m vsec audit <case>` (lines like: C01 PASS iommu_cmdline ...)' });
+  const nm = el('input', { type: 'text', value: 'imported-vm', 'aria-label': 'name for the imported VM' });
+  const msg = el('div', { class: 'mute' });
+  const file = el('input', { type: 'file', accept: '.json,.txt', on: { change: async e => { const f = e.target.files[0]; if (f) ta.value = await f.text(); } } });
+  dlg.append(el('h2', {}, 'Import a real audit'),
+    el('p', { class: 'mute' }, 'Turns real findings into a host and a VM in this fleet, so the attacks run against your own audit results. Nothing leaves your browser.'),
+    file, ta, el('p', {}, 'Name (used when the input has no VM name): ', nm), msg,
+    el('div', { class: 'row' }, el('button', { class: 'btn', on: { click: () => { const r = importAudit(ta.value, nm.value.trim() || 'imported-vm'); if (r.error) msg.textContent = r.error; else dlg.close(); } } }, 'Import'),
+      el('button', { class: 'btn sec', on: { click: () => dlg.close() } }, 'Cancel')));
+  dlg.showModal();
+}
+function importAudit(text, defName) {
+  const byVm = {};
+  let parsed = null;
+  try { parsed = JSON.parse(text); } catch (e) { parsed = null; }
+  if (parsed) {
+    const list = Array.isArray(parsed) ? parsed : parsed.findings;
+    if (!Array.isArray(list)) return { error: 'JSON has no findings list.' };
+    for (const f of list) if (f && f.id && D.controls[f.id] && ['PASS', 'FAIL', 'NA'].includes(f.status)) (byVm[f.vm || defName] ||= {})[f.id] = f.status;
+  } else {
+    for (const line of text.split(/\r?\n/)) { const m = /^(C\d\d)\s+(PASS|FAIL|NA)\b/.exec(line.trim()); if (m && D.controls[m[1]]) (byVm[defName] ||= {})[m[1]] = m[2]; }
+  }
+  const names = Object.keys(byVm).filter(n => Object.keys(byVm[n]).length >= 5);
+  if (!names.length) return { error: 'No M1 control results found (need at least 5 lines like C01 PASS ...).' };
+  for (const n of names) {
+    let id = n.replace(/[^\w.-]/g, '-'); while (FL.vms.some(v => v.id === id)) id += '-2';
+    const hid = 'imp-' + id, hs = {}, vs = {};
+    for (const c of D.order) { const s = byVm[n][c] || 'NA'; if (VML.has(c)) vs[c] = s; else hs[c] = s; }
+    FL.hosts.push({ id: hid, name: 'host of ' + n, note: 'imported audit' });
+    FL.vms.push({ id, name: n, role: 'imported audit', host: hid, segment: 'imported-' + id, criticality: 2 });
+    hostS[hid] = hs; vmS[id] = vs; origH[hid] = { ...hs }; origV[id] = { ...vs }; sel = id;
+  }
+  tab = 'insights'; resetViews(); render(); live(`Imported ${names.length} VM audit(s)`); return {};
+}
+
+/* ---------- sidebar ---------- */
+function renderSide() {
+  const side = document.getElementById('side'); side.replaceChildren();
+  side.append(el('div', { class: 'card' }, el('h2', {}, 'Fleet'),
+    el('div', { class: 'mute' }, 'Pick a VM. Controls marked HOST are shared by every VM on that host.'),
+    el('div', { class: 'vmlist' }, ...FL.vms.map(v => { const r = riskOf(stOf(v.id));
+      return el('button', { class: 'vmbtn', 'aria-pressed': sel === v.id, on: { click: () => { sel = v.id; resetViews(); render(); } } },
+        el('span', { class: 'n' }, v.name), el('span', { class: 'h' }, hostOf(v.host).name), el('span', { class: 'risk ' + riskClass(r), title: 'risk score' }, r)); })),
+    el('div', { class: 'row' }, el('button', { class: 'btn sec sm', on: { click: openImport } }, 'Import real audit'),
+      el('button', { class: 'btn sec sm', on: { click: () => { loadFleet(); render(); } } }, 'Reset fleet'))));
+  const v = vmOf(sel), st = stOf(sel), groups = {};
+  D.order.forEach(c => (groups[D.controls[c].threat] ||= []).push(c));
+  const gated = new Set(gateControls());
+  const cbox = el('div', { class: 'card' }, el('h2', {}, `Controls: ${v.name}`),
+    el('div', { class: 'mute' }, `${v.role}; on ${hostOf(v.host).name}, segment ${v.segment}. Click a status to toggle. Faded rows are not used by any modelled attack.`));
+  for (const [g, ids] of Object.entries(groups)) {
+    cbox.append(el('div', { class: 'grp' }, g));
+    for (const c of ids) {
+      const ctl = D.controls[c], s = st[c], isVm = VML.has(c), n = vmsOnHost(v.host).length;
+      const d = el('details', { class: 'ctl' + (gated.has(c) ? '' : ' dim') });
+      if (expanded.has(c)) d.open = true;
+      d.addEventListener('toggle', () => d.open ? expanded.add(c) : expanded.delete(c));
+      const pill = el('button', { class: 'pill ' + s, title: s === 'NA' ? 'Cannot be tested with this input' : 'Toggle PASS / FAIL', disabled: s === 'NA',
+        on: { click: e => { e.preventDefault(); e.stopPropagation(); setControl(sel, c, s === 'PASS' ? 'FAIL' : 'PASS'); } } }, s);
+      d.append(el('summary', {}, el('span', { class: 'id' }, c), el('span', { class: 'nm' }, NAME(c)),
+        el('span', { class: 'scope ' + (isVm ? 'vm' : 'host'), title: isVm ? 'this VM only' : `shared by ${n} VM(s) on this host` }, isVm ? 'VM' : 'HOST'), pill),
+        el('div', { class: 'body' }, el('div', {}, 'Expected: ', ctl.expected), el('div', {}, 'Survey: ', ctl.survey),
+          el('div', {}, 'Fix: ', el('code', {}, ctl.fix), ' (', effort(c), ')'),
+          isVm ? null : el('div', {}, `Fixing it protects ${n} VM(s): ${vmsOnHost(v.host).map(x => x.name).join(', ')}.`)));
+      cbox.append(d);
+    }
+  }
+  side.append(cbox);
+}
+
+/* ---------- shared widgets ---------- */
+function ringSvg(value, label, color) {
+  const C = 2 * Math.PI * 52, off = C * (1 - value / 100);
+  const svg = svgEl('svg', { viewBox: '0 0 130 130', class: 'ring', role: 'img', 'aria-label': `${label}: ${value}` });
+  svg.append(svgEl('circle', { class: 'bg', cx: 65, cy: 65, r: 52 }), svgEl('circle', { class: 'fg', cx: 65, cy: 65, r: 52, stroke: color, 'stroke-dasharray': C, 'stroke-dashoffset': off }),
+    svgEl('text', { x: 65, y: 72 }, value), svgEl('text', { class: 'sub', x: 65, y: 92 }, label));
+  return svg;
+}
+const riskColor = r => r === 0 ? '#15803d' : r < 30 ? '#ca8a04' : r < 60 ? '#ea580c' : '#b91c1c';
+function scopeTag(c) { return el('span', { class: 'scope ' + (VML.has(c) ? 'vm' : 'host') }, VML.has(c) ? 'VM' : 'HOST'); }
+
+/* ---------- Fleet tab ---------- */
+function renderFleet(m) {
+  const risks = FL.vms.map(v => riskOf(stOf(v.id)));
+  const outside = campaignOf(FL, hostS, vmS, null), ob = blastOf(FL, outside);
+  const exposedVms = FL.vms.filter(v => posture(stOf(v.id)).n < D.attacks.length).length;
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'Fleet overview'),
+    el('div', { class: 'mute' }, 'Example fleet: invented scenario, real audit states. Risk is the severity-weighted share of the 11 attacks that are open against a VM.'),
+    el('div', { class: 'stats' },
+      el('div', { class: 'stat' }, el('b', {}, FL.vms.length), `VMs on ${FL.hosts.length} hosts`),
+      el('div', { class: 'stat' }, el('b', {}, Math.round(risks.reduce((a, b) => a + b, 0) / risks.length)), 'average risk'),
+      el('div', { class: 'stat' }, el('b', {}, exposedVms), 'VMs with an open attack'),
+      el('div', { class: 'stat' }, el('b', {}, `${ob[1]}/${FL.vms.length}`), `breached by an outsider (${ob[0]}% weighted)`))));
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'Hosts and VMs'),
+    el('div', { class: 'hosts' }, ...FL.hosts.map(h => el('div', { class: 'host' }, el('h3', {}, h.name), el('div', { class: 'mute' }, h.note),
+      ...vmsOnHost(h.id).map(v => { const r = riskOf(stOf(v.id));
+        return el('button', { class: 'vm', on: { click: () => { sel = v.id; tab = 'insights'; resetViews(); render(); } } },
+          el('span', { class: 'n' }, v.name), el('span', { class: 'mute' }, v.role), el('span', { class: 'risk ' + riskClass(r) }, r)); }))))));
+  const head = el('tr', {}, el('th', { class: 'l' }, 'VM'), ...D.attacks.map(a => el('th', { title: `${a.name} (${a.class})` }, a.id)));
+  const rows = FL.vms.map(v => { const P = posture(stOf(v.id));
+    return el('tr', {}, el('td', { class: 'l' }, v.name), ...D.attacks.map(a => { const r = P.r[a.id];
+      return el('td', {}, el('button', { class: 'cell ' + (r.blocked ? 'B' : 'O'), title: `${a.name}: ${r.blocked ? 'blocked by ' + r.by : 'OPEN'}`,
+        on: { click: () => { sel = v.id; selAtt = a.id; tab = 'lab'; resetViews(); render(); } } }, r.blocked ? '✓' : '✕')); })); });
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'Attack heatmap'),
+    el('div', { class: 'mute' }, 'Every VM against every attack. Click a cell to replay that attack in the Attack Lab. Green = blocked, red = open.'),
+    el('div', { class: 'tw' }, el('table', { class: 'heat' }, head, ...rows))));
+  m.append(el('div', { class: 'card' }, el('div', { class: 'row' },
+    el('button', { class: 'btn sec', on: { click: exportFleet } }, 'Export fleet session (JSON)'),
+    el('button', { class: 'btn sec', on: { click: openImport } }, 'Import a real audit'))));
+}
+function exportFleet() {
+  const outside = campaignOf(FL, hostS, vmS, null);
+  download('vsec-fleet-session.json', JSON.stringify({ generated: new Date().toISOString(), note: 'What-if model of the survey attack logic. Not a measurement.',
+    hosts: FL.hosts.map(h => ({ ...h, state: hostS[h.id] })),
+    vms: FL.vms.map(v => ({ ...v, state: vmS[v.id], risk: riskOf(stOf(v.id)), openAttacks: D.attacks.filter(a => !evaluate(a, stOf(v.id)).blocked).map(a => a.id) })),
+    outsiderCampaign: { ...outside, blast: blastOf(FL, outside) } }, null, 2), 'application/json');
+}
+
+/* ---------- Insights tab ---------- */
+function bestFixFor(vmId, a) {
+  const st = stOf(vmId), base = posture(st).n;
+  let best = null;
+  for (const g of new Set(a.steps.flatMap(s => s.gates))) {
+    if (st[g] === 'PASS' || st[g] === 'NA') continue;
+    const gain = posture({ ...st, [g]: 'PASS' }).n - base;
+    if (!best || gain > best.gain) best = { g, gain };
+  }
+  return best;
+}
+function runbook(vmId) {
+  const v = vmOf(vmId), st = stOf(vmId), P = posture(st), plan = minimalFix(st) || [];
+  const lines = [`# Remediation runbook: ${v.name}`, '',
+    `Host: ${hostOf(v.host).name}. Segment: ${v.segment}. Role: ${v.role}.`,
+    `Risk score: ${riskOf(st)} / 100 (severity-weighted share of the ${D.attacks.length} modelled attacks that are open).`,
+    '', '> Generated by the vsec Attack Lab. This is a what-if model of the survey attack logic, not a measurement. PASS means a control passed its defined test, not that the system is secure.', '',
+    '## Open attacks', ''];
+  const open = D.attacks.filter(a => !P.r[a.id].blocked).sort((x, y) => y.severity - x.severity);
+  lines.push(...(open.length ? open.map(a => `- ${a.id} ${a.name} (severity ${a.severity}, survey ${a.survey})`) : ['- none']));
+  lines.push('', '## Fix plan (smallest set that blocks every modelled attack)', '');
+  lines.push(...(plan.length ? plan.map((c, i) => `${i + 1}. **${c} ${NAME(c)}** (${VML.has(c) ? 'this VM' : 'HOST: shared by ' + vmsOnHost(v.host).map(x => x.name).join(', ')}; ${effort(c)})\n   - ${D.controls[c].fix}`) : ['- nothing to fix']));
+  const thin = D.attacks.filter(a => P.r[a.id].blocked && P.r[a.id].layers === 1);
+  lines.push('', '## Defence in depth: attacks stopped by a single control', '');
+  lines.push(...(thin.length ? thin.map(a => { const extra = [...new Set(a.steps.flatMap(s => s.gates))].filter(g => st[g] !== 'PASS' && st[g] !== 'NA');
+    return `- ${a.id} ${a.name}: held by ${P.r[a.id].by} only` + (extra.length ? `; add a second layer with ${extra.map(g => g + ' ' + NAME(g)).join(' or ')}` : ''); }) : ['- none']));
+  lines.push('', '## Controls not used by any modelled attack', '', 'These still matter for real hardening: ' + D.order.filter(c => !gateControls().includes(c)).map(c => c + ' ' + NAME(c)).join(', ') + '.');
+  return lines.join('\n') + '\n';
+}
+function renderInsights(m) {
+  const v = vmOf(sel), st = stOf(sel), P = posture(st), r = riskOf(st), plan = minimalFix(st) || [];
+  const own = blastOf(FL, campaignOf(FL, hostS, vmS, sel));
+  m.append(el('div', { class: 'card' }, el('h2', {}, `${v.name}: insights`),
+    el('div', { class: 'row', style: 'align-items:flex-start;gap:24px' }, ringSvg(r, 'risk', riskColor(r)),
+      el('div', { style: 'flex:1;min-width:260px' },
+        el('div', { class: 'mute' }, `${v.role}. Host ${hostOf(v.host).name}, segment ${v.segment}, criticality ${v.criticality}/3.`),
+        el('div', { class: 'stats' },
+          el('div', { class: 'stat' }, el('b', {}, `${D.attacks.length - P.n}`), 'attacks open'),
+          el('div', { class: 'stat' }, el('b', {}, P.depth), 'with 2+ layers'),
+          el('div', { class: 'stat' }, el('b', {}, `${own[1]}/${FL.vms.length}`), 'VMs reached if this VM is breached')),
+        el('div', { class: 'mute' }, 'Risk = 100 x (sum of severity of open attacks) / (sum of all severities). Severities are the project’s own judgement (survey Table 3 impact).')))));
+  const rows = D.attacks.slice().sort((a, b) => (P.r[a.id].blocked - P.r[b.id].blocked) || b.severity - a.severity).map(a => {
+    const res = P.r[a.id], bf = res.blocked ? null : bestFixFor(sel, a);
+    return el('tr', {}, el('td', {}, a.severity), el('td', {}, el('b', {}, a.name), el('div', { class: 'mute' }, `${a.class}; survey ${a.survey}`)),
+      el('td', {}, el('span', { class: 'pill ' + (res.blocked ? 'PASS' : 'FAIL') }, res.blocked ? 'BLOCKED' : 'OPEN'), res.blocked ? el('div', { class: 'mute' }, `${res.by}, ${res.layers} layer${res.layers > 1 ? 's' : ''}`) : null),
+      el('td', {}, bf ? [el('button', { class: 'btn sm', on: { click: () => setControl(sel, bf.g, 'PASS') } }, `Fix ${bf.g}`), ' ', scopeTag(bf.g), el('div', { class: 'mute' }, `${NAME(bf.g)}; closes ${bf.gain} attack${bf.gain === 1 ? '' : 's'} here`)] : ''),
+      el('td', {}, el('button', { class: 'btn sec sm', on: { click: () => { selAtt = a.id; tab = 'lab'; resetViews(); render(); } } }, 'Replay')));
+  });
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'Exposure'), el('div', { class: 'mute' }, 'Open attacks first, worst first.'),
+    el('div', { class: 'tw' }, el('table', {}, el('tr', {}, ...['Sev', 'Attack', 'Status', 'Best single fix', ''].map(h => el('th', {}, h))), ...rows))));
+  const planRows = plan.map(c => { const n = VML.has(c) ? 1 : vmsOnHost(v.host).filter(x => stOf(x.id)[c] !== 'PASS').length;
+    return el('div', { class: 'fixrow' }, el('button', { class: 'btn sm', on: { click: () => setControl(sel, c, 'PASS') } }, `Fix ${c}`),
+      el('div', {}, el('b', {}, NAME(c)), ' ', scopeTag(c), ` ${effort(c)}. `, VML.has(c) ? '' : `Also protects ${n - 1} other VM(s) on this host. `, el('code', {}, D.controls[c].fix))); });
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'Fix plan'),
+    el('div', { class: 'mute' }, plan.length ? `The smallest set that blocks all ${D.attacks.length} modelled attacks on this VM (exact search): ${plan.length} fix${plan.length > 1 ? 'es' : ''}.` : 'Nothing left to fix for the modelled attacks.'),
+    ...planRows,
+    el('div', { class: 'row', style: 'margin-top:8px' },
+      el('button', { class: 'btn', disabled: !plan.length, on: { click: () => applyList(plan.map(c => [VML.has(c) ? 'vm' : 'host', VML.has(c) ? sel : v.host, c])) } }, 'Apply the whole plan'),
+      el('button', { class: 'btn sec', on: { click: () => download(`runbook-${v.id}.md`, runbook(sel), 'text/markdown') } }, 'Export runbook (Markdown)'))));
+  const thin = D.attacks.filter(a => P.r[a.id].blocked && P.r[a.id].layers === 1);
+  if (thin.length) m.append(el('div', { class: 'card' }, el('h2', {}, 'Single points of failure'),
+    el('div', { class: 'mute' }, 'Blocked, but by one control only. If it is misconfigured or removed, the attack gets through.'),
+    ...thin.map(a => { const extra = [...new Set(a.steps.flatMap(s => s.gates))].filter(g => st[g] !== 'PASS' && st[g] !== 'NA');
+      return el('div', { class: 'fixrow' }, el('div', {}, el('b', {}, a.name), ` held by ${P.r[a.id].by} only. `, extra.length ? ['Add a second layer: ', ...extra.flatMap(g => [el('button', { class: 'btn sec sm', on: { click: () => setControl(sel, g, 'PASS') } }, `${g} ${NAME(g)}`), ' '])] : 'No further independent control exists in the model.')); })));
+}
+
+/* ---------- Attack Lab ---------- */
+function stepView(a, i, res, active, st) {
+  const s = a.steps[i];
+  let cls = 'step ' + s.lane;
+  if (!active) cls += ' preview';
+  else if (res.blocked && i > res.stage) cls += ' skipped';
+  else if (res.blocked && i === res.stage && run.shown > i) cls += ' blocked';
+  else if (run.shown > i) cls += ' reached';
+  else cls += ' skipped';
+  return el('div', { class: cls },
+    el('div', { class: 'num' }, cls.includes('blocked') ? '✔' : i + 1),
+    el('div', {}, el('div', {}, el('span', { class: 'lane ' + s.lane }, s.lane === 'device' ? 'VMM / device' : s.lane), el('span', { class: 'st' }, s.title)),
+      el('div', { class: 'sx' }, s.text),
+      s.gates.length ? el('div', { class: 'gates' }, el('span', { class: 'mute' }, 'Stopped by any of:'),
+        ...s.gates.map(g => el('button', { class: 'gate ' + st[g], title: 'Click to toggle ' + g,
+          on: { click: () => setControl(sel, g, st[g] === 'PASS' ? 'FAIL' : 'PASS') } }, `${g} ${NAME(g)} (${st[g]})`, ' ', scopeTag(g)))) : null,
+      cls.includes('blocked') ? el('div', { class: 'why' }, el('b', {}, `${res.by} holds. `), s.why) : null));
+}
+async function play(id) {
+  const my = ++token, a = D.attacks.find(x => x.id === id), res = evaluate(a, stOf(sel));
+  run = { id, vm: sel, shown: 0, done: false }; renderMain();
+  const last = res.blocked ? res.stage : a.steps.length - 1;
+  for (let i = 0; i <= last; i++) { await sleep(reduce ? 0 : 700); if (my !== token) return; run.shown = i + 1; renderMain(); }
+  await sleep(reduce ? 0 : 250); if (my !== token) return;
+  run.done = true; renderMain(); live(res.blocked ? `${a.name} blocked by ${res.by}` : `${a.name} compromised ${vmOf(sel).name}`);
+}
+function renderLab(m) {
+  const st = stOf(sel), P = posture(st), v = vmOf(sel);
+  m.append(el('div', { class: 'card' }, el('h2', {}, `Choose an attack against ${v.name}`),
+    el('div', { class: 'mute' }, 'Documented classes from the survey (case study Table 3). The badge shows how this VM fares. Change the VM in the left panel.'),
+    el('div', { class: 'grid' }, ...D.attacks.map(a => el('button', { class: 'acard', 'aria-pressed': selAtt === a.id, on: { click: () => { selAtt = a.id; resetViews(); render(); } } },
+      el('span', { class: 'badge ' + (P.r[a.id].blocked ? 'B' : 'C') }, P.r[a.id].blocked ? 'BLOCKED' : 'OPEN'),
+      el('span', { class: 'chip' }, a.class), el('div', { class: 't' }, a.name), el('div', { class: 'mute' }, `Severity ${a.severity}; survey ${a.survey}`))))));
+  const a = D.attacks.find(x => x.id === selAtt), res = P.r[a.id], active = run && run.id === a.id && run.vm === sel;
+  const card = el('div', { class: 'card' }, el('h2', {}, a.name),
+    el('div', { class: 'row' }, el('span', { class: 'chip' }, a.class), el('span', { class: 'chip' }, 'Survey ' + a.survey), el('span', { class: 'chip' }, `Starts: ${a.origin}`), el('span', { class: 'chip' }, `Reach: ${a.scope}`)),
+    el('p', { class: 'mute' }, a.real),
+    el('div', { class: 'row' }, el('button', { class: 'btn', on: { click: () => play(a.id) } }, active && !run.done ? 'Running…' : 'Launch attack'),
+      el('span', { class: 'mute' }, 'Target: ', el('b', {}, v.name), ` on ${hostOf(v.host).name}`)),
+    el('div', { class: 'chain' }, ...a.steps.map((_, i) => stepView(a, i, res, active, st))));
+  if (active && run.done) {
+    if (res.blocked) card.append(el('div', { class: 'verdict B' }, `BLOCKED at stage ${res.stage + 1} by ${res.by} (${NAME(res.by)}).`,
+      el('div', { class: 'mute' }, `${res.layers} independent control${res.layers > 1 ? 's' : ''} on this attack's path hold${res.layers > 1 ? ' (defence in depth)' : 's (a single layer)'}.`)));
+    else {
+      const opts = []; a.steps.forEach((s, i) => s.gates.forEach(g => { if (!['PASS', 'NA'].includes(st[g])) opts.push({ g, stage: i + 1 }); }));
+      card.append(el('div', { class: 'verdict C' }, 'COMPROMISED. Impact: ' + a.impact,
+        el('div', { class: 'mute', style: 'margin-top:6px' }, 'How to stop it (any one is enough; more is better):'),
+        ...opts.map(o => el('div', { class: 'fixrow' },
+          el('button', { class: 'btn', on: { click: () => { setControl(sel, o.g, 'PASS'); play(a.id); } } }, `Fix ${o.g}`),
+          el('div', {}, el('b', {}, `Stage ${o.stage}: ${NAME(o.g)}.`), ' ', scopeTag(o.g), ' ', el('code', {}, D.controls[o.g].fix))))));
+    }
+  } else card.append(el('div', { class: 'verdict N' }, active ? 'Attack in progress…' : 'Not launched yet. Press Launch, or click any control chip in the chain to change the defences first.'));
+  card.append(el('div', { class: 'mute', style: 'margin-top:8px' }, 'Tested by project module: ' + a.module));
+  m.append(card);
+}
+
+/* ---------- Campaign ---------- */
+function pathOf(r, start) {
+  const out = [], comp = new Set(start ? [start] : []), exp = new Set();
+  const group = (f, t, k) => r.edges.filter(e => e[0] === f && e[1] === t && e[3] === k).map(e => e[2]);
+  for (const e of r.edges) {
+    const f = e[0], t = e[1], k = e[3];
+    if (k === 'compromised') { if (comp.has(t)) continue; comp.add(t); out.push({ from: f, to: t, kind: k, attacks: group(f, t, k) }); }
+    else if (!r.compromised.includes(t) && !exp.has(t)) { exp.add(t); out.push({ from: f, to: t, kind: k, attacks: group(f, t, k) }); }
+  }
+  return out;
+}
+function graphSvg(path, shown, start) {
+  const hostsW = 300, boxH = 66, gap = 22, top = 70, W = Math.max(720, FL.hosts.length * hostsW + 40);
+  const pos = {};
+  FL.hosts.forEach((h, hi) => vmsOnHost(h.id).forEach((v, vi) => { pos[v.id] = { x: 30 + hi * hostsW + 20, y: top + vi * (boxH + gap), w: hostsW - 70 }; }));
+  const H = top + Math.max(...FL.hosts.map(h => vmsOnHost(h.id).length)) * (boxH + gap) + 10;
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'graph', role: 'img', 'aria-label': 'Attack path through the fleet' });
+  const defs = svgEl('defs', {});
+  const mk = (id, col) => defs.append(svgEl('marker', { id, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, svgEl('path', { d: 'M0 0L10 5L0 10z', fill: col })));
+  mk('arR', '#b91c1c'); mk('arA', '#92600a'); svg.append(defs);
+  FL.hosts.forEach((h, hi) => { const n = vmsOnHost(h.id).length;
+    svg.append(svgEl('rect', { class: 'hostbox', x: 30 + hi * hostsW, y: 38, width: hostsW - 30, height: 30 + n * (boxH + gap) + 8, rx: 14 }), svgEl('text', { class: 'hostlbl', x: 44 + hi * hostsW, y: 56 }, h.name)); });
+  const visible = shown >= 0 ? path.slice(0, shown) : [];
+  const seenC = new Set(start ? [start] : []), seenE = new Set();
+  visible.forEach(e => { (e.kind === 'compromised' ? seenC : seenE).add(e.to); });
+  if (start === null) svg.append(svgEl('circle', { cx: 18, cy: 24, r: 11, fill: '#b91c1c' }), svgEl('text', { x: 36, y: 29 }, 'outside attacker'));
+  visible.forEach(e => {
+    const to = pos[e.to]; let fx, fy;
+    if (e.from === 'outside') { fx = 18; fy = 24; } else { const f = pos[e.from]; fx = f.x + f.w / 2; fy = f.y + boxH / 2; }
+    const tx = to.x + to.w / 2, ty = to.y + boxH / 2, mx = (fx + tx) / 2, my = (fy + ty) / 2 - 24;
+    const kind = e.kind === 'compromised' ? 'comp' : 'expo';
+    svg.append(svgEl('path', { class: 'edge ' + kind, d: `M${fx} ${fy} Q${mx} ${my} ${tx} ${ty}`, 'marker-end': `url(#${kind === 'comp' ? 'arR' : 'arA'})` }),
+      svgEl('text', { class: 'elbl', x: mx, y: my + 6, 'text-anchor': 'middle', fill: kind === 'comp' ? '#b91c1c' : '#92600a' }, e.attacks.join('+')));
+  });
+  FL.vms.forEach(v => { const p = pos[v.id];
+    const status = seenC.has(v.id) ? 'comp' : (seenE.has(v.id) ? 'expo' : 'safe');
+    const g = svgEl('g', { class: `node ${status}${start === v.id ? ' foot' : ''}` });
+    g.append(svgEl('rect', { x: p.x, y: p.y, width: p.w, height: boxH, rx: 12 }), svgEl('text', { x: p.x + 12, y: p.y + 26 }, v.name),
+      svgEl('text', { class: 'sm', x: p.x + 12, y: p.y + 44 }, `${v.role} | crit ${v.criticality}`),
+      svgEl('text', { class: 'sm', x: p.x + 12, y: p.y + 58 }, status === 'comp' ? 'COMPROMISED' : status === 'expo' ? 'data exposed' : 'not reached'));
+    svg.append(g); });
+  return svg;
+}
+async function runCampaign() {
+  const my = ++token, r = campaignOf(FL, hostS, vmS, camp.start), n = pathOf(r, camp.start).length;
+  camp = { start: camp.start, shown: 0, done: false }; renderMain();
+  for (let i = 1; i <= n; i++) { await sleep(reduce ? 0 : 520); if (my !== token) return; camp.shown = i; renderMain(); }
+  camp.done = true; renderMain(); live(`Campaign finished: ${r.compromised.length} VMs compromised`);
+}
+function renderCampaign(m) {
+  const r = campaignOf(FL, hostS, vmS, camp.start), b = blastOf(FL, r), path = pathOf(r, camp.start);
+  const starts = [null, ...FL.vms.map(v => v.id)];
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'Campaign: follow the breach'),
+    el('div', { class: 'mute' }, 'Where does the attacker start? The model then spreads by explicit rules: a host escape takes every VM on that host, shared networks allow lateral movement, side channels expose co-resident data.'),
+    el('div', { class: 'row', style: 'margin:8px 0' }, ...starts.map(s => el('button', { class: 'btn sm ' + (camp.start === s ? '' : 'sec'), 'aria-pressed': camp.start === s,
+      on: { click: () => { camp = { start: s, shown: -1, done: false }; token++; render(); } } }, s === null ? 'Outsider (no foothold)' : `Root in ${vmOf(s).name}`))),
+    el('div', { class: 'row' }, el('button', { class: 'btn', on: { click: runCampaign } }, 'Run campaign'),
+      el('button', { class: 'btn sec', on: { click: () => { token++; camp = { start: camp.start, shown: path.length, done: true }; renderMain(); } } }, 'Show final result'))));
+  const shown = camp.shown, finished = shown >= path.length && shown >= 0;
+  const compNow = shown < 0 ? [] : (finished ? r.compromised : [...new Set([...(camp.start ? [camp.start] : []), ...path.slice(0, shown).filter(e => e.kind === 'compromised').map(e => e.to)])]);
+  m.append(el('div', { class: 'card' }, graphSvg(path, shown, camp.start),
+    el('div', { class: 'stats', style: 'margin-top:10px' },
+      el('div', { class: 'stat' }, el('b', {}, shown < 0 ? '–' : `${compNow.length}/${FL.vms.length}`), 'VMs compromised'),
+      el('div', { class: 'stat' }, el('b', {}, shown < 0 ? '–' : (finished ? b[0] + '%' : '…')), 'criticality-weighted'),
+      el('div', { class: 'stat' }, el('b', {}, shown < 0 ? '–' : (finished ? b[2] : '…')), 'VMs with exposed data'),
+      el('div', { class: 'stat' }, el('b', {}, shown < 0 ? '–' : (finished ? r.persistent.length : '…')), 'with a persistent foothold'))));
+  if (shown >= 0) m.append(el('div', { class: 'card' }, el('h2', {}, 'Attack path'),
+    path.length ? el('div', { class: 'tw' }, el('table', {}, el('tr', {}, ...['Step', 'From', 'To', 'Attack(s)', 'Effect'].map(h => el('th', {}, h))),
+      ...path.slice(0, shown).map((e, i) => el('tr', {}, el('td', {}, i + 1), el('td', {}, e.from === 'outside' ? 'outside' : vmOf(e.from).name), el('td', {}, vmOf(e.to).name),
+        el('td', {}, ...e.attacks.map(id => { const a = D.attacks.find(x => x.id === id); return el('div', {}, `${a.id} ${a.name}`, el('span', { class: 'mute' }, ` (survey ${a.survey})`)); })),
+        el('td', {}, e.kind === 'compromised' ? 'compromised' : 'data exposed')))))
+      : el('div', { class: 'mute' }, 'This attacker cannot reach anything with the current defences.')));
+  const adv = containmentOf(FL, hostS, vmS, camp.start, 3);
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'Containment advice'),
+    el('div', { class: 'mute' }, 'Fixes ranked by how much they shrink this campaign. If no single fix helps (two independent paths are open), fix pairs are shown.'),
+    ...(adv.length ? adv.map(x => el('div', { class: 'fixrow' }, el('button', { class: 'btn', on: { click: () => applyList(x.fixes) } }, `Apply ${x.fixes.length > 1 ? x.fixes.length + ' fixes' : 'fix'}`),
+      el('div', {}, el('b', {}, x.fixes.map(fixLabel).join(' + ')), ` : compromised VMs ${x.before[1]} to ${x.after[1]}, weighted ${x.before[0]}% to ${x.after[0]}%, exposed ${x.before[2]} to ${x.after[2]}.`)))
+      : [el('div', { class: 'mute' }, 'Nothing more to gain: this campaign is already contained or cannot be shrunk by the modelled controls.')]),
+    el('div', { class: 'row', style: 'margin-top:8px' }, el('button', { class: 'btn sec', disabled: !adv.length, on: { click: () => {
+      let guard = 0; while (guard++ < 10) { const a1 = containmentOf(FL, hostS, vmS, camp.start, 1); if (!a1.length) break; for (const [kind, ent, c] of a1[0].fixes) (kind === 'host' ? hostS : vmS)[ent][c] = 'PASS'; }
+      resetViews(); render(); } } }, 'Auto-harden (greedy)'))));
+}
+
+/* ---------- Challenge ---------- */
+function stars(used, par, hints) { return used <= par && hints === 0 ? 3 : used <= par + 3 ? 2 : 1; }
+function fixesUsed() {
+  const now = stOf(challenge.vm);
+  return D.order.filter(c => now[c] === 'PASS' && challenge.start[c] !== 'PASS').length;
+}
+function renderChallenge(m) {
+  const total = D.attacks.length;
+  if (challenge && challenge.vm !== sel) challenge = null;
+  if (!challenge) {
+    const v = vmOf(sel), par = (minimalFix(stOf(sel)) || []).length;
+    m.append(el('div', { class: 'card' }, el('h2', {}, 'Hardening challenge'),
+      el('p', {}, `Harden ${v.name} until all ${total} attacks are blocked, with as few fixes as you can. Its current par is ${par} fix${par === 1 ? '' : 'es'}, found by exhaustive search.`),
+      el('p', { class: 'mute' }, 'Host-level fixes count once but protect every VM on the host. Hints cost a star. Pick a different VM in the left panel for a different challenge.'),
+      el('button', { class: 'btn', disabled: par === 0, on: { click: () => { challenge = { vm: sel, start: { ...stOf(sel) }, par, hints: 0, reveal: false, hint: null }; render(); } } }, par === 0 ? 'This VM is already fully blocked' : 'Start challenge')));
+    return;
+  }
+  const P = posture(stOf(sel)), used = fixesUsed(), win = P.n === total, v = vmOf(sel);
+  const card = el('div', { class: 'card' }, el('h2', {}, `Hardening challenge: ${v.name}`),
+    el('div', { class: 'stats' },
+      el('div', { class: 'stat' }, el('b', {}, `${P.n}/${total}`), 'attacks blocked'),
+      el('div', { class: 'stat' }, el('b', {}, used), `fixes used (par ${challenge.par})`),
+      el('div', { class: 'stat' }, el('b', {}, challenge.hints), 'hints used'),
+      el('div', { class: 'stat' }, el('b', {}, P.depth), 'attacks with 2+ layers')));
+  if (!win) {
+    card.append(el('div', { class: 'verdict N' }, 'Flip controls in the left panel. Open attacks: ' + D.attacks.filter(a => !P.r[a.id].blocked).map(a => a.id).join(', ')),
+      el('div', { class: 'row', style: 'margin-top:10px' },
+        el('button', { class: 'btn sec', on: { click: () => { challenge.hints++; const gs = gateControls().filter(g => !['PASS', 'NA'].includes(stOf(sel)[g])); let best = null;
+          for (const g of gs) { const gain = posture({ ...stOf(sel), [g]: 'PASS' }).n - P.n; if (!best || gain > best.gain) best = { g, gain }; } challenge.hint = best ? best.g : null; render(); } } }, 'Hint (costs a star)'),
+        el('button', { class: 'btn sec', on: { click: () => { challenge.reveal = true; render(); } } }, 'Reveal par solution'),
+        el('button', { class: 'btn sec', on: { click: () => { challenge = null; render(); } } }, 'Quit')));
+    if (challenge.hint) card.append(el('div', { class: 'why' }, `Hint: fixing ${challenge.hint} (${NAME(challenge.hint)}) blocks the most open attacks.`));
+  } else {
+    const s = stars(used, challenge.par, challenge.hints);
+    card.append(el('div', { class: 'verdict B' }, el('div', { class: 'stars' }, `Rating ${s} of 3`),
+      used <= challenge.par ? `All ${total} attacks blocked with ${used} fixes: optimal.` : `All ${total} attacks blocked with ${used} fixes (par ${challenge.par}).`,
+      el('div', { class: 'mute' }, `Par stops every modelled attack with the fewest changes, but ${P.depth} of ${total} attacks have a second independent layer. Real hardening adds layers so one mistake is not fatal.`)),
+      el('div', { class: 'row', style: 'margin-top:10px' }, el('button', { class: 'btn', on: { click: () => { challenge = null; render(); } } }, 'Next challenge'),
+        el('button', { class: 'btn sec', on: { click: () => { tab = 'fleet'; render(); } } }, 'See the fleet')));
+  }
+  if (challenge.reveal) card.append(el('div', { class: 'why' }, 'Par solution (one of several): ' + (minimalFix(challenge.start) || []).map(c => `${c} ${NAME(c)}`).join(', ')));
+  m.append(card);
+}
+
+/* ---------- Survey map ---------- */
+function renderMap(m) {
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'Survey map: attack to control to module'),
+    el('div', { class: 'mute' }, 'Every simulated attack traces to a section of Sierra-Arriaga, Branco and Lee (ACM CSUR 53(2), 2020) and to a table of our case study. Severity, origin and reach are the project’s own modelling judgement.'),
+    el('div', { class: 'tw' }, el('table', {}, el('tr', {}, ...['ID', 'Attack', 'Class', 'Sev', 'Starts', 'Reach', 'Survey', 'Case study', 'Controls that stop it', 'Module'].map(h => el('th', {}, h))),
+      ...D.attacks.map(a => el('tr', {}, el('td', {}, a.id), el('td', {}, a.name), el('td', {}, a.class), el('td', {}, a.severity), el('td', {}, a.origin), el('td', {}, a.scope), el('td', {}, a.survey), el('td', {}, a.case),
+        el('td', {}, [...new Set(a.steps.flatMap(s => s.gates))].join(', ')), el('td', {}, a.module)))))));
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'What the model does not claim'),
+    el('ul', {},
+      el('li', {}, 'It decides whether a control would stop a stage as the survey describes. It runs no exploit and measures no real success rate.'),
+      el('li', {}, 'Stages without a control are assumed to succeed. Campaign spread follows the stated scope rules, which are simplifications.'),
+      el('li', {}, 'PASS means a control passed its defined test, not that the system is secure. NA never counts as protection.'),
+      el('li', {}, 'The example fleet is an invented scenario. Its control states come from the real auditor run on generated folders, not from captured machines. Import your own audit to use real data.'),
+      el('li', {}, 'Local-origin attacks (A04, A09) need a host account and are not part of campaigns; they appear in per-VM insights.'),
+      el('li', {}, 'Only configuration controls (M1) gate attacks. M2, M3 and M4 are not run on real hardware yet.'),
+      el('li', {}, 'Survey recommendations not yet covered by a control: PCIe ACS, DMA-remap register lock, device-memory scrubbing, Secure Boot / measured launch, SEV/TDX memory encryption, cache partitioning, guest kernel integrity.'))));
+}
+
+/* ---------- Guided simulation (Simulate tab) ---------- */
+let wiz = { step: 1, vm: null, att: null, done: false, applied: [] }, simFast = false;
+const ORIGIN_TXT = { network: 'Starts from outside: any attacker who can reach the network', guest: 'Starts with root inside this VM (for example a compromised app)', local: 'Starts with a user account on the KVM host' };
+const SCOPE_TXT = { host: 'escapes to the host, so every VM on it is at risk', vm: 'takes over this VM', neighbour: 'spreads to other VMs on the same network', leak: 'leaks data from other VMs on the same host' };
+const LANEPOS = { network: [300, 38], guest: [290, 190], device: [290, 268], host: [445, 372] };
+const STARTPOS = { network: [55, 38], guest: [190, 190], local: [640, 385] };
+function hostPosture(hid) { const f = Object.values(hostS[hid]).filter(x => x === 'FAIL').length; return f === 0 ? 'hardened host' : f > 8 ? 'unhardened host' : 'partly hardened host'; }
+function canGo(n) { return n === 1 || (n === 2 && wiz.vm) || (n >= 3 && wiz.vm && wiz.att); }
+function stepper() {
+  const names = ['Choose a VM', 'Choose an attack', 'Simulate the attack', 'How to protect it'];
+  return el('div', { class: 'stepper', id: 'stepper' }, ...names.map((t, i) => el('button', {
+    class: 'stp' + (wiz.step === i + 1 ? ' on' : '') + (wiz.step > i + 1 ? ' done' : ''), disabled: !canGo(i + 1) || (i === 3 && !wiz.done),
+    on: { click: () => { if (i === 3) { document.getElementById('simres').scrollIntoView({ behavior: 'smooth' }); return; } token++; wiz.step = i + 1; wiz.done = false; renderMain(); if (i === 2) playSim(); } } },
+    el('span', { class: 'n' }, wiz.step > i + 1 ? '✓' : i + 1), t)));
+}
+function paintStepper() { const s = document.getElementById('stepper'); if (s) s.replaceWith(stepper()); }
+function renderSim(m) {
+  m.append(stepper());
+  if (wiz.step === 1) simPickVm(m); else if (wiz.step === 2) simPickAttack(m); else simStage(m);
+}
+function simPickVm(m) {
+  m.append(el('div', { class: 'card' }, el('h2', {}, 'Step 1: choose the virtual machine to attack'),
+    el('p', { class: 'mute' }, 'Each VM is a different kind of workload on a KVM host. Its defences are real results of our auditor (vsec audit) on generated example configurations, so a weak host or a careless VM definition shows up here exactly as the tool reports it.'),
+    el('div', { class: 'grid' }, ...FL.vms.map(v => {
+      const st = stOf(v.id), r = riskOf(st), fails = Object.values(st).filter(x => x === 'FAIL').length;
+      return el('button', { class: 'acard vmcard', 'aria-pressed': wiz.vm === v.id, on: { click: () => { wiz.vm = v.id; sel = v.id; wiz.step = 2; wiz.applied = []; renderMain(); } } },
+        el('span', { class: 'rk ' + riskClass(r) }, 'risk ' + r),
+        el('span', { class: 'chip' }, v.role), el('div', { class: 't' }, v.name),
+        el('div', { class: 'post mute' }, `${hostOf(v.host).name} (${hostPosture(v.host)}), network: ${v.segment}`),
+        el('div', { class: 'post mute' }, `${fails} of ${Object.keys(st).length} security controls failing`));
+    }))));
+}
+function simPickAttack(m) {
+  const v = vmOf(wiz.vm);
+  m.append(el('div', { class: 'card' }, el('h2', {}, `Step 2: choose an attack against ${v.name}`),
+    el('p', { class: 'mute' }, 'Every attack is a documented class from the survey (case study Table 3). The result is not shown here: run the simulation to find out whether this VM survives.'),
+    el('div', { class: 'grid' }, ...D.attacks.map(a => el('button', { class: 'acard', 'aria-pressed': wiz.att === a.id,
+      on: { click: () => { wiz.att = a.id; wiz.step = 3; wiz.applied = []; renderMain(); playSim(); } } },
+      el('span', { class: 'chip' }, a.class), el('div', { class: 't' }, a.name),
+      el('div', { class: 'mute' }, ORIGIN_TXT[a.origin] + '.'),
+      el('div', { class: 'mute' }, `If it succeeds it ${SCOPE_TXT[a.scope]}. Severity ${a.severity}/4, survey ${a.survey}.`)))),
+    el('div', { class: 'row', style: 'margin-top:10px' }, el('button', { class: 'btn sec', on: { click: () => { wiz.step = 1; renderMain(); } } }, 'Back to VM selection'))));
+}
+function envSvg(a, v) {
+  const host = hostOf(v.host), others = vmsOnHost(v.host).filter(o => o.id !== v.id).slice(0, 3);
+  const remote = FL.vms.filter(o => o.segment === v.segment && o.host !== v.host).slice(0, 4);
+  const svg = svgEl('svg', { viewBox: '0 0 1000 440', class: 'env', role: 'img', 'aria-label': `Simulated environment: ${v.name} on ${host.name}` });
+  svg.append(svgEl('circle', { cx: 55, cy: 38, r: 22, class: 'z', id: 'z-out' }), svgEl('text', { x: 55, y: 78, 'text-anchor': 'middle', class: 's' }, 'outside'),
+    svgEl('rect', { x: 120, y: 18, width: 870, height: 40, rx: 10, class: 'z', id: 'z-network' }),
+    svgEl('text', { x: 520, y: 43, class: 's' }, `virtual network "${v.segment}"`),
+    svgEl('rect', { x: 120, y: 80, width: 645, height: 345, rx: 14, class: 'hb' }),
+    svgEl('text', { x: 136, y: 103, class: 'lbl' }, `KVM host: ${host.name}`), svgEl('text', { x: 755, y: 103, class: 's', 'text-anchor': 'end' }, hostPosture(v.host)),
+    svgEl('line', { x1: 410, y1: 58, x2: 410, y2: 118, class: 'wire' }),
+    svgEl('rect', { x: 140, y: 118, width: 300, height: 108, rx: 12, class: 'z', id: 'z-guest' }),
+    svgEl('text', { x: 156, y: 145, class: 'lbl' }, `${v.name} (target VM)`), svgEl('text', { x: 156, y: 166, class: 's' }, v.role),
+    svgEl('text', { x: 156, y: 212, class: 's' }, 'guest operating system'),
+    svgEl('rect', { x: 140, y: 240, width: 300, height: 55, rx: 10, class: 'z', id: 'z-device' }),
+    svgEl('text', { x: 156, y: 272, class: 's' }, 'QEMU virtual devices (disk, NIC, USB, floppy...)'),
+    svgEl('rect', { x: 140, y: 312, width: 605, height: 100, rx: 10, class: 'z', id: 'z-host' }),
+    svgEl('text', { x: 156, y: 340, class: 'lbl' }, 'Host layer'), svgEl('text', { x: 156, y: 360, class: 's' }, 'QEMU process, libvirt daemon, host kernel with KVM'));
+  svg.append(svgEl('text', { x: 465, y: 128, class: 's' }, others.length ? 'Other VMs on this host' : 'No other VMs on this host'));
+  others.forEach((o, i) => svg.append(svgEl('rect', { x: 465, y: 136 + i * 56, width: 280, height: 48, rx: 10, class: 'z', id: 'ov-' + o.id }),
+    svgEl('text', { x: 478, y: 157 + i * 56, class: 'lbl' }, o.name), svgEl('text', { x: 478, y: 175 + i * 56, class: 's' }, o.role)));
+  svg.append(svgEl('rect', { x: 780, y: 80, width: 210, height: 345, rx: 14, class: 'hb' }), svgEl('text', { x: 792, y: 103, class: 's' }, 'Same network, other hosts'));
+  remote.forEach((o, i) => svg.append(svgEl('line', { x1: 885, y1: 58, x2: 885, y2: 80, class: 'wire' }),
+    svgEl('rect', { x: 792, y: 118 + i * 62, width: 186, height: 50, rx: 10, class: 'z', id: 'ov-' + o.id }),
+    svgEl('text', { x: 804, y: 140 + i * 62, class: 'lbl' }, o.name), svgEl('text', { x: 804, y: 158 + i * 62, class: 's' }, hostOf(o.host).name)));
+  if (!remote.length) svg.append(svgEl('text', { x: 792, y: 130, class: 's' }, 'none'));
+  const [sx, sy] = STARTPOS[a.origin];
+  svg.append(svgEl('g', { id: 'simshield' }), svgEl('g', { id: 'simtok', class: 'tok', style: `transform:translate(${sx}px,${sy}px)` },
+    svgEl('circle', { r: 15 }), svgEl('text', { 'text-anchor': 'middle', y: 5 }, '!')));
+  return svg;
+}
+function simStage(m) {
+  const a = D.attacks.find(x => x.id === wiz.att), v = vmOf(wiz.vm);
+  m.append(el('div', { class: 'card' }, el('h2', {}, `Step 3: ${a.name} against ${v.name}`),
+    el('div', { class: 'row' }, el('span', { class: 'chip' }, a.class), el('span', { class: 'chip' }, 'Survey ' + a.survey), el('span', { class: 'chip' }, ORIGIN_TXT[a.origin])),
+    el('p', { class: 'mute' }, a.real),
+    el('div', { class: 'row' }, el('button', { class: 'btn', on: { click: () => playSim() } }, 'Replay'),
+      el('button', { class: 'btn sec', on: { click: () => { simFast = true; } } }, 'Skip animation'),
+      el('button', { class: 'btn sec', on: { click: () => { token++; wiz.step = 2; renderMain(); } } }, 'Back to attack selection'))),
+    el('div', { class: 'simgrid' },
+      el('div', { class: 'card' }, el('h3', { style: 'margin-top:0' }, 'Simulated environment'), envSvg(a, v),
+        el('div', { class: 'mute', style: 'font-size:12.5px' }, 'Red marker = attacker. Blue outline = where the attack is now. Green shield = a defence that stopped it. Red = compromised, amber = data exposed.')),
+      el('div', { class: 'card' }, el('h3', { style: 'margin-top:0' }, 'What is happening'), el('ul', { class: 'simlog', id: 'simlog', 'aria-live': 'polite' }))),
+    el('div', { class: 'card', id: 'simres' }, el('div', { class: 'verdict N' }, 'Simulation running…')));
+}
+async function playSim() {
+  const my = ++token; simFast = false;
+  const a = D.attacks.find(x => x.id === wiz.att), v = vmOf(wiz.vm), st = stOf(v.id), res = evaluate(a, st);
+  wiz.done = false; wiz.step = 3; renderMain();
+  const log = document.getElementById('simlog'), tok = document.getElementById('simtok');
+  const wait = ms => sleep(reduce || simFast ? 0 : ms);
+  const move = ([x, y]) => { tok.style.transform = `translate(${x}px,${y}px)`; };
+  const hot = id => { document.querySelectorAll('.env .z.hot').forEach(z => z.classList.remove('hot')); const z = document.getElementById(id); if (z) z.classList.add('hot'); };
+  const say = (cls, ...kids) => { const li = el('li', { class: cls }, ...kids); log.append(li); log.scrollTop = log.scrollHeight; return li; };
+  say('', el('b', {}, 'Start. '), ORIGIN_TXT[a.origin] + '.');
+  await wait(1000); if (my !== token) return;
+  const last = res.blocked ? res.stage : a.steps.length - 1;
+  for (let i = 0; i <= last; i++) {
+    const s = a.steps[i];
+    hot('z-' + s.lane); move(LANEPOS[s.lane]);
+    const li = say(s.lane, el('b', {}, `Stage ${i + 1}: ${s.title}`), el('div', {}, s.text));
+    await wait(1300); if (my !== token) return;
+    if (!s.gates.length) { li.append(el('div', { class: 'mute', style: 'font-size:13px' }, 'No configuration setting can stop this step (the flaw itself is assumed, as in the survey).')); await wait(500); continue; }
+    for (const g of s.gates) {
+      li.append(el('div', { class: 'chk ' + st[g] }, `Defence check: ${g} ${NAME(g)} (${VML.has(g) ? 'VM' : 'host'} setting) is ${st[g]}`, st[g] === 'PASS' ? ' → it holds' : ' → it does not stop the attack'));
+      await wait(600); if (my !== token) return;
+    }
+    if (res.blocked && res.stage === i) {
+      const [x, y] = LANEPOS[s.lane];
+      document.getElementById('simshield').append(svgEl('g', { class: 'shield', transform: `translate(${x + 40},${y - 22})` },
+        svgEl('path', { d: 'M0 -18 L16 -11 L14 8 Q8 18 0 22 Q-8 18 -14 8 L-16 -11 Z' }), svgEl('text', { 'text-anchor': 'middle', y: 6 }, '✓')));
+      tok.classList.add('blk'); li.append(el('div', { class: 'why' }, el('b', {}, 'Blocked. '), s.why || ''));
+    }
+  }
+  if (!res.blocked) {
+    const mark = (id, c) => { const z = document.getElementById(id); if (!z) return; z.classList.add(c);
+      z.after(svgEl('text', { class: 'stl ' + c, x: +z.getAttribute('x') + +z.getAttribute('width') - 10, y: +z.getAttribute('y') + +z.getAttribute('height') - 9, 'text-anchor': 'end' }, { comp: 'COMPROMISED', expo: 'DATA EXPOSED', safe: 'SAFE' }[c])); };
+    hot('none');
+    if (a.scope !== 'leak') mark('z-guest', 'comp');
+    if (a.scope === 'host') { mark('z-host', 'comp'); mark('z-device', 'comp'); vmsOnHost(v.host).forEach(o => mark('ov-' + o.id, 'comp')); }
+    if (a.scope === 'leak') vmsOnHost(v.host).forEach(o => o.id !== v.id && mark('ov-' + o.id, 'expo'));
+    if (a.scope === 'neighbour') FL.vms.forEach(o => { if (o.id !== v.id && o.segment === v.segment) mark('ov-' + o.id, evaluate(a, stOf(o.id)).blocked ? 'safe' : 'comp'); });
+    say('', el('b', {}, 'Attack succeeded. '), a.impact);
+  } else say('', el('b', {}, 'Attack stopped. '), `${res.layers} defence${res.layers > 1 ? 's' : ''} on this attack's path ${res.layers > 1 ? 'hold' : 'holds'}.`);
+  wiz.done = true; wiz.step = 4; paintStepper(); simResult(a, v, st, res);
+  live(res.blocked ? 'Attack blocked' : 'Attack succeeded');
+}
+function simResult(a, v, st, res) {
+  const box = document.getElementById('simres'); box.replaceChildren();
+  box.append(el('h2', { style: 'margin-top:0' }, 'Step 4: result and how to protect it'));
+  if (res.blocked) box.append(el('div', { class: 'verdict B' }, `BLOCKED at stage ${res.stage + 1}: ${res.by} ${NAME(res.by)} stopped it.`,
+    el('div', { class: 'mute' }, res.layers > 1 ? `${res.layers} independent defences on the path: defence in depth.` : 'Only one defence on the path holds: fixing one more would give defence in depth.')));
+  else box.append(el('div', { class: 'verdict C' }, `COMPROMISED. ${a.impact}`));
+  const reached = a.steps.slice(0, res.blocked ? res.stage + 1 : a.steps.length);
+  box.append(el('h3', {}, 'How the attack happened'), el('ol', { class: 'how' }, ...reached.map(s => el('li', {}, el('b', {}, s.title + '. '), s.text,
+    el('span', { class: 'mute' }, s.gates.length ? ` Defences here: ${s.gates.map(g => `${g} ${NAME(g)} = ${st[g]}`).join(', ')}.` : ' No configuration defence applies to this step.')))));
+  const gates = [];
+  a.steps.forEach((s, i) => s.gates.forEach(g => { if (!gates.some(x => x.g === g)) gates.push({ g, i, why: s.why }); }));
+  box.append(el('h3', {}, 'How to protect it'),
+    el('p', { class: 'mute' }, `Any one of these settings at PASS stops the attack at its stage; turning on several gives defence in depth. HOST settings protect every VM on ${hostOf(v.host).name}.`),
+    el('div', { class: 'protect' }, ...gates.map(x => el('div', { class: 'pc' },
+      el('div', { class: 'row' }, el('b', {}, `${x.g} ${NAME(x.g)}`), scopeTag(x.g), el('span', { class: 'chk ' + st[x.g] }, 'now ' + st[x.g]), el('span', { class: 'mute' }, `stops stage ${x.i + 1}`)),
+      x.why ? el('div', { style: 'margin-top:4px' }, x.why) : null, el('code', {}, D.controls[x.g].fix)))));
+  const open = gates.filter(x => st[x.g] === 'FAIL');
+  const row = el('div', { class: 'row', style: 'margin-top:14px' });
+  if (!res.blocked && open.length) row.append(
+    el('button', { class: 'btn', on: { click: () => protect([open[0].g]) } }, `Apply the earliest fix (${open[0].g}) and re-run`),
+    el('button', { class: 'btn', on: { click: () => protect(open.map(x => x.g)) } }, `Apply all ${open.length} fixes and re-run`));
+  if (wiz.applied.length) row.append(el('button', { class: 'btn sec', on: { click: undoProtect } }, 'Undo my fixes'));
+  row.append(el('button', { class: 'btn sec', on: { click: () => { token++; wiz.step = 2; renderMain(); } } }, 'Try another attack'),
+    el('button', { class: 'btn sec', on: { click: () => { token++; wiz.step = 1; renderMain(); } } }, 'Choose another VM'));
+  box.append(row, el('p', { class: 'mute', style: 'font-size:12.5px;margin-bottom:0' }, 'This is a model of the survey\'s attack logic, not a measurement: no exploit runs. Every PASS/FAIL comes from the real auditor; the fix commands are the ones vsec audit prints.'));
+}
+function protect(gs) {
+  const v = vmOf(wiz.vm);
+  for (const g of gs) { const vm = VML.has(g), bag = vm ? vmS[v.id] : hostS[v.host]; wiz.applied.push([g, vm ? 'vm' : 'host', vm ? v.id : v.host, bag[g]]); bag[g] = 'PASS'; }
+  playSim();
+}
+function undoProtect() { for (const [g, k, ent, old] of wiz.applied.slice().reverse()) (k === 'vm' ? vmS : hostS)[ent][g] = old; wiz.applied = []; playSim(); }
+
+/* ---------- shell ---------- */
+const TABS = [['sim', 'Simulate'], ['fleet', 'Fleet'], ['insights', 'VM Insights'], ['lab', 'Attack Lab'], ['campaign', 'Campaign'], ['challenge', 'Hardening Challenge'], ['map', 'Survey Map']];
+function renderTabs() {
+  document.getElementById('tabs').replaceChildren(...TABS.map(([k, label]) =>
+    el('button', { role: 'tab', 'aria-selected': tab === k, on: { click: () => { tab = k; resetViews(); render(); } } }, label)));
+}
+function renderMain() {
+  const m = document.getElementById('main'); m.replaceChildren();
+  document.querySelector('.layout').classList.toggle('full', tab === 'sim');
+  ({ sim: renderSim, fleet: renderFleet, insights: renderInsights, lab: renderLab, campaign: renderCampaign, challenge: renderChallenge, map: renderMap })[tab](m);
+}
+function render() { renderTabs(); renderSide(); renderMain(); }
+loadFleet();
+render();
+</script>
+</body>
+</html>

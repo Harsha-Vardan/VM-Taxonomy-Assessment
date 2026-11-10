@@ -1,0 +1,21 @@
+# Example fleet for the what-if simulator. ILLUSTRATIVE SCENARIO: the VM names, roles and criticality are invented to make
+# the lessons visible; the control states are produced by running the real M1 auditor (vsec audit) on generated case folders
+# (scripts/make_demo_cases.py build_fleet). Nothing here was captured from a real machine.
+#
+# vm_level controls live in a VM's own definition (libvirt XML); every other M1 control is a property of the HOST, so all VMs on
+# a host share it: fixing a host control once protects every VM on that host (the "shared fate" lesson).
+vm_level: [C11, C12, C13, C14, C15, C16, C22, C27]
+
+hosts:
+  - {id: host-a, name: "kvm-host-a", note: "libvirt reachable over plain TCP; KSM and nested virtualization left on", faults: [C09, C10, C17, C21, C20]}
+  - {id: host-b, name: "kvm-host-b", note: "older host, most hardening never applied", faults: [C01, C02, C03, C04, C05, C06, C07, C08, C09, C18, C19, C25]}
+  - {id: host-c, name: "kvm-host-c", note: "hardened host", faults: []}
+
+# criticality 1-3 (3 = business critical) weights the blast-radius score. segment = libvirt network the VM is attached to.
+vms:
+  - {id: web-frontend, name: "web-frontend", role: "public website", host: host-a, segment: dmz, criticality: 2, faults: [C11, C12, C15, C16, C14]}
+  - {id: ci-runner, name: "ci-runner", role: "builds untrusted code", host: host-a, segment: dmz, criticality: 1, faults: [C15, C16, C13, C27]}
+  - {id: dev-sandbox, name: "dev-sandbox", role: "developer playground", host: host-b, segment: dev, criticality: 1, faults: [C11, C12, C13, C14, C15, C16, C22, C27]}
+  - {id: legacy-erp, name: "legacy-erp", role: "legacy business app", host: host-b, segment: internal, criticality: 3, faults: [C14, C15, C16, C11, C22]}
+  - {id: payments-db, name: "payments-db", role: "card data store", host: host-c, segment: internal, criticality: 3, faults: [C15, C16]}
+  - {id: monitoring, name: "monitoring", role: "metrics and logs", host: host-c, segment: mgmt, criticality: 2, faults: []}

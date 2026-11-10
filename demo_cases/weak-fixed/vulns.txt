@@ -1,0 +1,3 @@
+meltdown: Mitigation: PTI
+l1tf: Mitigation: PTE Inversion; SMT vulnerable
+spectre_v2: Vulnerable

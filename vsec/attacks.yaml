@@ -1,0 +1,191 @@
+# Attack scenarios for the what-if simulator (simulator.html).
+#
+# MODEL, NOT MEASUREMENT. Each attack is a chain of stages taken from the survey / case study. A stage with
+# `gates` is stopped when ANY listed control is PASS on the chosen VM (controls are the ids in taxonomy.yaml).
+# A stage with no gates always succeeds (the underlying bug or physics is assumed). The attack is "compromised"
+# if every stage succeeds, otherwise "blocked" at the first stage whose gate holds. This models whether the
+# CONFIGURATION would stop each stage as the survey describes; it contains no exploit code and no timing data.
+#
+# lane: guest | device | host | network
+# severity: 1-4, the PROJECT'S OWN judgement of impact (4 = host compromise). Used only to weight a VM's risk score.
+# origin:   who can start it. network = any outsider; guest = attacker already has root inside a guest VM; local = needs a host account.
+# scope:    what a success gives, used by the campaign model:
+#   vm         the target VM only
+#   host       the whole KVM host: every VM on that host (survey S3.1: guest escape)
+#   neighbour  other VMs on the same network segment
+#   leak       data exposure of co-resident VMs on the same host (side channels), not full control
+# survey: section of Sierra-Arriaga, Branco, Lee, ACM CSUR 53(2) 2020. case: table of our case study report.
+attacks:
+  - id: A01
+    severity: 4
+    origin: guest
+    scope: host
+    name: Floppy-controller escape (VENOM-style)
+    class: Guest->Host
+    survey: "S4.1"
+    case: "CS Table 3 (QEMU floppy controller); T9 'guest escape'"
+    module: "M1 (C14, C03/C04, C05/C06, C07/C08)"
+    real: "A queue-position flaw in QEMU's emulated floppy controller sat unnoticed from 2004 to 2015 (survey S4.1)."
+    impact: "Code execution on the host: every VM on the machine is exposed."
+    steps:
+      - {lane: guest, title: "Probe the virtual hardware", text: "An attacker with root inside the guest lists the emulated devices and finds a legacy floppy controller.", gates: []}
+      - {lane: device, title: "Send oversized FIFO command sequences", text: "Crafted commands drive the emulated controller into its vulnerable code path.", gates: [C14], why: "Unused virtual hardware is attack surface that buys nothing. With no floppy device defined, the vulnerable code cannot be reached."}
+      - {lane: device, title: "The overflow corrupts device-model memory", text: "The device model runs with VMM privilege, so this memory belongs to the trusted computing base.", gates: []}
+      - {lane: host, title: "Attacker code runs inside the QEMU process", text: "The shellcode tries to spawn a shell and open sockets.", gates: [C04, C03], why: "A seccomp filter restricts which system calls QEMU may make, so the shellcode cannot freely exec or connect."}
+      - {lane: host, title: "Read other VMs' disks and host files", text: "The compromised process walks the file system as the QEMU user.", gates: [C06, C05], why: "sVirt (AppArmor or SELinux) labels each QEMU process so it can only touch its own VM's files."}
+      - {lane: host, title: "Escalate to host root", text: "The attacker looks for a path from the QEMU user to root.", gates: [C07, C08], why: "QEMU running as an unprivileged user with emulator capabilities cleared has no direct path to root."}
+  - id: A02
+    severity: 3
+    origin: network
+    scope: vm
+    name: Open VNC/SPICE console takeover
+    class: Guest->Host
+    survey: "S2.1 (VMM administration), S5.2"
+    case: "CS S3.2 (administration function); T9 'guest escape'"
+    module: "M1 (C11, C12)"
+    real: "Administration interfaces are listed by the survey as an attack vector of the VMM."
+    impact: "Full takeover of the guest: screen, keyboard and any data on it."
+    steps:
+      - {lane: network, title: "Scan the network for console ports", text: "The attacker sweeps the LAN for VNC/SPICE ports (5900 and up).", gates: [C12], why: "A console bound to 127.0.0.1 (or a Unix socket) is not visible from the network."}
+      - {lane: network, title: "Connect to the guest console", text: "The attacker opens the console in any VNC client.", gates: [C11], why: "A console password stops a connection even when the port is reachable."}
+      - {lane: guest, title: "Take over the guest", text: "Screen, keyboard and clipboard are under the attacker's control.", gates: []}
+  - id: A03
+    severity: 4
+    origin: network
+    scope: host
+    name: Unauthenticated libvirt over TCP
+    class: Host->VMM
+    survey: "S3.1 (Host to VMM), S5.2 (VM management software)"
+    case: "CS Table 2; T9 'guest escape'"
+    module: "M1 (C20)"
+    real: "VM management software is named by the survey as part of the VMM attack surface."
+    impact: "Remote control of the hypervisor: create VMs that mount host disks, read host secrets."
+    steps:
+      - {lane: network, title: "Find libvirtd listening on TCP", text: "libvirtd with listen_tcp enabled and auth_tcp = none accepts any connection.", gates: [C20], why: "Disabling plain TCP, or requiring TLS or SASL, closes the remote door."}
+      - {lane: host, title: "Define a VM that mounts the host's disk", text: "The management API lets the attacker define any VM.", gates: []}
+      - {lane: host, title: "Start it and read host secrets", text: "Keys, configs and images on the host are readable.", gates: []}
+  - id: A04
+    severity: 4
+    origin: local
+    scope: host
+    name: World-writable libvirt socket (local privilege escalation)
+    class: Host->VMM
+    survey: "S3.1 (Host to VMM), S5.2"
+    case: "CS Table 2"
+    module: "M1 (C18, C19)"
+    real: "A host process attacking the VMM is the survey's Host to VMM class."
+    impact: "A local unprivileged user obtains root-equivalent control of the host through libvirt."
+    steps:
+      - {lane: host, title: "An unprivileged local user finds the libvirt socket", text: "The attacker has an ordinary account on the host.", gates: []}
+      - {lane: host, title: "Write to the socket", text: "The socket mode allows 'other' to write.", gates: [C18, C19], why: "Socket permissions of 0660/0770 restrict access to the libvirt group."}
+      - {lane: host, title: "Create a privileged VM through the socket", text: "The attacker mounts the host file system into a VM and edits it.", gates: []}
+  - id: A05
+    severity: 2
+    origin: guest
+    scope: leak
+    name: Memory-deduplication timing side channel
+    class: Side channels
+    survey: "S5.4.3"
+    case: "CS Table 5; T9 'cross-VM side channels'"
+    module: "M1 (C09)"
+    real: "The survey reports that merged-page copy-on-write delays reveal applications and library addresses in a co-resident guest."
+    impact: "Information leak between tenants (installed software, ASLR bypass)."
+    steps:
+      - {lane: network, title: "Become co-resident with the victim", text: "Co-residency on popular clouds has been demonstrated (survey S5.4).", gates: []}
+      - {lane: host, title: "Kernel same-page merging merges identical pages", text: "KSM scans memory and merges pages with identical content across VMs.", gates: [C09], why: "With KSM off, no pages are merged and there is nothing to time. The cost is lower memory density."}
+      - {lane: guest, title: "Measure write latency", text: "A write to a merged page is slower (copy-on-write).", gates: []}
+      - {lane: guest, title: "Infer the victim's applications or library addresses", text: "This defeats ASLR and eases later exploitation.", gates: []}
+  - id: A06
+    severity: 3
+    origin: guest
+    scope: leak
+    name: Rowhammer + deduplication (Flip Feng Shui)
+    class: Side channels
+    survey: "S4.2"
+    case: "CS Table 3 (rowhammer with deduplication); T9 'cross-VM side channels'"
+    module: "M1 (C09)"
+    real: "A few bit flips in a co-resident guest's executable were turned into an authentication bypass (survey S4.2)."
+    impact: "Integrity break: the attacker modifies a neighbour's code or keys."
+    steps:
+      - {lane: network, title: "Become co-resident with the victim", text: "The attacker VM shares the physical host.", gates: []}
+      - {lane: host, title: "Get the victim's page merged with the attacker's crafted copy", text: "Deduplication places the victim's data in a page the attacker can neighbour in DRAM.", gates: [C09], why: "Switching deduplication off between untrusted guests is the mitigation the survey names."}
+      - {lane: guest, title: "Hammer the DRAM rows next to the shared page", text: "Repeated access causes bit flips (DRAM disturbance errors).", gates: []}
+      - {lane: guest, title: "Flipped bits corrupt the victim's executable or key", text: "Chosen bits turn a limited primitive into a real compromise.", gates: []}
+  - id: A07
+    severity: 3
+    origin: guest
+    scope: leak
+    name: Transient-execution read (Spectre / L1TF-style)
+    class: Side channels
+    survey: "S5.4.5"
+    case: "CS Table 5, Table 6; T9 'cross-VM side channels'"
+    module: "M1 (C25, C26)"
+    real: "A guest was shown reading KVM host memory; Foreshadow-NG reads co-resident VMs or the VMM (survey S5.4.5)."
+    impact: "Cross-VM or guest-to-host memory read, including keys."
+    steps:
+      - {lane: guest, title: "Trigger speculative execution", text: "The attacker trains the predictor or faults a page so the CPU speculates.", gates: []}
+      - {lane: host, title: "Transient reads leave cache traces", text: "Secret-dependent cache state is created.", gates: [C25], why: "Microcode and kernel mitigations (reported as 'Mitigation' not 'Vulnerable') stop the transient access from leaking."}
+      - {lane: host, title: "A sibling hyper-thread shares the core's caches", text: "On SMT cores the attacker's thread shares L1 with the victim's.", gates: [C26], why: "Where a vulnerability needs it, disabling SMT removes the shared core."}
+      - {lane: guest, title: "Recover memory with Flush+Reload", text: "The attacker reads the cache timing to rebuild the data.", gates: []}
+  - id: A08
+    severity: 4
+    origin: guest
+    scope: host
+    name: Malicious DMA from a device (Thunderclap-style)
+    class: DMA/IOMMU
+    survey: "S5.1, S5.3"
+    case: "CS Table 4; T9 'DMA and device pass-through'"
+    module: "M1 (C01, C02; live on E1)"
+    real: "Project Thunderclap found IOMMU weaknesses in Windows, macOS, Linux and FreeBSD (survey S5.3)."
+    impact: "Read or modify host memory below the OS, bypassing all software checks."
+    steps:
+      - {lane: device, title: "Control a DMA-capable device", text: "A passed-through or malicious PCIe device.", gates: []}
+      - {lane: device, title: "Issue DMA to arbitrary physical addresses", text: "Without remapping the device sees all of memory.", gates: [C01, C02], why: "An enabled IOMMU confines each device to the memory domain assigned to it. The survey stresses it must be configured correctly in OS and firmware."}
+      - {lane: host, title: "Read or modify host kernel memory", text: "Kernel structures and keys are exposed.", gates: []}
+  - id: A09
+    severity: 3
+    origin: local
+    scope: vm
+    name: Secret theft from VM snapshots
+    class: Snapshot privacy
+    survey: "S6.1.1 (PPVM)"
+    case: "CS Table 7 (PPVM); T9 'data exposure to host or snapshots'"
+    module: "M1 (C21, C17) + M2 scanner"
+    real: "The survey notes an attacker can access confidential data simply by copying a snapshot."
+    impact: "Keys, tokens and passwords in the VM's memory leak. (Second line of defence: redact or encrypt saved images, tested by M2.)"
+    steps:
+      - {lane: host, title: "Gain access as another local user", text: "Any ordinary account, or a compromised service.", gates: []}
+      - {lane: host, title: "List the saved-state and dump directory", text: "Saved VM state sits on disk.", gates: [C21], why: "A private (0700) save directory hides saved state from other users."}
+      - {lane: host, title: "Read the VM disk or memory image", text: "The image is copied out.", gates: [C17], why: "Images without 'other' permission bits cannot be read by unrelated users."}
+      - {lane: host, title: "Search the image for keys and tokens", text: "Pattern matching and entropy scans find secrets.", gates: []}
+  - id: A10
+    severity: 3
+    origin: guest
+    scope: neighbour
+    name: Neighbour VM pivot over a shared network
+    class: Guest->Guest
+    survey: "S3.1 (Guest to Guest), S4.2"
+    case: "CS Table 2; T9 'guest escape'"
+    module: "M1 (C15, C16)"
+    real: "Guest to Guest breaks tenant separation in multi-tenant clouds (survey S3.1)."
+    impact: "Tenant isolation broken: the attacker reaches another VM's services."
+    steps:
+      - {lane: network, title: "Scan other VMs on the shared network", text: "On libvirt's default NAT network all guests share one bridge.", gates: [C15], why: "An isolated network (no forward, no shared bridge) removes the neighbours from view."}
+      - {lane: network, title: "Reach the neighbour's open services", text: "SSH, databases or web admin pages are reachable.", gates: [C16], why: "A host-side check that guests cannot reach each other shows the isolation actually works."}
+      - {lane: guest, title: "Exploit the neighbour", text: "Weak credentials or a service bug give access.", gates: []}
+  - id: A11
+    severity: 3
+    origin: guest
+    scope: vm
+    name: Rogue hypervisor inside a guest (VMBR-style)
+    class: Hypervisor/VMBR presence
+    survey: "S7.1, S7.2"
+    case: "CS S8; T8; T9 'rogue hypervisor (VMBR)'"
+    module: "M1 (C10); detection is the M4 research question"
+    real: "SubVirt, Blue Pill and Vitriol show a hypervisor placed beneath an OS (survey S7.1). Here the idea is applied to a guest that is allowed to use nested virtualization."
+    impact: "Stealthy persistence under the guest OS. Whether it can be detected is the survey's open question and our M4 experiment (not yet run on real hardware)."
+    steps:
+      - {lane: guest, title: "Gain root in the guest", text: "Any foothold with administrative rights.", gates: []}
+      - {lane: guest, title: "Start a hypervisor using nested VT-x", text: "The guest needs hardware virtualization exposed to it.", gates: [C10], why: "With nested virtualization off, the guest cannot run its own hypervisor."}
+      - {lane: device, title: "The rogue hypervisor runs the guest OS beneath it", text: "The OS now runs deprivileged and cannot see the layer below.", gates: []}
+      - {lane: guest, title: "Hide from in-guest checks", text: "CPUID, DMI strings and device models can be masked.", gates: []}

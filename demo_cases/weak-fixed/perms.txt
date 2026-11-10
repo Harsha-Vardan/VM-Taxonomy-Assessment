@@ -1,0 +1,4 @@
+image 600 0 0 /var/lib/libvirt/images/a b.qcow2
+socket 660 0 0 /run/libvirt/libvirt-sock
+socket 777 0 0 /run/libvirt/libvirt-sock-ro
+savedir 700 0 0 /var/lib/libvirt/qemu/save

@@ -363,8 +363,11 @@ def cmd_run(args):
         modules[name], fs = _module(step, name)
         findings += fs
     m2, m3, m4 = (modules[n] for n in ("M2 (snapshot privacy)", "M3 (forensics)", "M4 (hypervisor detection)"))
-    notes = ["M1 results are self-consistency tests: one author wrote both checker and fixtures (solo project), "
+    notes = ["M1 results are self-consistency tests: the same team wrote both checker and fixtures, "
              "not independent ground truth."]
+    if any("demo_cases" in str(folder).replace("\\", "/") for _, folder in args.vm):
+        notes.append("The --vm hosts from demo_cases are HAND-BUILT demo targets, constructed to look like captured "
+                     "host files. The audit shows the checker working, not the state of a real machine.")
     if m2.get("synthetic"):
         notes.append("M2 results are from SYNTHETIC dumps. Run on real `virsh dump` output with --m2-dumps.")
     if m3.get("symbols_unverified"):

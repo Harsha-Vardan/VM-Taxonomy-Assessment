@@ -5,7 +5,7 @@
 Each control gets >= 3 distinct seeded faults. A case holds several faults on different settings.
 Also writes cves_fixture.yaml: the real CVE list with every entry marked verified, so the C23/C24 version
 logic can be scored (the real list is unverified, which makes C23/C24 NA). Files are written with LF; case49 uses CRLF.
-NOTE: this generator has the same author as the checker (solo project), so the M1 score is a
+NOTE: this generator has the same author as the checker (same team), so the M1 score is a
 self-consistency test, not independent ground truth.
 """
 import json

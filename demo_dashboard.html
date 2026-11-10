@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>vsec: KVM Virtualization Security Assessment & Architecture Studio</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts: Space Grotesk & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Space Grotesk', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    
+    .cyber-bg {
+      background-color: #030712;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.08) 0px, transparent 50%),
+        linear-gradient(rgba(15, 23, 42, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.4) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    
+    .flow-connector {
+      position: relative;
+    }
+    .flow-connector::after {
+      content: '→';
+      position: absolute;
+      right: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      font-weight: bold;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body class="cyber-bg text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white"><div style="position:sticky;top:0;z-index:9999;background:#b45309;color:#fff;padding:8px 12px;font:600 14px sans-serif;text-align:center">ILLUSTRATIVE DEMO: all values are simulated, not measured results. No real KVM, memory or hardware data exists yet.</div>
+
+  <!-- ========================================================================= -->
+  <!-- TOP HEADER & ENVIRONMENT CONTROLS -->
+  <!-- ========================================================================= -->
+  <header class="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md sticky top-0 z-50 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center font-extrabold text-xl shadow-lg shadow-indigo-500/20 border border-indigo-400/30">
+        🛡️
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+            vsec <span class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700/80 px-2 py-0.5 rounded font-mono font-bold">KVM SECURITY OPS</span>
+          </h1>
+          <span class="text-[10px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded font-mono">ACM CSUR 2020</span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-mono">Taxonomy-Driven Virtualization Isolation & Side-Channel Assessment Platform</p>
+      </div>
+    </div>
+
+    <!-- Center Control Group: Target Profile & Action Buttons -->
+    <div class="flex items-center flex-wrap gap-3">
+      <!-- Target Profile Switcher -->
+      <div class="flex items-center bg-slate-900 rounded-xl p-1 border border-slate-800 shadow-inner">
+        <button id="btn-weak" onclick="setProfile('weak')" class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 bg-rose-600 text-white shadow-md flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+          Weak Baseline (7 Faults)
+        </button>
+        <button id="btn-hardened" onclick="setProfile('hardened')" class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+          Hardened (Defense-in-Depth)
+        </button>
+      </div>
+
+      <!-- Live Master Audit Trigger -->
+      <button id="btn-master-run" onclick="runComprehensiveAudit()" class="bg-gradient-to-r from-indigo-600 to-cyan-500 hover:brightness-110 text-white font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition active:scale-95">
+        <span id="run-icon">⚡</span>
+        <span id="run-text">Run Complete Audit Pipeline</span>
+      </button>
+
+      <!-- Print/Report -->
+      <button onclick="window.print()" title="Print Executive Summary" class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs">
+        🖨️
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- SECTION 1: ARCHITECTURAL ISOLATION PIPELINE (REPLACES THE GAME SIMULATOR) -->
+  <!-- ========================================================================= -->
+  <section class="max-w-7xl w-full mx-auto p-6 pb-2">
+    <div class="glass-panel rounded-2xl p-5 border border-slate-800 shadow-xl space-y-4">
+      
+      <!-- Flow Header & Scenario Selector -->
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider font-mono">
+              Hypervisor Isolation & Security Boundary Pipeline
+            </h2>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Select a security test scenario to inspect how isolation controls enforce boundaries across CPU privilege rings and hypervisor layers.
+          </p>
+        </div>
+
+        <!-- Scenario Selector Buttons -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="selectScenario('escape')" id="scen-escape" class="scen-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold font-mono transition shadow border border-indigo-400/30">
+            1. Guest-to-Host Escape
+          </button>
+          <button onclick="selectScenario('shmem')" id="scen-shmem" class="scen-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white text-xs font-bold font-mono transition border border-slate-800">
+            2. Cross-Tenant Memory Theft
+          </button>
+          <button onclick="selectScenario('dump')" id="scen-dump" class="scen-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white text-xs font-bold font-mono transition border border-slate-800">
+            3. Snapshot Secret Leaks
+          </button>
+          <button onclick="selectScenario('timing')" id="scen-timing" class="scen-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white text-xs font-bold font-mono transition border border-slate-800">
+            4. Side-Channel Timing Probing
+          </button>
+        </div>
+      </div>
+
+      <!-- 4-Stage Architectural Flow Diagram -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-1 font-mono text-xs">
+        
+        <!-- Stage 1: Guest VM Boundary -->
+        <div id="stage-card-1" class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 relative transition-all duration-300">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-800 pb-1.5">
+            <span class="font-bold uppercase tracking-wider text-indigo-400">Layer 1: Guest VM</span>
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-[10px]">Ring 3 / Ring 0</span>
+          </div>
+          <div class="text-white font-bold text-xs" id="stage-1-title">Workload Action</div>
+          <p class="text-[11px] text-slate-400" id="stage-1-desc">Untrusted guest code executes privileged syscall.</p>
+          <div class="pt-2 border-t border-slate-800/60 text-[10px] text-slate-500" id="stage-1-sub">
+            Subsystem: Guest libc / Kernel
+          </div>
+        </div>
+
+        <!-- Stage 2: Hardware VM-Exit -->
+        <div id="stage-card-2" class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 relative transition-all duration-300">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-800 pb-1.5">
+            <span class="font-bold uppercase tracking-wider text-cyan-400">Layer 2: Hardware Trap</span>
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-[10px]">Intel VT-x / AMD-V</span>
+          </div>
+          <div class="text-white font-bold text-xs" id="stage-2-title">VM-Exit Trap</div>
+          <p class="text-[11px] text-slate-400" id="stage-2-desc">Hardware traps into Ring -1 root hypervisor mode.</p>
+          <div class="pt-2 border-t border-slate-800/60 text-[10px] text-slate-500" id="stage-2-sub">
+            Latency: ~1,340-1,480 CPU cycles
+          </div>
+        </div>
+
+        <!-- Stage 3: QEMU VMM Confinement -->
+        <div id="stage-card-3" class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 relative transition-all duration-300">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-800 pb-1.5">
+            <span class="font-bold uppercase tracking-wider text-amber-400">Layer 3: VMM Confinement</span>
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-[10px]">QEMU Userspace</span>
+          </div>
+          <div class="text-white font-bold text-xs" id="stage-3-title">Privilege & Device Gate</div>
+          <p class="text-[11px] text-slate-400" id="stage-3-desc">Checks QEMU user permissions & device boundaries.</p>
+          <div class="pt-2 border-t border-slate-800/60 text-[10px] text-slate-500" id="stage-3-sub">
+            Enforced by: C07, C08, C27
+          </div>
+        </div>
+
+        <!-- Stage 4: Host Kernel Enforcement -->
+        <div id="stage-card-4" class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 relative transition-all duration-300">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-800 pb-1.5">
+            <span class="font-bold uppercase tracking-wider text-emerald-400">Layer 4: Host OS Defense</span>
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-[10px]">Host Ring 0 Kernel</span>
+          </div>
+          <div class="text-white font-bold text-xs" id="stage-4-title">Seccomp & sVirt MAC</div>
+          <p class="text-[11px] text-slate-400" id="stage-4-desc">Host kernel evaluates BPF filter & AppArmor labels.</p>
+          <div class="pt-2 border-t border-slate-800/60 text-[10px] text-slate-500" id="stage-4-sub">
+            Enforced by: C04, C06, C01
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Real-Time Evaluation Result Banner for Selected Scenario -->
+      <div id="pipeline-verdict-box" class="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+        <div class="flex items-center gap-3">
+          <span id="pipeline-status-icon" class="text-xl">🚨</span>
+          <div>
+            <span id="pipeline-status-title" class="font-bold text-white block">Weak VM Posture: Escape Vulnerability Present</span>
+            <span id="pipeline-status-desc" class="text-slate-400 text-[11px]">
+              QEMU emulator executes with root privileges (C07 FAIL). A breakout compromises the entire host system.
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="pipeline-badge" class="px-2.5 py-1 rounded font-bold text-[11px] bg-rose-950 text-rose-300 border border-rose-800">
+            VULNERABLE (C07 FAIL)
+          </span>
+          <button onclick="remediateCurrentScenario()" id="btn-remediate-scen" class="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold transition">
+            🛠️ Apply Hardening
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN WORKSPACE: KPI OVERVIEW & TABBED RESEARCH MODULES -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 pt-3 space-y-6">
+
+    <!-- KPI Metric Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      
+      <!-- Overall Posture Gauge -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Posture Score</span>
+          <span id="stat-grade" class="text-xs font-extrabold font-mono px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-800">
+            GRADE F (HIGH RISK)
+          </span>
+        </div>
+        <div class="my-2 flex items-baseline gap-3">
+          <span id="stat-pct" class="text-4xl font-extrabold text-rose-400 font-mono">42%</span>
+          <span class="text-xs text-slate-400 font-mono">Isolation Compliance</span>
+        </div>
+        <div>
+          <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div id="stat-bar" class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-rose-600 to-amber-500" style="width: 42%"></div>
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-400 mt-2 font-mono">
+            <span id="stat-crit-cnt" class="text-rose-400">7 Critical Breaches</span>
+            <span id="stat-pass-cnt" class="text-emerald-400">21 Enforced</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- M1 Isolation Controls -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between shadow-xl">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">M1: Config Audit</span>
+          <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">28 Controls</span>
+        </div>
+        <div class="my-2">
+          <span id="stat-m1-ratio" class="text-3xl font-extrabold text-white font-mono">21 / 28</span>
+          <span class="text-xs text-slate-400 block mt-1">Hypervisor Hardening</span>
+        </div>
+        <div id="stat-m1-tag" class="text-[11px] text-rose-400 font-mono flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> 7 Controls Violate Taxonomy
+        </div>
+      </div>
+
+      <!-- M2 Memory Leaks -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between shadow-xl">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">M2: RAM Privacy</span>
+          <span class="text-[11px] font-mono text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/60">virsh dump</span>
+        </div>
+        <div class="my-2">
+          <span id="stat-m2-leaks" class="text-3xl font-extrabold text-rose-400 font-mono">2 Leaked</span>
+          <span class="text-xs text-slate-400 block mt-1">Cleartext Cloud Keys in RAM</span>
+        </div>
+        <div id="stat-m2-tag" class="text-[11px] text-rose-400 font-mono flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> AWS API Key & RSA Header
+        </div>
+      </div>
+
+      <!-- M4 Hypervisor Detection -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between shadow-xl">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">M4: ML Side-Channel</span>
+          <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/60">Nested CV</span>
+        </div>
+        <div class="my-2">
+          <span class="text-3xl font-extrabold text-emerald-400 font-mono">0.988</span>
+          <span class="text-xs text-slate-400 block mt-1">Multi-Signal ROC-AUC</span>
+        </div>
+        <div class="text-[11px] text-emerald-400 font-mono flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Fingerprinted in &lt;1.0s Window
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex border-b border-slate-800 gap-2 overflow-x-auto custom-scroll">
+      <button onclick="switchTab('m1')" id="tab-m1" class="tab-btn px-4 py-2.5 text-xs font-bold font-mono border-b-2 border-indigo-500 text-white flex items-center gap-2 whitespace-nowrap">
+        <span>⚙️</span> M1: Interactive Hardening Lab (Auto-Remediate)
+      </button>
+      <button onclick="switchTab('diff')" id="tab-diff" class="tab-btn px-4 py-2.5 text-xs font-bold font-mono border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>📄</span> Hypervisor Config Diff Inspector
+      </button>
+      <button onclick="switchTab('m2')" id="tab-m2" class="tab-btn px-4 py-2.5 text-xs font-bold font-mono border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>🔍</span> M2: Live Physical RAM Hex & Entropy Scanner
+      </button>
+      <button onclick="switchTab('m3')" id="tab-m3" class="tab-btn px-4 py-2.5 text-xs font-bold font-mono border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>🧬</span> M3: Volatility DKOM Rootkit Forensics
+      </button>
+      <button onclick="switchTab('m4')" id="tab-m4" class="tab-btn px-4 py-2.5 text-xs font-bold font-mono border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>⏱️</span> M4: Timing Scope & Classifier Tuning
+      </button>
+      <button onclick="switchTab('heatmap')" id="tab-heatmap" class="tab-btn px-4 py-2.5 text-xs font-bold font-mono border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>📊</span> ACM CSUR 2020 Threat Heatmap
+      </button>
+      <button onclick="switchTab('terminal')" id="tab-terminal" class="tab-btn px-4 py-2.5 text-xs font-bold font-mono border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>💻</span> Live Telemetry Terminal
+      </button>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: M1 HARDENING LAB WITH AUTO-REMEDIATION -->
+    <!-- ========================================================================= -->
+    <div id="panel-m1" class="tab-panel space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 glass-panel p-4 rounded-2xl">
+        <div>
+          <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+            Hypervisor Isolation Hardening Laboratory (28 Controls)
+          </h2>
+          <p class="text-xs text-slate-400">
+            Click <b>"Auto-Fix"</b> on any failing isolation control to simulate real-time kernel & libvirt configuration patching.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs font-mono">
+          <button onclick="filterControls('all')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold border border-slate-800">All (28)</button>
+          <button onclick="filterControls('FAIL')" class="px-3 py-1.5 rounded-lg bg-rose-950 hover:bg-rose-900 text-rose-300 font-semibold border border-rose-800">Failing Only</button>
+          <button onclick="filterControls('PASS')" class="px-3 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 font-semibold border border-emerald-800">Passing Only</button>
+          <button onclick="remediateAll()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-500 hover:brightness-110 text-slate-950 font-bold shadow-lg transition">✨ Remediate All</button>
+        </div>
+      </div>
+
+      <!-- Controls Table Card -->
+      <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-slate-950/90 border-b border-slate-800 text-slate-400 uppercase text-[11px]">
+              <tr>
+                <th class="p-3.5">ID</th>
+                <th class="p-3.5">Control Name</th>
+                <th class="p-3.5">Threat Domain</th>
+                <th class="p-3.5">Status</th>
+                <th class="p-3.5">Audit Proof & Test Mechanism</th>
+                <th class="p-3.5 text-right">Interactive Actions</th>
+              </tr>
+            </thead>
+            <tbody id="controls-table-body" class="divide-y divide-slate-800/60">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: HYPERVISOR CONFIG DIFF INSPECTOR -->
+    <!-- ========================================================================= -->
+    <div id="panel-diff" class="tab-panel hidden space-y-4">
+      <div class="glass-panel p-4 rounded-2xl flex justify-between items-center">
+        <div>
+          <h2 class="text-sm font-bold text-white font-mono">Hypervisor Configuration File Diff Inspector</h2>
+          <p class="text-xs text-slate-400">Direct before-and-after comparison of domain XML and host QEMU configurations.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="showDiffFile('qemu_conf')" id="diff-btn-qemu" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-mono font-bold">/etc/libvirt/qemu.conf</button>
+          <button onclick="showDiffFile('domain_xml')" id="diff-btn-xml" class="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-mono font-bold border border-slate-800">domain.xml (KVM Devices)</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+        <!-- Baseline File -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            <span class="text-rose-400 font-bold">Weak Baseline (Vulnerable)</span>
+            <span class="text-[10px] bg-rose-950 text-rose-300 px-2 py-0.5 rounded">Unchecked</span>
+          </div>
+          <pre id="diff-weak-content" class="text-slate-400 overflow-x-auto custom-scroll text-[11px] leading-relaxed"></pre>
+        </div>
+
+        <!-- Hardened File -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            <span class="text-emerald-400 font-bold">Hardened Profile (Remediated)</span>
+            <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded">Compliant</span>
+          </div>
+          <pre id="diff-hardened-content" class="text-slate-300 overflow-x-auto custom-scroll text-[11px] leading-relaxed"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: M2 PHYSICAL RAM HEX & SHANNON ENTROPY SCOPE -->
+    <!-- ========================================================================= -->
+    <div id="panel-m2" class="tab-panel hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 glass-panel p-4 rounded-2xl">
+        <div>
+          <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+            Physical RAM Snapshot (virsh dump) Hex Inspector & Shannon Entropy Scanner
+          </h2>
+          <p class="text-xs text-slate-400">
+            Shannon entropy measures randomness (>3.8 bits/byte indicates cryptographic keys or credentials in unencrypted RAM dumps).
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="scanNextPage()" class="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-white font-mono font-semibold transition">
+            📄 Stream Page (4096B)
+          </button>
+          <button onclick="toggleRedaction()" id="btn-redact" class="text-xs bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-200 font-mono font-semibold transition">
+            🔒 Apply Memory Zeroization (Redact)
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Interactive Hex Stream Viewer -->
+        <div class="lg:col-span-2 bg-slate-950 border border-slate-800 rounded-2xl p-4 font-mono text-xs shadow-2xl overflow-x-auto">
+          <div class="text-slate-500 mb-2 border-b border-slate-800 pb-2 flex justify-between font-bold text-[11px]">
+            <span>PHYSICAL OFFSET</span>
+            <span>HEX BYTES (16 BYTES/LINE)</span>
+            <span>ASCII STRING</span>
+          </div>
+          <div id="hex-view" class="space-y-1.5 text-slate-300">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Shannon Entropy Graph & Secret Tokens Detail -->
+        <div class="space-y-4">
+          <!-- Entropy Chart -->
+          <div class="glass-panel rounded-2xl p-4 shadow-xl">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 font-mono">Shannon Entropy by Block</h3>
+            <div class="h-36 relative">
+              <canvas id="entropyChart"></canvas>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-2 font-mono">Spikes indicate high-entropy cryptographic material.</p>
+          </div>
+
+          <!-- Secret Tokens Card -->
+          <div class="glass-panel rounded-2xl p-4 space-y-3 shadow-xl">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">Discovered Secret Tokens</h3>
+            
+            <div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-rose-400 flex items-center gap-1.5 font-mono">
+                  <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span> AWS Cloud API Key
+                </span>
+                <span class="text-[9px] bg-rose-900 text-rose-200 px-1.5 py-0.5 rounded font-mono font-bold">CRITICAL</span>
+              </div>
+              <p class="text-xs text-white font-mono font-bold" id="val-aws">AKIAJSIE4PKEY123</p>
+              <p class="text-[10px] text-slate-400 font-mono">Offset: 0x7fff01a0 | Entropy: 3.84</p>
+            </div>
+
+            <div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-rose-400 flex items-center gap-1.5 font-mono">
+                  <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span> RSA Private Key Header
+                </span>
+                <span class="text-[9px] bg-rose-900 text-rose-200 px-1.5 py-0.5 rounded font-mono font-bold">CRITICAL</span>
+              </div>
+              <p class="text-xs text-white font-mono font-bold" id="val-rsa">-----BEGIN RSA PRIVATE KEY-----</p>
+              <p class="text-[10px] text-slate-400 font-mono">Offset: 0x7fff01c0 | ASN.1 Structure</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: M3 VOLATILITY DKOM ROOTKIT FORENSICS -->
+    <!-- ========================================================================= -->
+    <div id="panel-m3" class="tab-panel hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 glass-panel p-4 rounded-2xl">
+        <div>
+          <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+            Volatility 3 Memory Forensics: Direct Kernel Object Manipulation (DKOM)
+          </h2>
+          <p class="text-xs text-slate-400">
+            Rootkits hide by unlinking from <code class="text-indigo-400">task_struct.tasks</code>. Direct memory pool carving (<code class="text-cyan-400">psscan</code>) exposes unlinked processes.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="injectDkomMalware()" class="text-xs bg-rose-600 hover:bg-rose-500 px-3.5 py-1.5 rounded-lg text-white font-bold font-mono transition shadow-lg">
+            🦠 Inject DKOM Rootkit
+          </button>
+          <button onclick="runVolatilityScan()" class="text-xs bg-cyan-600 hover:bg-cyan-500 px-3.5 py-1.5 rounded-lg text-slate-950 font-bold font-mono transition shadow-lg">
+            🔬 Run Pool Carving (psscan)
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- pslist View -->
+        <div class="glass-panel rounded-2xl p-4 space-y-3 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div>
+              <h3 class="text-xs font-bold text-slate-200 uppercase font-mono">1. OS Task List (pslist)</h3>
+              <p class="text-[11px] text-slate-400 font-mono">Traverses linked list: <code class="text-cyan-400">tasks.next</code></p>
+            </div>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-900 text-slate-300 font-mono">Standard ps</span>
+          </div>
+
+          <div class="space-y-2 font-mono text-xs">
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between">
+              <div><span class="text-slate-400">PID 1:</span> <span class="font-bold text-white">systemd</span></div>
+              <span class="text-emerald-400 font-bold">LINKED (tasks.next -> 542)</span>
+            </div>
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between">
+              <div><span class="text-slate-400">PID 542:</span> <span class="font-bold text-white">systemd-journald</span></div>
+              <span class="text-emerald-400 font-bold">LINKED (tasks.next -> 1024)</span>
+            </div>
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between">
+              <div><span class="text-slate-400">PID 1024:</span> <span class="font-bold text-white">sshd</span></div>
+              <span class="text-emerald-400 font-bold">LINKED (tasks.next -> init)</span>
+            </div>
+            <div id="dkom-stealth-card" class="p-3 bg-slate-950/40 border border-dashed border-slate-800 rounded-xl text-slate-500 italic text-center">
+              [Malicious process PID 1337 unlinked - Invisible to in-guest ps/top commands!]
+            </div>
+          </div>
+        </div>
+
+        <!-- psscan View -->
+        <div class="glass-panel rounded-2xl p-4 space-y-3 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div>
+              <h3 class="text-xs font-bold text-slate-200 uppercase font-mono">2. Physical RAM Pool Carving (psscan)</h3>
+              <p class="text-[11px] text-slate-400 font-mono">Heuristic physical scanning for task structure pool tags</p>
+            </div>
+            <span class="text-xs px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">Hypervisor VMI</span>
+          </div>
+
+          <div class="space-y-2 font-mono text-xs">
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between">
+              <div><span class="text-slate-400">PID 1:</span> <span class="font-bold text-white">systemd</span></div>
+              <span class="text-slate-400">RAM: 0x02a100</span>
+            </div>
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between">
+              <div><span class="text-slate-400">PID 542:</span> <span class="font-bold text-white">systemd-journald</span></div>
+              <span class="text-slate-400">RAM: 0x04f210</span>
+            </div>
+            <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between">
+              <div><span class="text-slate-400">PID 1024:</span> <span class="font-bold text-white">sshd</span></div>
+              <span class="text-slate-400">RAM: 0x09c400</span>
+            </div>
+            <div id="dkom-pool-card" class="p-3 bg-rose-950/70 border-2 border-rose-500 rounded-xl flex items-center justify-between shadow-xl">
+              <div>
+                <span class="text-rose-300 font-bold">PID 1337:</span>
+                <span class="font-bold text-white">evil_backdoor</span>
+              </div>
+              <span class="text-rose-400 font-bold animate-pulse">DETECTED BY POOL CARVING!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 5: M4 TIMING SCOPE & ML HYPERVISOR CLASSIFIER -->
+    <!-- ========================================================================= -->
+    <div id="panel-m4" class="tab-panel hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 glass-panel p-4 rounded-2xl">
+        <div>
+          <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+            Side-Channel Timing & Multi-Signal Hypervisor Classifier (bench.c)
+          </h2>
+          <p class="text-xs text-slate-400">
+            CPUID instruction VM-exit traps take ~1,480 cycles on KVM compared to 85 cycles on bare-metal silicon.
+          </p>
+        </div>
+        <!-- Time Window Slider -->
+        <div class="flex items-center gap-3 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
+          <span class="text-slate-400 font-mono">Measurement Window (T):</span>
+          <input type="range" id="time-window-slider" min="0.1" max="5.0" step="0.2" value="1.0" oninput="updateTimeWindow(this.value)" class="cursor-pointer accent-indigo-500">
+          <span id="window-val" class="font-bold text-indigo-400 font-mono w-12">1.0s</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Latency Bar Chart -->
+        <div class="glass-panel rounded-2xl p-4 space-y-3 shadow-xl">
+          <h3 class="text-xs font-bold text-slate-300 uppercase font-mono">CPUID Instruction Trap Latency (Cycles)</h3>
+          <div class="h-56 relative">
+            <canvas id="timingChart"></canvas>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center text-xs font-mono pt-2 border-t border-slate-800">
+            <div class="bg-slate-950 p-2 rounded-lg">
+              <span class="text-slate-400 block text-[10px]">Native Bare-Metal</span>
+              <span class="text-emerald-400 font-bold">~85 Cycles</span>
+            </div>
+            <div class="bg-slate-950 p-2 rounded-lg">
+              <span class="text-slate-400 block text-[10px]">KVM-Masked (Stealth)</span>
+              <span class="text-amber-400 font-bold">~1,340 Cycles</span>
+            </div>
+            <div class="bg-slate-950 p-2 rounded-lg">
+              <span class="text-slate-400 block text-[10px]">KVM-Plain (Default)</span>
+              <span class="text-rose-400 font-bold">~1,480 Cycles</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hypotheses Checklist -->
+        <div class="glass-panel rounded-2xl p-4 space-y-3 shadow-xl flex flex-col justify-between">
+          <div>
+            <h3 class="text-xs font-bold text-slate-300 uppercase mb-2 font-mono">Research Hypotheses (prereg.md)</h3>
+            <div class="space-y-2 text-xs font-mono">
+              <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-white">H1: Combined Multi-Signal Superiority</span>
+                  <p class="text-[10px] text-slate-400">Combined timing signals beat single-signal RDTSC</p>
+                </div>
+                <span class="text-emerald-400 font-bold">ILLUSTRATIVE (not measured)</span>
+              </div>
+
+              <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-white">H2: High Sensitivity (TPR &ge; 0.90)</span>
+                  <p class="text-[10px] text-slate-400">True positive detection operating point</p>
+                </div>
+                <span class="text-emerald-400 font-bold">ILLUSTRATIVE (not measured)</span>
+              </div>
+
+              <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-white">H3: Rapid Time-To-Detect</span>
+                  <p class="text-[10px] text-slate-400">Smallest window T reaching AUROC &ge; 0.95</p>
+                </div>
+                <span class="text-emerald-400 font-bold">T = 0.5s</span>
+              </div>
+
+              <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-white">H4: Low Decision Cost</span>
+                  <p class="text-[10px] text-slate-400">Total decision cost below 10.0s &amp; &lt; 5% CPU</p>
+                </div>
+                <span class="text-emerald-400 font-bold">PASS (3.2% CPU)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-indigo-950/40 border border-indigo-900/60 rounded-xl flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-300">Classifier: <b class="text-white">Random Forest + LogReg</b></span>
+            <span class="text-emerald-400 font-bold text-sm" id="auc-score-display">ROC-AUC: 0.988</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 6: ACM CSUR 2020 THREAT HEATMAP -->
+    <!-- ========================================================================= -->
+    <div id="panel-heatmap" class="tab-panel hidden space-y-4">
+      <div class="glass-panel p-4 rounded-2xl">
+        <h2 class="text-sm font-bold text-white font-mono">ACM CSUR 2020 Taxonomy Matrix & Threat Domain Health</h2>
+        <p class="text-xs text-slate-400">Coverage across the 9 peer-reviewed virtualization security threat categories.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+        <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-rose-500">
+          <div class="flex justify-between font-bold"><span>1. Guest-to-Host Escapes</span><span class="text-rose-400">PARTIAL</span></div>
+          <p class="text-[11px] text-slate-400">Controls: C03-C08, C10-C14, C22. Root QEMU execution increases escape vulnerability.</p>
+        </div>
+        <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-rose-500">
+          <div class="flex justify-between font-bold"><span>2. Guest-to-Guest Covert Channels</span><span class="text-rose-400">FAIL (C27)</span></div>
+          <p class="text-[11px] text-slate-400">Controls: C15, C16, C27. Shared memory (IVSHMEM) creates cross-tenant side channel.</p>
+        </div>
+        <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-emerald-500">
+          <div class="flex justify-between font-bold"><span>3. Host-to-VMM Tampering</span><span class="text-emerald-400">ENFORCED</span></div>
+          <p class="text-[11px] text-slate-400">Controls: C17-C21, C28. Libvirt socket permissions and restrictive file modes verified.</p>
+        </div>
+        <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-emerald-500">
+          <div class="flex justify-between font-bold"><span>4. DMA / IOMMU Remapping</span><span class="text-emerald-400">ENFORCED</span></div>
+          <p class="text-[11px] text-slate-400">Controls: C01, C02. Intel VT-d IOMMU kernel parameters verified active.</p>
+        </div>
+        <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-rose-500">
+          <div class="flex justify-between font-bold"><span>5. Snapshot & Memory Privacy</span><span class="text-rose-400">FAIL (C29)</span></div>
+          <p class="text-[11px] text-slate-400">Controls: C29. Unencrypted virsh dump files leak cleartext cloud API tokens.</p>
+        </div>
+        <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-rose-500">
+          <div class="flex justify-between font-bold"><span>6. VMI & Kernel Forensics</span><span class="text-rose-400">FAIL (C30)</span></div>
+          <p class="text-[11px] text-slate-400">Controls: C30. Hidden unlinked process detected via Volatility pool carving.</p>
+        </div>
+        <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-emerald-500">
+          <div class="flex justify-between font-bold"><span>7. Side-Channel Detection</span><span class="text-amber-400">NOT TESTED</span></div>
+          <p class="text-[11px] text-slate-400">Controls: C09, C25, C26, C31. CPUID timing traps reliably fingerprinted by ML.</p>
+        </div>
+        <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-cyan-500">
+          <div class="flex justify-between font-bold"><span>8. VMM CVE Vulnerabilities</span><span class="text-cyan-400">CHECKED</span></div>
+          <p class="text-[11px] text-slate-400">Controls: C23, C24. QEMU and kernel CVE advisories evaluated.</p>
+        </div>
+        <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-indigo-500">
+          <div class="flex justify-between font-bold"><span>9. Hypervisor Presence</span><span class="text-indigo-400">CLASSIFIED</span></div>
+          <p class="text-[11px] text-slate-400">Controls: C31. Environment matched declared virtualization profile.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 7: TELEMETRY STREAM CONSOLE -->
+    <!-- ========================================================================= -->
+    <div id="panel-terminal" class="tab-panel hidden space-y-2">
+      <div class="flex items-center justify-between glass-panel p-3 rounded-2xl">
+        <h2 class="text-xs font-bold text-white font-mono flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          Live Kernel & Hypervisor Telemetry Buffer
+        </h2>
+        <button onclick="clearTerminal()" class="text-xs bg-slate-900 hover:bg-slate-800 px-3 py-1 rounded text-slate-300 font-mono border border-slate-800">
+          Clear
+        </button>
+      </div>
+      <div id="terminal-console" class="custom-scroll bg-slate-950 border border-slate-800 rounded-2xl p-4 font-mono text-xs text-slate-300 h-96 overflow-y-auto space-y-1.5 shadow-inner">
+        <div class="text-slate-500">[INIT] vsec real-time telemetry subsystem active. Click "Run Complete Audit Pipeline" to stream live events.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- CONTROL INSPECTION MODAL -->
+  <!-- ========================================================================= -->
+  <div id="modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-panel border border-slate-700 rounded-3xl max-w-xl w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+        <div>
+          <span id="modal-cid" class="text-xs font-mono bg-indigo-950 text-indigo-300 px-2.5 py-0.5 rounded-full font-bold border border-indigo-800">C01</span>
+          <h3 id="modal-name" class="text-base font-bold text-white mt-1 font-mono">Control Name</h3>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+      </div>
+
+      <div class="space-y-3.5 text-xs text-slate-300 font-mono">
+        <div>
+          <span class="text-slate-500 uppercase font-semibold block text-[10px]">Threat Domain:</span>
+          <p id="modal-threat" class="font-bold text-indigo-300 mt-0.5">Guest-to-Host</p>
+        </div>
+        <div>
+          <span class="text-slate-500 uppercase font-semibold block text-[10px]">Security Expectation:</span>
+          <p id="modal-expected" class="text-slate-200 mt-0.5">Requirement summary</p>
+        </div>
+        <div>
+          <span class="text-slate-500 uppercase font-semibold block text-[10px]">Verification Mechanism:</span>
+          <p id="modal-test" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-slate-300 mt-0.5">Test details</p>
+        </div>
+        <div>
+          <span class="text-slate-500 uppercase font-semibold block text-[10px]">Remediation Patch:</span>
+          <p id="modal-fix" class="bg-indigo-950/40 border border-indigo-900/60 p-2.5 rounded-xl text-cyan-200 mt-0.5 select-all font-bold">Fix command</p>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 flex justify-end">
+        <button onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-4 py-2 rounded-lg font-semibold font-mono">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <!-- ========================================================================= -->
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. Controls Database (28 Controls)
+    // -------------------------------------------------------------------------
+    const CONTROLS_DATA = [
+      { id: 'C01', name: 'iommu_cmdline', threat: 'DMA/IOMMU', severity: 3, expected: 'IOMMU enabled on host kernel command-line', test: 'cmdline has intel_iommu=on or iommu=pt', fix: 'Add intel_iommu=on to GRUB_CMDLINE_LINUX and update-grub', status: 'PASS', ev: 'intel_iommu=on iommu=pt verified' },
+      { id: 'C03', name: 'qemu_seccomp_config', threat: 'Guest->Host', severity: 3, expected: 'seccomp_sandbox not disabled in qemu.conf', test: 'seccomp_sandbox != 0', fix: 'Set seccomp_sandbox = 1 in /etc/libvirt/qemu.conf', status: 'PASS', ev: 'seccomp_sandbox=1 active' },
+      { id: 'C04', name: 'qemu_seccomp_live', threat: 'Guest->Host', severity: 3, expected: 'QEMU process runs under strict syscall filter', test: 'Seccomp: 2 in /proc/<pid>/status', fix: 'Restart VM under active seccomp policy', status: 'PASS', ev: 'Seccomp: 2 (STRICT BPF FILTER)' },
+      { id: 'C05', name: 'svirt_config', threat: 'Guest->Host', severity: 3, expected: 'Security driver AppArmor or SELinux enabled', test: 'security_driver != none', fix: 'Set security_driver = "apparmor" in qemu.conf', status: 'FAIL', ev: 'security_driver = "none" (UNCONFINED)' },
+      { id: 'C06', name: 'svirt_live', threat: 'Guest->Host', severity: 3, expected: 'QEMU process confined by per-VM MAC label', test: 'label is enforcing', fix: 'Enable AppArmor and restart libvirt', status: 'FAIL', ev: 'Process label is unconfined' },
+      { id: 'C07', name: 'qemu_not_root', threat: 'Guest->Host', severity: 4, expected: 'QEMU runs as an unprivileged user', test: 'user != root in qemu.conf', fix: 'Remove user = "root" from qemu.conf', status: 'FAIL', ev: 'user = "root" (ELEVATED PRIVILEGE)' },
+      { id: 'C08', name: 'clear_capabilities', threat: 'Guest->Host', severity: 2, expected: 'POSIX emulator capabilities cleared', test: 'clear_emulator_capabilities != 0', fix: 'Set clear_emulator_capabilities = 1', status: 'PASS', ev: 'Capabilities dropped' },
+      { id: 'C09', name: 'ksm_off', threat: 'Side channels', severity: 2, expected: 'Kernel Samepage Merging disabled', test: '/sys/kernel/mm/ksm/run == 0', fix: 'echo 0 > /sys/kernel/mm/ksm/run', status: 'PASS', ev: 'ksm run = 0 (No Deduplication)' },
+      { id: 'C10', name: 'nested_off', threat: 'Guest->Host', severity: 2, expected: 'Nested virtualization disabled', test: 'kvm parameter nested is N or 0', fix: 'options kvm_intel nested=0 in modprobe.d', status: 'PASS', ev: 'nested = N' },
+      { id: 'C11', name: 'graphics_password', threat: 'Guest->Host', severity: 3, expected: 'VNC/SPICE console requires authentication', test: 'graphics element has passwd', fix: 'Add passwd to <graphics> in domain XML', status: 'FAIL', ev: 'VNC console has NO PASSWORD' },
+      { id: 'C12', name: 'graphics_listen', threat: 'Guest->Host', severity: 3, expected: 'Console listens on localhost only', test: 'graphics listen is 127.0.0.1 or unix socket', fix: 'Set listen="127.0.0.1"', status: 'FAIL', ev: 'VNC listens on 0.0.0.0 (EXPOSED TO LAN)' },
+      { id: 'C13', name: 'no_usb_redirect', threat: 'Guest->Host', severity: 2, expected: 'No USB device redirection enabled', test: 'No <redirdev> element in XML', fix: 'Remove <redirdev> elements', status: 'PASS', ev: 'No redirdev devices' },
+      { id: 'C14', name: 'unused_devices', threat: 'Guest->Host', severity: 1, expected: 'No unused sound, parallel, or floppy devices', test: 'Attack surface minimization', fix: 'Remove unused device elements', status: 'PASS', ev: 'Legacy emulators disabled' },
+      { id: 'C15', name: 'network_mode', threat: 'Guest->Guest', severity: 3, expected: 'VM not connected to shared default bridge', test: 'Network is isolated or filtered', fix: 'Move to isolated libvirt bridge network', status: 'FAIL', ev: 'Connected to default shared NAT bridge' },
+      { id: 'C17', name: 'image_permissions', threat: 'Host->VMM', severity: 3, expected: 'Disk image files private to libvirt', test: 'No other rwx bits on image files', fix: 'chmod o-rwx /var/lib/libvirt/images/*', status: 'PASS', ev: 'Permissions: 0600' },
+      { id: 'C18', name: 'socket_permissions', threat: 'Host->VMM', severity: 3, expected: 'Libvirt sockets not world-writable', test: 'Socket mode has no other write bit', fix: 'chmod 0660 on libvirt socket', status: 'PASS', ev: 'Socket permissions 0660' },
+      { id: 'C19', name: 'libvirtd_sock_perms', threat: 'Host->VMM', severity: 3, expected: 'unix_sock_rw_perms restrictive', test: 'not 0666/0777 in libvirtd.conf', fix: 'Set unix_sock_rw_perms = "0770"', status: 'PASS', ev: 'Permissions: 0770' },
+      { id: 'C20', name: 'libvirt_tcp', threat: 'Host->VMM', severity: 4, expected: 'No unauthenticated TCP libvirt access', test: 'listen_tcp off or auth_tcp != none', fix: 'Disable listen_tcp or require SASL/TLS', status: 'PASS', ev: 'TCP listener disabled' },
+      { id: 'C21', name: 'savedir_permissions', threat: 'Host->VMM', severity: 3, expected: 'Saved-state directory private', test: 'save/dump dir has no other bits', fix: 'chmod 0700 on save directory', status: 'PASS', ev: 'Mode: 0700' },
+      { id: 'C22', name: 'disk_cache', threat: 'Guest->Host', severity: 1, expected: 'Disk cache mode not unsafe', test: 'no cache="unsafe"', fix: 'Use cache="none" or "writethrough"', status: 'PASS', ev: 'cache="none"' },
+      { id: 'C25', name: 'cpu_vulnerabilities', threat: 'Side channels', severity: 3, expected: 'Microcode mitigations active', test: 'No "Vulnerable" in sysfs mitigations', fix: 'Update CPU microcode and kernel', status: 'PASS', ev: 'Mitigations: active' },
+      { id: 'C26', name: 'smt_state', threat: 'Side channels', severity: 2, expected: 'Simultaneous multithreading disabled if vulnerable', test: 'SMT state safe', fix: 'nosmt on kernel cmdline', status: 'PASS', ev: 'smt = 0 (Safe)' },
+      { id: 'C27', name: 'no_shared_memory', threat: 'Guest->Guest', severity: 3, expected: 'No inter-guest shared memory (IVSHMEM)', test: 'No <shmem> elements', fix: 'Remove <shmem> devices from XML', status: 'FAIL', ev: 'Found 3 <shmem> IVSHMEM backdoors!' },
+      { id: 'C28', name: 'default_confined', threat: 'Host->VMM', severity: 2, expected: 'New VMs confined by default', test: 'security_default_confined != 0', fix: 'Set security_default_confined = 1', status: 'PASS', ev: 'security_default_confined = 1' }
+    ];
+
+    let currentFilter = 'all';
+    let isRedacted = false;
+    let currentScenarioKey = 'escape';
+
+    // -------------------------------------------------------------------------
+    // 2. Scenario Pipeline Data & State
+    // -------------------------------------------------------------------------
+    const SCENARIOS = {
+      escape: {
+        btnId: 'scen-escape',
+        stage1: { title: 'Privileged Syscall Trigger', desc: 'Guest process attempts execve on restricted host path.', sub: 'Control: C04 Seccomp' },
+        stage2: { title: 'VM-Exit Trap (Reason 10)', desc: 'Hardware exits guest mode to host hypervisor context.', sub: 'Latency: ~1,420 cycles' },
+        stage3: { title: 'QEMU Process Integrity', desc: 'Evaluates QEMU UID privileges and capabilities.', sub: 'Control: C07, C08' },
+        stage4: { title: 'Host Seccomp & sVirt MAC', desc: 'Evaluates Linux BPF filter and AppArmor labels.', sub: 'Control: C04, C06' },
+        weakVerdict: {
+          icon: '🚨',
+          title: 'Guest-to-Host Breakout Vulnerable!',
+          desc: 'QEMU runs as root (C07 FAIL) without active AppArmor MAC (C06 FAIL). A compromised VM process gains full host root privileges!',
+          badge: 'VULNERABLE (C07 & C06 FAIL)',
+          badgeClass: 'bg-rose-950 text-rose-300 border-rose-800'
+        },
+        hardenedVerdict: {
+          icon: '🛡️',
+          title: 'Hypervisor Defense-in-Depth Enforced',
+          desc: 'QEMU runs unprivileged as libvirt-qemu (C07 PASS), confined by AppArmor sVirt (C06 PASS) and Seccomp-BPF (C04 PASS). Escape blocked.',
+          badge: 'ENFORCED (C07, C06, C04 PASS)',
+          badgeClass: 'bg-emerald-950 text-emerald-300 border-emerald-800'
+        },
+        remediateCtrl: 'C07'
+      },
+      shmem: {
+        btnId: 'scen-shmem',
+        stage1: { title: 'Cross-Tenant Read', desc: 'Guest opens /dev/uio0 shared memory device node.', sub: 'Control: C27 IVSHMEM' },
+        stage2: { title: 'Memory Bus Access', desc: 'Direct memory bus read bypassing hypervisor software layers.', sub: 'Bus: PCIe / IVSHMEM' },
+        stage3: { title: 'Domain XML Device Check', desc: 'Libvirt inspects domain specification for <shmem> elements.', sub: 'Control: C27' },
+        stage4: { title: 'Tenant Isolation Barrier', desc: 'Ensures strict tenant memory separation across VMs.', sub: 'Control: C15, C16' },
+        weakVerdict: {
+          icon: '🚨',
+          title: 'Cross-Tenant Memory Theft Possible!',
+          desc: 'Domain XML contains 3 <shmem> IVSHMEM devices (C27 FAIL). Malicious tenant can read adjacent virtual machine private RAM.',
+          badge: 'VULNERABLE (C27 FAIL)',
+          badgeClass: 'bg-rose-950 text-rose-300 border-rose-800'
+        },
+        hardenedVerdict: {
+          icon: '🛡️',
+          title: 'Tenant Memory Boundary Strictly Enforced',
+          desc: 'Domain XML has zero <shmem> devices attached (C27 PASS). No inter-VM shared memory channels exist.',
+          badge: 'ENFORCED (C27 PASS)',
+          badgeClass: 'bg-emerald-950 text-emerald-300 border-emerald-800'
+        },
+        remediateCtrl: 'C27'
+      },
+      dump: {
+        btnId: 'scen-dump',
+        stage1: { title: 'Admin Snapshot Request', desc: 'Operator or automated pipeline calls virsh dump <vm> /tmp/dump.mem.', sub: 'Command: virsh dump' },
+        stage2: { title: 'RAM Serialization', desc: 'QEMU streams all guest physical memory pages to disk unencrypted.', sub: 'Size: 4.0 GB physical RAM' },
+        stage3: { title: 'File Permission Check', desc: 'Audit verifies save directory permissions (C21 Mode 0700).', sub: 'Control: C21' },
+        stage4: { title: 'Entropy & Secret Analysis', desc: 'Scans pages for unencrypted AWS keys and private credentials.', sub: 'Control: C29' },
+        weakVerdict: {
+          icon: '🚨',
+          title: 'Unencrypted Memory Snapshots Leak Keys!',
+          desc: 'Memory dump contains cleartext AWS credentials and RSA private key headers (C29 FAIL). Anyone with read access can extract credentials.',
+          badge: 'VULNERABLE (C29 FAIL)',
+          badgeClass: 'bg-rose-950 text-rose-300 border-rose-800'
+        },
+        hardenedVerdict: {
+          icon: '🛡️',
+          title: 'Memory Dump Zeroization & Encryption Enforced',
+          desc: 'Automated cryptographic redaction filter applied (C29 PASS). Memory dumps zeroized before disk persistence.',
+          badge: 'ENFORCED (C29 PASS)',
+          badgeClass: 'bg-emerald-950 text-emerald-300 border-emerald-800'
+        },
+        remediateCtrl: 'C29'
+      },
+      timing: {
+        btnId: 'scen-timing',
+        stage1: { title: 'CPUID Instruction Probing', desc: 'In-guest malware executes CPUID leaf 0x40000000 probing hypervisor signature.', sub: 'Instruction: CPUID' },
+        stage2: { title: 'Hardware VM-Exit Trap', desc: 'Hardware traps into root mode taking ~1,480 cycles (vs 85 native).', sub: 'Latency: ~1,480 cycles' },
+        stage3: { title: 'RDTSC Cycle Profiling', desc: 'Software measures execution time using rdtsc timestamp counters.', sub: 'Feature: delta_tsc' },
+        stage4: { title: 'Nested CV ML Classifier', desc: 'Random Forest + LogReg evaluates multi-signal timing profile.', sub: 'Control: C31 (0.988 AUC)' },
+        weakVerdict: {
+          icon: '⏱️',
+          title: 'Virtual Environment Readily Fingerprinted',
+          desc: 'Hardware cycle trap penalty (1,480 cycles vs 85 cycles) allows untrusted code to determine it is inside a KVM guest within <1.0 second.',
+          badge: 'SIMULATED DETECTION (illustrative)',
+          badgeClass: 'bg-cyan-950 text-cyan-300 border-cyan-800'
+        },
+        hardenedVerdict: {
+          icon: '⏱️',
+          title: 'Stealth Masked Hypervisor Profile Evaluated',
+          desc: 'KVM stealth masking reduces timing anomalies, but multi-signal ML classifier still confirms hypervisor presence (Hypothesis H1).',
+          badge: 'SIMULATED (illustrative)',
+          badgeClass: 'bg-indigo-950 text-indigo-300 border-indigo-800'
+        },
+        remediateCtrl: null
+      }
+    };
+
+    function selectScenario(key) {
+      currentScenarioKey = key;
+      document.querySelectorAll('.scen-btn').forEach(b => {
+        b.className = 'scen-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white text-xs font-bold font-mono transition border border-slate-800';
+      });
+      document.getElementById(SCENARIOS[key].btnId).className = 'scen-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold font-mono transition shadow border border-indigo-400/30';
+
+      const s = SCENARIOS[key];
+      document.getElementById('stage-1-title').innerText = s.stage1.title;
+      document.getElementById('stage-1-desc').innerText = s.stage1.desc;
+      document.getElementById('stage-1-sub').innerText = s.stage1.sub;
+
+      document.getElementById('stage-2-title').innerText = s.stage2.title;
+      document.getElementById('stage-2-desc').innerText = s.stage2.desc;
+      document.getElementById('stage-2-sub').innerText = s.stage2.sub;
+
+      document.getElementById('stage-3-title').innerText = s.stage3.title;
+      document.getElementById('stage-3-desc').innerText = s.stage3.desc;
+      document.getElementById('stage-3-sub').innerText = s.stage3.sub;
+
+      document.getElementById('stage-4-title').innerText = s.stage4.title;
+      document.getElementById('stage-4-desc').innerText = s.stage4.desc;
+      document.getElementById('stage-4-sub').innerText = s.stage4.sub;
+
+      updateScenarioVerdict();
+    }
+
+    function updateScenarioVerdict() {
+      const s = SCENARIOS[currentScenarioKey];
+      const isWeak = s.remediateCtrl ? CONTROLS_DATA.find(c => c.id === s.remediateCtrl)?.status === 'FAIL' : (document.getElementById('stat-pct').innerText !== '100%');
+      const v = isWeak ? s.weakVerdict : s.hardenedVerdict;
+
+      document.getElementById('pipeline-status-icon').innerText = v.icon;
+      document.getElementById('pipeline-status-title').innerText = v.title;
+      document.getElementById('pipeline-status-desc').innerText = v.desc;
+      
+      const badge = document.getElementById('pipeline-badge');
+      badge.innerText = v.badge;
+      badge.className = `px-2.5 py-1 rounded font-bold text-[11px] border ${v.badgeClass}`;
+
+      const fixBtn = document.getElementById('btn-remediate-scen');
+      if (s.remediateCtrl && isWeak) {
+        fixBtn.classList.remove('hidden');
+      } else {
+        fixBtn.classList.add('hidden');
+      }
+    }
+
+    function remediateCurrentScenario() {
+      const s = SCENARIOS[currentScenarioKey];
+      if (s.remediateCtrl) {
+        remediateControl(s.remediateCtrl);
+        updateScenarioVerdict();
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. Render Controls Table with One-Click Fix
+    // -------------------------------------------------------------------------
+    function renderControls(filter = currentFilter) {
+      currentFilter = filter;
+      const tbody = document.getElementById('controls-table-body');
+      tbody.innerHTML = '';
+
+      CONTROLS_DATA.forEach(c => {
+        if (filter !== 'all' && c.status !== filter) return;
+
+        const isPass = (c.status === 'PASS');
+        const badgeClass = isPass ? 'bg-emerald-950/80 text-emerald-300 border-emerald-800' : 'bg-rose-950/80 text-rose-300 border-rose-800';
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition group';
+        tr.innerHTML = `
+          <td class="p-3.5 font-bold text-slate-300">${c.id}</td>
+          <td class="p-3.5 font-semibold text-white flex items-center gap-1.5">
+            ${c.name}
+            ${c.severity >= 4 ? '<span class="text-[9px] bg-rose-950 text-rose-300 border border-rose-800 px-1 rounded font-bold">SEV-4</span>' : ''}
+          </td>
+          <td class="p-3.5 text-slate-400">${c.threat}</td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded border text-[11px] font-bold ${badgeClass}">${c.status}</span></td>
+          <td class="p-3.5 text-slate-300">${c.ev}</td>
+          <td class="p-3.5 text-right space-x-2">
+            ${!isPass ? `<button onclick="remediateControl('${c.id}')" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-slate-950 px-2.5 py-1 rounded font-bold shadow transition">🛠️ Fix</button>` : ''}
+            <button onclick="openModal('${c.id}')" class="text-cyan-400 hover:text-cyan-300 underline text-xs font-semibold">Inspect</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      recalculateScore();
+      updateScenarioVerdict();
+    }
+
+    function filterControls(type) {
+      renderControls(type);
+    }
+
+    function remediateControl(cid) {
+      const c = CONTROLS_DATA.find(x => x.id === cid);
+      if (!c) return;
+
+      c.status = 'PASS';
+      c.ev = 'Remediated & verified compliant';
+      log(`<span class="text-emerald-400 font-bold">[HARDENING]</span> Control <b>${c.id} (${c.name})</b> patched and verified.`);
+      renderControls();
+    }
+
+    function remediateAll() {
+      CONTROLS_DATA.forEach(c => {
+        c.status = 'PASS';
+        c.ev = 'Remediated & verified compliant';
+      });
+      log(`<span class="text-emerald-400 font-bold">[HARDENING]</span> All 28 hypervisor isolation controls applied! System 100% compliant.`);
+      renderControls();
+    }
+
+    function recalculateScore() {
+      const total = CONTROLS_DATA.length;
+      const passed = CONTROLS_DATA.filter(c => c.status === 'PASS').length;
+      const pct = Math.round((passed / total) * 100);
+
+      const scoreEl = document.getElementById('stat-pct');
+      const barEl = document.getElementById('stat-bar');
+      const gradeEl = document.getElementById('stat-grade');
+      const statM1 = document.getElementById('stat-m1-ratio');
+      const passCnt = document.getElementById('stat-pass-cnt');
+      const critCnt = document.getElementById('stat-crit-cnt');
+      const m1Tag = document.getElementById('stat-m1-tag');
+
+      scoreEl.innerText = pct + '%';
+      barEl.style.width = pct + '%';
+      statM1.innerText = `${passed} / ${total}`;
+      passCnt.innerText = `${passed} Enforced`;
+      critCnt.innerText = `${total - passed} Critical Breaches`;
+
+      if (pct >= 90) {
+        scoreEl.className = 'text-4xl font-extrabold text-emerald-400 font-mono';
+        gradeEl.className = 'text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800';
+        gradeEl.innerText = 'GRADE A+ (HARDENED)';
+        barEl.className = 'h-full rounded-full transition-all duration-700 bg-gradient-to-r from-emerald-500 to-teal-400';
+        m1Tag.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 100% Isolation Controls Enforced';
+        m1Tag.className = 'text-[11px] text-emerald-400 font-mono flex items-center gap-1.5';
+      } else {
+        scoreEl.className = 'text-4xl font-extrabold text-rose-400 font-mono';
+        gradeEl.className = 'text-xs font-extrabold font-mono px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-800';
+        gradeEl.innerText = 'GRADE F (HIGH RISK)';
+        barEl.className = 'h-full rounded-full transition-all duration-700 bg-gradient-to-r from-rose-600 to-amber-500';
+        m1Tag.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> ${total - passed} Controls Violate Taxonomy`;
+        m1Tag.className = 'text-[11px] text-rose-400 font-mono flex items-center gap-1.5';
+      }
+    }
+
+    function setProfile(profile) {
+      const btnWeak = document.getElementById('btn-weak');
+      const btnHard = document.getElementById('btn-hardened');
+
+      if (profile === 'weak') {
+        btnWeak.className = 'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 bg-rose-600 text-white shadow-md flex items-center gap-1.5';
+        btnHard.className = 'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-1.5';
+        CONTROLS_DATA.forEach(c => {
+          if (['C05','C06','C07','C11','C12','C15','C27'].includes(c.id)) {
+            c.status = 'FAIL';
+            if (c.id === 'C07') c.ev = 'user = "root" (ELEVATED PRIVILEGE)';
+            if (c.id === 'C27') c.ev = 'Found 3 <shmem> IVSHMEM backdoors!';
+          } else {
+            c.status = 'PASS';
+          }
+        });
+        document.getElementById('stat-m2-leaks').innerText = '2 Leaked';
+        document.getElementById('stat-m2-leaks').className = 'text-3xl font-extrabold text-rose-400 font-mono';
+      } else {
+        btnHard.className = 'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 bg-emerald-600 text-white shadow-md flex items-center gap-1.5';
+        btnWeak.className = 'px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-1.5';
+        CONTROLS_DATA.forEach(c => {
+          c.status = 'PASS';
+          c.ev = 'Verified compliant & isolated';
+        });
+        document.getElementById('stat-m2-leaks').innerText = '0 Leaks';
+        document.getElementById('stat-m2-leaks').className = 'text-3xl font-extrabold text-emerald-400 font-mono';
+      }
+      renderControls();
+      log(`[PROFILE] Target VM changed to <b>${profile.toUpperCase()}</b>.`);
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. Hypervisor Config Diff Data & Display
+    // -------------------------------------------------------------------------
+    const DIFF_DATA = {
+      qemu_conf: {
+        weak: `# /etc/libvirt/qemu.conf (Weak Baseline)
+# VULNERABILITY: QEMU executes with full host root privileges!
+user = "root"
+group = "root"
+
+# VULNERABILITY: Mandatory Access Control (MAC) driver disabled!
+security_driver = "none"
+security_default_confined = 0
+
+# VULNERABILITY: Seccomp syscall filtering disabled
+seccomp_sandbox = 0
+clear_emulator_capabilities = 0`,
+        hardened: `# /etc/libvirt/qemu.conf (Hardened Profile)
+# REMEDIATED: QEMU drops privileges to dedicated unprivileged user
+user = "libvirt-qemu"
+group = "kvm"
+
+# REMEDIATED: AppArmor per-VM confinement active
+security_driver = "apparmor"
+security_default_confined = 1
+
+# REMEDIATED: Strict Seccomp-BPF whitelist active
+seccomp_sandbox = 1
+clear_emulator_capabilities = 1`
+      },
+      domain_xml: {
+        weak: `<!-- Domain XML (Weak Baseline) -->
+<domain type='kvm'>
+  <name>tenant-vm-01</name>
+  <devices>
+    <!-- VULNERABILITY: Shared memory backdoor allows tenant cross-talk! -->
+    <shmem name='ivshmem0'>
+      <model type='ivshmem-plain'/>
+      <size unit='M'>16</size>
+    </shmem>
+    <!-- VULNERABILITY: VNC listens on all interfaces without password! -->
+    <graphics type='vnc' port='5900' listen='0.0.0.0'/>
+  </devices>
+</domain>`,
+        hardened: `<!-- Domain XML (Hardened Profile) -->
+<domain type='kvm'>
+  <name>tenant-vm-01</name>
+  <devices>
+    <!-- REMEDIATED: Shared memory devices completely eliminated -->
+    <!-- REMEDIATED: VNC bound to localhost with password required -->
+    <graphics type='vnc' port='5900' listen='127.0.0.1' passwd='[SECRET]'/>
+  </devices>
+</domain>`
+      }
+    };
+
+    function showDiffFile(type) {
+      document.getElementById('diff-weak-content').innerText = DIFF_DATA[type].weak;
+      document.getElementById('diff-hardened-content').innerText = DIFF_DATA[type].hardened;
+
+      document.getElementById('diff-btn-qemu').className = (type === 'qemu_conf') ? 
+        'px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-mono font-bold' : 
+        'px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-mono font-bold border border-slate-800';
+      document.getElementById('diff-btn-xml').className = (type === 'domain_xml') ? 
+        'px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-mono font-bold' : 
+        'px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 text-xs font-mono font-bold border border-slate-800';
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. M2 Physical RAM Hex Rendering
+    // -------------------------------------------------------------------------
+    function renderHex() {
+      const hexView = document.getElementById('hex-view');
+      const awsVal = isRedacted ? "****************" : "AKIAJSIE4PKEY123";
+      const rsaVal = isRedacted ? "****************" : "-----BEGIN RSA P";
+      const awsHex = isRedacted ? "2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a" : "41 4b 49 41 4a 53 49 45 34 50 4b 45 59 31 32 33";
+      const rsaHex = isRedacted ? "2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a" : "2d 2d 2d 2d 2d 42 45 47 49 4e 20 52 53 41 20 50";
+
+      hexView.innerHTML = `
+        <div class="hover:bg-slate-900 p-0.5 rounded">0x7fff0180:  48 65 6c 6c 6f 20 57 6f 72 6c 64 21 00 00 00 00  [Hello World!....]</div>
+        <div class="hover:bg-slate-900 p-0.5 rounded">0x7fff0190:  61 75 74 68 5f 74 6f 6b 65 6e 5f 70 6f 6f 6c 00  [auth_token_pool.]</div>
+        <div class="${isRedacted ? 'text-emerald-400 bg-emerald-950/40' : 'text-rose-400 bg-rose-950/40'} p-1 rounded font-bold">
+          0x7fff01a0:  ${awsHex}  [${awsVal}] ${isRedacted ? '<- REDACTED' : '<- AWS_KEY'}
+        </div>
+        <div class="hover:bg-slate-900 p-0.5 rounded">0x7fff01b0:  00 00 00 00 00 00 00 00 24 32 61 24 31 32 24 61  [........$2a$12$a]</div>
+        <div class="${isRedacted ? 'text-emerald-400 bg-emerald-950/40' : 'text-rose-400 bg-rose-950/40'} p-1 rounded font-bold">
+          0x7fff01c0:  ${rsaHex}  [${rsaVal}] ${isRedacted ? '<- REDACTED' : '<- RSA_KEY'}
+        </div>
+        <div class="hover:bg-slate-900 p-0.5 rounded">0x7fff01d0:  72 69 76 61 74 65 4b 65 79 44 61 74 61 30 31 32  [rivateKeyData012]</div>
+        <div class="hover:bg-slate-900 p-0.5 rounded">0x7fff01e0:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  [................]</div>
+      `;
+
+      document.getElementById('val-aws').innerText = awsVal;
+      document.getElementById('val-rsa').innerText = rsaVal;
+    }
+
+    function toggleRedaction() {
+      isRedacted = !isRedacted;
+      const btn = document.getElementById('btn-redact');
+      if (isRedacted) {
+        btn.innerText = "🔓 Remove Redaction (Show Raw Bytes)";
+        btn.className = "text-xs bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-lg text-slate-950 font-mono font-bold transition";
+        log('[M2 ACTION] Cryptographic zeroization applied. Leaked cleartext tokens masked.');
+      } else {
+        btn.innerText = "🔒 Apply Memory Zeroization (Redact)";
+        btn.className = "text-xs bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-200 font-mono font-semibold transition";
+        log('[M2 ACTION] Redaction filter lifted. Displaying unencrypted RAM dump.');
+      }
+      renderHex();
+    }
+
+    function scanNextPage() {
+      log('[M2] Scanned next 4096-byte memory page (0x7fff1000). Shannon Entropy: 2.14.');
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. M3 Volatility DKOM Functions
+    // -------------------------------------------------------------------------
+    function injectDkomMalware() {
+      document.getElementById('dkom-stealth-card').classList.remove('hidden');
+      document.getElementById('dkom-pool-card').classList.remove('hidden');
+      log('<span class="text-rose-400 font-bold">[M3 INJECT]</span> Injected stealth rootkit: unlinked PID 1337 from scheduler tasks list.');
+    }
+
+    function runVolatilityScan() {
+      log('<span class="text-cyan-400 font-bold">[M3 SCAN]</span> Volatility linux.psscan completed. Discovered 1 unlinked task_struct signature at physical RAM 0x7f40190!');
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. M4 Timing Scope Slider
+    // -------------------------------------------------------------------------
+    function updateTimeWindow(val) {
+      document.getElementById('window-val').innerText = parseFloat(val).toFixed(1) + 's';
+      const auc = (0.84 + (parseFloat(val) / 5.0) * 0.15).toFixed(3);
+      document.getElementById('auc-score-display').innerText = `ROC-AUC: ${Math.min(0.992, auc)}`;
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. Navigation & Master Run
+    // -------------------------------------------------------------------------
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('border-indigo-500', 'text-white');
+        b.classList.add('border-transparent', 'text-slate-400');
+      });
+
+      document.getElementById('panel-' + tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('tab-' + tabId);
+      activeBtn.classList.remove('border-transparent', 'text-slate-400');
+      activeBtn.classList.add('border-indigo-500', 'text-white');
+
+      if (tabId === 'm2' && !entropyChartInstance) initEntropyChart();
+      if (tabId === 'm4' && !timingChartInstance) initTimingChart();
+      if (tabId === 'diff') showDiffFile('qemu_conf');
+    }
+
+    function log(msg) {
+      const consoleEl = document.getElementById('terminal-console');
+      const div = document.createElement('div');
+      const time = new Date().toLocaleTimeString();
+      div.innerHTML = `<span class="text-slate-500 font-mono">[${time}]</span> ${msg}`;
+      consoleEl.appendChild(div);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    function clearTerminal() {
+      document.getElementById('terminal-console').innerHTML = '';
+    }
+
+    async function runComprehensiveAudit() {
+      const runBtn = document.getElementById('btn-master-run');
+      runBtn.disabled = true;
+      runBtn.classList.add('opacity-50');
+
+      switchTab('terminal');
+      log('<span class="text-indigo-400 font-bold">============================================================</span>');
+      log('<span class="text-indigo-400 font-bold">  STARTING COMPREHENSIVE TAXONOMY EVALUATION PIPELINE</span>');
+      log('<span class="text-indigo-400 font-bold">============================================================</span>');
+
+      log('[M1] Connecting to libvirt daemon via unix:///var/run/libvirt/libvirt-sock...');
+      await sleep(400);
+      log('[M1] Auditing host kernel cmdline: intel_iommu=on verified (C01 PASS)');
+      log('[M1] Checking QEMU Seccomp BPF status: Seccomp: 2 (C04 PASS)');
+      await sleep(400);
+
+      log('[M2] Triggering memory snapshot: virsh dump target /tmp/dump.mem (4.0 GB RAM)...');
+      await sleep(400);
+      log('<span class="text-rose-400">[M2 LEAK] Page 0x7fff01a0: Leaked AWS Access Key (AKIAJSIE4PKEY123)!</span>');
+      log('<span class="text-rose-400">[M2 LEAK] Page 0x7fff01c0: Leaked RSA Private Key Header!</span>');
+      await sleep(400);
+
+      log('[M3] Executing Volatility 3 plugins with DWARF vmlinux debug symbols...');
+      await sleep(400);
+      log('<span class="text-rose-400">[M3 ANOMALY] PID 1337 (evil_backdoor) unlinked from pslist but active in memory pool!</span>');
+      await sleep(400);
+
+      log('[M4] Benchmarking CPUID VM-exit trap penalty vs native silicon ticks...');
+      log('[M4] Training Nested StratifiedGroupKFold Classifier (LogReg + Random Forest)...');
+      await sleep(400);
+      log('<span class="text-emerald-400 font-bold">[SIMULATION] Illustrative value only. No real data: H1 is untested.</span>');
+      log('<span class="text-emerald-400 font-bold">=== FULL AUDIT COMPLETE: Executive Report updated in out/report.html ===</span>');
+
+      runBtn.disabled = false;
+      runBtn.classList.remove('opacity-50');
+    }
+
+    function openModal(cid) {
+      const c = CONTROLS_DATA.find(x => x.id === cid);
+      if (!c) return;
+
+      document.getElementById('modal-cid').innerText = c.id;
+      document.getElementById('modal-name').innerText = c.name;
+      document.getElementById('modal-threat').innerText = c.threat;
+      document.getElementById('modal-expected').innerText = c.expected;
+      document.getElementById('modal-test').innerText = c.test;
+      document.getElementById('modal-fix').innerText = c.fix;
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. Charts Initializer
+    // -------------------------------------------------------------------------
+    let entropyChartInstance = null;
+    let timingChartInstance = null;
+
+    function initEntropyChart() {
+      const ctx = document.getElementById('entropyChart').getContext('2d');
+      entropyChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['0KB','0.5KB','1KB','1.5KB','2KB','2.5KB','3KB','3.5KB','4KB'],
+          datasets: [{
+            label: 'Entropy',
+            data: [1.2, 1.4, 3.84, 1.8, 3.92, 1.1, 0.4, 0.0, 0.0],
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.15)',
+            borderWidth: 2,
+            tension: 0.35,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { min: 0, max: 4.5, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+            x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function initTimingChart() {
+      const ctx = document.getElementById('timingChart').getContext('2d');
+      timingChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Native Bare-Metal', 'KVM-Masked (Stealth)', 'KVM-Plain (Default)'],
+          datasets: [{
+            label: 'CPUID Latency (Cycles)',
+            data: [85, 1340, 1480],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+            x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // Startup
+    renderControls();
+    renderHex();
+    selectScenario('escape');
+    showDiffFile('qemu_conf');
+  </script>
+</body>
+</html>
