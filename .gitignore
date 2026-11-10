@@ -31,3 +31,7 @@ data/
 cases/
 tests/fixtures/
 dist/
+
+# Published/third-party source PDFs are not redistributed in the repo
+/3382190 (1).pdf
+/Virtualization_Security_Case_Study_Report.pdf
