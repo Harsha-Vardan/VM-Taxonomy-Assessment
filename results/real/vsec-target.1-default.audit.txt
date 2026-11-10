@@ -1,0 +1,28 @@
+C01 FAIL iommu_cmdline          cmdline: initrd=\initrd.img WSL_ROOT_INIT=1 panic=-1 nr_cpus=8 hv_utils.timesync_implicit=1 console=hvc0 debug pty.legacy_count=0
+C02 NA   iommu_groups           IOMMU not testable on E0
+C03 PASS qemu_seccomp_config    seccomp_sandbox=1 (unset: libvirt default)
+C04 PASS qemu_seccomp_live      Seccomp: 2
+C05 NA   svirt_config           key unset, effective value unknown (see live check)
+C06 FAIL svirt_live             label: kernel
+C07 NA   qemu_not_root          key unset, effective value unknown (see live check)
+C08 PASS clear_capabilities     clear_emulator_capabilities=1 (unset: libvirt default)
+C09 PASS ksm_off                ksm run=0
+C10 FAIL nested_off             nested=Y
+C11 FAIL graphics_password      no password on: ['vnc']
+C12 PASS graphics_listen        ok
+C13 PASS no_usb_redirect        redirdev count=0
+C14 PASS unused_devices         ok
+C15 FAIL network_mode           ['default network']
+C16 FAIL guest_reachability     host: not-isolated: <channel type='unix'> is not on the chardev al
+C17 FAIL image_permissions      world-accessible images: ['/var/lib/libvirt/images/cirros.qcow2']
+C18 PASS socket_permissions     ok
+C19 PASS libvirtd_sock_perms    unix_sock_rw_perms=0770 (unset: libvirt default)
+C20 PASS libvirt_tcp            listen_tcp=0 auth_tcp=sasl (unset: libvirt default)
+C21 FAIL savedir_permissions    world-accessible save dirs: ['/var/lib/libvirt/qemu/save', '/var/lib/libvirt/qemu/dump']
+C22 PASS disk_cache             ok
+C23 NA   qemu_cve               qemu 8.2.2: 3 of 3 qemu CVE entries are unverified: list not usable for results; distro version: backports ignored, use the distro tracker
+C24 NA   kernel_cve             kernel 6.6.114.1-microsoft-standard-WSL2: 2 of 2 kernel CVE entries are unverified: list not usable for results; distro version: backports ignored, use the distro tracker
+C25 PASS cpu_vulnerabilities    ok
+C26 PASS smt_state              smt=1 smt_vulnerable=False
+C27 PASS no_shared_memory       shmem count=0
+C28 PASS default_confined       security_default_confined=1 (unset: libvirt default)

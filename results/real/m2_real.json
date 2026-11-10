@@ -1,0 +1,243 @@
+{
+ "vm": "vsec-target",
+ "dump_bytes": 285345043,
+ "dump_seconds": 0.4,
+ "plants": 12,
+ "v1": {
+  "by_encoding": {
+   "plain": {
+    "present": 4,
+    "detected": 4,
+    "ci": [
+     0.5100999795960008,
+     1.0
+    ]
+   },
+   "base64": {
+    "present": 4,
+    "detected": 0,
+    "ci": [
+     0.0,
+     0.48990002040399916
+    ]
+   },
+   "utf16": {
+    "present": 3,
+    "detected": 0,
+    "ci": [
+     0.0,
+     0.5615060804490177
+    ]
+   }
+  },
+  "rows": [
+   {
+    "kind": "aws",
+    "enc": "plain",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "aws",
+    "enc": "base64",
+    "present": true,
+    "detected": false
+   },
+   {
+    "kind": "aws",
+    "enc": "utf16",
+    "present": true,
+    "detected": false
+   },
+   {
+    "kind": "jwt",
+    "enc": "plain",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "jwt",
+    "enc": "base64",
+    "present": true,
+    "detected": false
+   },
+   {
+    "kind": "jwt",
+    "enc": "utf16",
+    "present": true,
+    "detected": false
+   },
+   {
+    "kind": "hex32",
+    "enc": "plain",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "hex32",
+    "enc": "base64",
+    "present": true,
+    "detected": false
+   },
+   {
+    "kind": "hex32",
+    "enc": "utf16",
+    "present": true,
+    "detected": false
+   },
+   {
+    "kind": "ssh_key",
+    "enc": "plain",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "ssh_key",
+    "enc": "base64",
+    "present": true,
+    "detected": false
+   },
+   {
+    "kind": "ssh_key",
+    "enc": "utf16",
+    "present": false,
+    "detected": false
+   }
+  ],
+  "hits": 38,
+  "false_positives": 13,
+  "fp_rules": [
+   "hex32"
+  ],
+  "fp_examples": [
+   "354143363335443841413341393345374233454242443535",
+   "464646464646464630303030303030304646464646464646",
+   "364231374431463245313243343234374638424345364535",
+   "344645333432453246453141374639423845453745423441",
+   "373835333938313633333937343438333039363135363630"
+  ],
+  "scan_seconds": 6.06,
+  "mib_per_s": 44.9
+ },
+ "v2": {
+  "by_encoding": {
+   "plain": {
+    "present": 4,
+    "detected": 4,
+    "ci": [
+     0.5100999795960008,
+     1.0
+    ]
+   },
+   "base64": {
+    "present": 4,
+    "detected": 4,
+    "ci": [
+     0.5100999795960008,
+     1.0
+    ]
+   },
+   "utf16": {
+    "present": 3,
+    "detected": 3,
+    "ci": [
+     0.43849391955098227,
+     1.0
+    ]
+   }
+  },
+  "rows": [
+   {
+    "kind": "aws",
+    "enc": "plain",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "aws",
+    "enc": "base64",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "aws",
+    "enc": "utf16",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "jwt",
+    "enc": "plain",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "jwt",
+    "enc": "base64",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "jwt",
+    "enc": "utf16",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "hex32",
+    "enc": "plain",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "hex32",
+    "enc": "base64",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "hex32",
+    "enc": "utf16",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "ssh_key",
+    "enc": "plain",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "ssh_key",
+    "enc": "base64",
+    "present": true,
+    "detected": true
+   },
+   {
+    "kind": "ssh_key",
+    "enc": "utf16",
+    "present": false,
+    "detected": false
+   }
+  ],
+  "hits": 66,
+  "false_positives": 13,
+  "fp_rules": [
+   "hex32"
+  ],
+  "fp_examples": [
+   "354143363335443841413341393345374233454242443535",
+   "464646464646464630303030303030304646464646464646",
+   "364231374431463245313243343234374638424345364535",
+   "344645333432453246453141374639423845453745423441",
+   "373835333938313633333937343438333039363135363630"
+  ],
+  "scan_seconds": 14.09,
+  "mib_per_s": 19.3
+ },
+ "after_v2_redaction": {
+  "secrets_still_present": 0,
+  "v2_hits_left": 0,
+  "size_unchanged": true
+ }
+}

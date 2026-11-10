@@ -1,0 +1,11 @@
+Lynis summary (full log kept on the WSL host only: /root/vsec/results/real/Harsha.lynis.txt; it contains contact e-mails from Lynis's banner)
+[ Lynis 3.0.9 ]
+- libvirtd.service: [ UNSAFE ]
+  -[ Lynis 3.0.9 Results ]-
+  Hardening index : 64 [############        ]
+  Tests performed : 247
+  Lynis 3.0.9
+- virtlockd.service: [ UNSAFE ]
+- virtlogd.service: [ PROTECTED ]
+- Checking presence AppArmor [ FOUND ]; Checking AppArmor status [ UNKNOWN ]; Checking presence SELinux [ NOT FOUND ]
+No mention of qemu, kvm, seccomp, ksm, nested, vnc or spice in the full log (case-insensitive count 0 for each).

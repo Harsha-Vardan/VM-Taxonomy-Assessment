@@ -35,8 +35,8 @@ EXCLUDE_FILE_GLOBS = ["*.pyc", "*.pyo", "*.o", "*.mem", "*.dump", "*.save", "*.k
 NOTE_FILES = {"docs/YOUR_TASKS.md", "docs/paper/README.md", "docs/slides/README.md"}  # with --exclude-notes
 REQUIRED_FILE = "SUBMISSION.md"
 
-# Secret patterns are not applied to the two places that hold the project's own synthetic test secrets.
-SECRET_ALLOW = ("tests/", "vsec/secrets_gen.py")
+# Secret patterns are not applied to the places that hold the project's own synthetic test secrets / demo data.
+SECRET_ALLOW = ("tests/", "vsec/secrets_gen.py", "demo_dashboard.html")
 SECRET_PATTERNS = [
     ("private key block", re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----")),
     ("GitHub token", re.compile(r"\bghp_[A-Za-z0-9]{20,}")),
@@ -89,13 +89,14 @@ def excluded_top_level(root):
 
 
 def _os_usernames():
+    generic = {"user", "admin", "administrator", "root", "ubuntu", "guest", "system", "test", "default"}
     names = set()
     for getter in (os.getlogin, getpass.getuser):
         try:
             names.add(getter())
         except Exception:  # noqa: BLE001  (getlogin: OSError without a terminal; getuser: KeyError on odd systems)
             pass
-    return {n for n in names if len(n) >= 3}
+    return {n for n in names if len(n) >= 3 and n.lower() not in generic}
 
 
 def _as_text(data):

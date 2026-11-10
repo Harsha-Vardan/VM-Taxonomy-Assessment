@@ -87,16 +87,52 @@ def _matches(data):
             yield name, m, 1 if name == "aws_secret" else 0
 
 
-def scan(data):
-    """Return [(rule, start, end, matched_bytes)]."""
-    return [(name, m.start(g), m.end(g), m.group(g)) for name, m, g in _matches(data)]
+_UTF16_RUN = re.compile(rb"(?:[\x09\x0a\x0d\x20-\x7e]\x00){16,}")
+_B64_RUN = re.compile(rb"[A-Za-z0-9+/]{24,}={0,2}")
 
 
-def redact(data):
+def _decoded_hits(data):
+    """v2 decode passes, added AFTER experiment E3 showed v1 misses encoded secrets. Each hit is a whole rule match
+    found in decoded text, reported as the raw ENCODED byte span (so redaction zeroes the right bytes).
+    Rule name gets a suffix: '@utf16' or '@base64'. Secrets split across pages are still not found."""
+    out = []
+    for run in _UTF16_RUN.finditer(data):
+        text = run.group()[::2]
+        for name, m, g in _matches(text):
+            s, e = run.start() + 2 * m.start(g), run.start() + 2 * m.end(g)
+            out.append((name + "@utf16", s, e, bytes(data[s:e])))
+    for run in _B64_RUN.finditer(data):
+        raw = run.group()
+        for off in range(4):  # the run may start a few characters before the real base64 text
+            chunk = raw[off:]
+            chunk = chunk[:len(chunk) // 4 * 4]
+            try:
+                text = base64.b64decode(chunk, validate=True)
+            except (binascii.Error, ValueError):
+                continue
+            found = False
+            for name, m, g in _matches(text):
+                found = True
+                s = run.start() + off + 4 * (m.start(g) // 3)
+                e = min(run.start() + off + 4 * -(-m.end(g) // 3), run.end())
+                out.append((name + "@base64", s, e, bytes(data[s:e])))
+            if found:
+                break
+    return out
+
+
+def scan(data, decode=False):
+    """Return [(rule, start, end, matched_bytes)]. decode=False is scanner v1 (plain ASCII rules only, the
+    pre-registered design); decode=True is v2, which adds UTF-16LE and base64 decoding passes."""
+    hits = [(name, m.start(g), m.end(g), m.group(g)) for name, m, g in _matches(data)]
+    return hits + _decoded_hits(data) if decode else hits
+
+
+def redact(data, decode=False):
     """Overwrite every hit with zeros (same size). Takes bytes and returns a COPY: needs 2x memory, so use
     redact_file() for multi-GB `virsh save` images."""
     out = bytearray(data)
-    for _, s, e, _ in scan(data):
+    for _, s, e, _ in scan(data, decode):
         out[s:e] = bytes(e - s)
     return bytes(out)
 
@@ -340,7 +376,7 @@ def _ratio_stats(d, p, absent):
             "recall": d / p if p else None, "ci": wilson(d, p)}
 
 
-def evaluate(dumps, synthetic=False):
+def evaluate(dumps, synthetic=False, decode=False):
     """Score dumps ((bytes-like, manifest) pairs). Recall is detected / present (all needles found).
     Planted dumps whose needles are NOT all found are counted per cell as `planted_but_absent`, never dropped
     silently. A dump that load_dumps() could not open or mmap (permission denied, truncated to empty) is
@@ -359,7 +395,7 @@ def evaluate(dumps, synthetic=False):
         _validate_manifest(man, f"dump #{i} (cell {man.get('cell')!r})" if isinstance(man, dict) else f"dump #{i}")
         needles = [bytes.fromhex(h) for h in man["needles"]]
         t0 = time.perf_counter()
-        hits = scan(data)
+        hits = scan(data, decode)
         scan_seconds += time.perf_counter() - t0
         _reject_slices(needles, hits, f"dump #{i} (cell {man['cell']!r})")
         total_hits += len(hits)
@@ -367,7 +403,9 @@ def evaluate(dumps, synthetic=False):
             row = cells[man["cell"]]
             if all(data.find(n) != -1 for n in needles):
                 row[1] += 1
-                row[0] += any(n in h[3] for h in hits for n in needles)
+                # v2 decoded hits are the encoded secret span inside the planted encoded text, so h[3] in n counts
+                row[0] += any(n in h[3] or ("@" in h[0] and len(h[3]) >= MIN_ENTRY_BYTES and h[3] in n)
+                              for h in hits for n in needles)
             else:
                 row[2] += 1
         planted = [bytes.fromhex(h) for h in man.get("planted", [])] + needles  # a hit is no FP only inside planted text

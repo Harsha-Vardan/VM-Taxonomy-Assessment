@@ -1,0 +1,1244 @@
+{
+ "seed": 20261109,
+ "generated": "2026-11-10",
+ "quick": false,
+ "labels": "(repeated in every output):\n  E1, E2  M1 auditor on CONSTRUCTED case folders with known seeded faults (fault injection). This measures whether\n          the checker reports exactly the faults that were seeded, including when many faults interact in one\n          folder. It is NOT accuracy on real hosts (same team wrote checker and fixtures).\n  E3      M2 secret scanner on SYNTHETIC memory dumps with planted secrets (ground truth by construction).\n  E4-E6   The Attack Lab MODEL (vsec/attacks.yaml + fleet.yaml): what the survey's attack logic implies, not a\n          measurement of real attacks.\nNothing here uses or replaces the pending real-hardware results (M3, M4, Sections 7.1-7.6).",
+ "E1": {
+  "baseline_all_pass": true,
+  "cases": 78,
+  "detected": 78,
+  "detection_ci": [
+   0.9530605462258804,
+   1.0
+  ],
+  "isolated": 78,
+  "isolation_ci": [
+   0.9530605462258804,
+   1.0
+  ],
+  "per_control": {
+   "C01": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C02": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C03": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C04": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C05": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C06": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C07": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C08": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C09": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C10": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C11": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C12": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C13": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C14": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C15": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C16": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C17": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C18": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C19": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C20": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C21": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C22": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C25": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C26": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C27": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   },
+   "C28": {
+    "variants": 3,
+    "detected": 3,
+    "no_side_effect": 3
+   }
+  },
+  "errors": []
+ },
+ "E2": {
+  "cases": 400,
+  "tp": 4058,
+  "fp": 0,
+  "fn": 0,
+  "tn": 6342,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "fpr": 0.0,
+  "precision_ci": [
+   0.9990542221045744,
+   1.0
+  ],
+  "recall_ci": [
+   0.9990542221045744,
+   1.0
+  ],
+  "by_fault_rate": {
+   "0.1": {
+    "cases": 100,
+    "exact_match": 100,
+    "ci": [
+     0.9630051925239981,
+     0.9999999999999999
+    ]
+   },
+   "0.3": {
+    "cases": 100,
+    "exact_match": 100,
+    "ci": [
+     0.9630051925239981,
+     0.9999999999999999
+    ]
+   },
+   "0.5": {
+    "cases": 100,
+    "exact_match": 100,
+    "ci": [
+     0.9630051925239981,
+     0.9999999999999999
+    ]
+   },
+   "0.7": {
+    "cases": 100,
+    "exact_match": 100,
+    "ci": [
+     0.9630051925239981,
+     0.9999999999999999
+    ]
+   }
+  },
+  "per_control": {
+   "C01": {
+    "tp": 168,
+    "fp": 0,
+    "fn": 0,
+    "tn": 232
+   },
+   "C02": {
+    "tp": 141,
+    "fp": 0,
+    "fn": 0,
+    "tn": 259
+   },
+   "C03": {
+    "tp": 146,
+    "fp": 0,
+    "fn": 0,
+    "tn": 254
+   },
+   "C04": {
+    "tp": 170,
+    "fp": 0,
+    "fn": 0,
+    "tn": 230
+   },
+   "C05": {
+    "tp": 147,
+    "fp": 0,
+    "fn": 0,
+    "tn": 253
+   },
+   "C06": {
+    "tp": 162,
+    "fp": 0,
+    "fn": 0,
+    "tn": 238
+   },
+   "C07": {
+    "tp": 151,
+    "fp": 0,
+    "fn": 0,
+    "tn": 249
+   },
+   "C08": {
+    "tp": 161,
+    "fp": 0,
+    "fn": 0,
+    "tn": 239
+   },
+   "C09": {
+    "tp": 166,
+    "fp": 0,
+    "fn": 0,
+    "tn": 234
+   },
+   "C10": {
+    "tp": 165,
+    "fp": 0,
+    "fn": 0,
+    "tn": 235
+   },
+   "C11": {
+    "tp": 164,
+    "fp": 0,
+    "fn": 0,
+    "tn": 236
+   },
+   "C12": {
+    "tp": 66,
+    "fp": 0,
+    "fn": 0,
+    "tn": 334
+   },
+   "C13": {
+    "tp": 159,
+    "fp": 0,
+    "fn": 0,
+    "tn": 241
+   },
+   "C14": {
+    "tp": 155,
+    "fp": 0,
+    "fn": 0,
+    "tn": 245
+   },
+   "C15": {
+    "tp": 149,
+    "fp": 0,
+    "fn": 0,
+    "tn": 251
+   },
+   "C16": {
+    "tp": 165,
+    "fp": 0,
+    "fn": 0,
+    "tn": 235
+   },
+   "C17": {
+    "tp": 162,
+    "fp": 0,
+    "fn": 0,
+    "tn": 238
+   },
+   "C18": {
+    "tp": 158,
+    "fp": 0,
+    "fn": 0,
+    "tn": 242
+   },
+   "C19": {
+    "tp": 160,
+    "fp": 0,
+    "fn": 0,
+    "tn": 240
+   },
+   "C20": {
+    "tp": 160,
+    "fp": 0,
+    "fn": 0,
+    "tn": 240
+   },
+   "C21": {
+    "tp": 169,
+    "fp": 0,
+    "fn": 0,
+    "tn": 231
+   },
+   "C22": {
+    "tp": 170,
+    "fp": 0,
+    "fn": 0,
+    "tn": 230
+   },
+   "C25": {
+    "tp": 158,
+    "fp": 0,
+    "fn": 0,
+    "tn": 242
+   },
+   "C26": {
+    "tp": 162,
+    "fp": 0,
+    "fn": 0,
+    "tn": 238
+   },
+   "C27": {
+    "tp": 168,
+    "fp": 0,
+    "fn": 0,
+    "tn": 232
+   },
+   "C28": {
+    "tp": 156,
+    "fp": 0,
+    "fn": 0,
+    "tn": 244
+   }
+  },
+  "audit_ms": {
+   "median": 40.28535005636513,
+   "p95": 72.80540000647306,
+   "n": 400
+  }
+ },
+ "E3": {
+  "cells": {
+   "aws/exited": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "aws/freed": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "aws/live": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "aws/live/base64": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "aws/live/split": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "aws/live/utf16": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "hex32/exited": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "hex32/freed": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "hex32/live": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "hex32/live/base64": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "hex32/live/split": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "hex32/live/utf16": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "jwt/exited": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "jwt/freed": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "jwt/live": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "jwt/live/base64": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "jwt/live/split": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "jwt/live/utf16": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "ssh_key/exited": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "ssh_key/freed": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "ssh_key/live": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "ssh_key/live/base64": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "ssh_key/live/split": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "ssh_key/live/utf16": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   }
+  },
+  "synthetic": true,
+  "dumps": 260,
+  "total_hits": 160,
+  "total_bytes": 68157440,
+  "false_positives": 0,
+  "gb_scanned": 0.0634765625,
+  "fp_per_gb": 0.0,
+  "scan_seconds": 2.7630425984971225,
+  "size_overhead_bytes": 0,
+  "dump_errors": [],
+  "plain": {
+   "detected": 120,
+   "present": 120,
+   "planted_but_absent": 0,
+   "recall": 1.0,
+   "ci": [
+    0.9689797289440706,
+    1.0
+   ]
+  },
+  "held_out": {
+   "detected": 0,
+   "present": 120,
+   "planted_but_absent": 0,
+   "recall": 0.0,
+   "ci": [
+    0.0,
+    0.031020271055929513
+   ]
+  },
+  "real_programs": {
+   "detected": 0,
+   "present": 0,
+   "planted_but_absent": 0,
+   "recall": null,
+   "ci": [
+    0.0,
+    1.0
+   ]
+  },
+  "redaction_clean": 240,
+  "redaction_n": 240,
+  "throughput_mb_s": 23.524791125317748
+ },
+ "E3v2": {
+  "cells": {
+   "aws/exited": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "aws/freed": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "aws/live": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "aws/live/base64": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "aws/live/split": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "aws/live/utf16": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "hex32/exited": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "hex32/freed": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "hex32/live": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "hex32/live/base64": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "hex32/live/split": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "hex32/live/utf16": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "jwt/exited": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "jwt/freed": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "jwt/live": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "jwt/live/base64": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "jwt/live/split": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "jwt/live/utf16": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "ssh_key/exited": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "ssh_key/freed": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "ssh_key/live": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "ssh_key/live/base64": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "ssh_key/live/split": {
+    "detected": 0,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 0.0,
+    "ci": [
+     0.0,
+     0.2775401687666166
+    ]
+   },
+   "ssh_key/live/utf16": {
+    "detected": 10,
+    "present": 10,
+    "planted_but_absent": 0,
+    "recall": 1.0,
+    "ci": [
+     0.7224598312333834,
+     1.0
+    ]
+   }
+  },
+  "synthetic": true,
+  "dumps": 260,
+  "total_hits": 260,
+  "total_bytes": 68157440,
+  "false_positives": 0,
+  "gb_scanned": 0.0634765625,
+  "fp_per_gb": 0.0,
+  "scan_seconds": 7.347779199946672,
+  "size_overhead_bytes": 0,
+  "dump_errors": [],
+  "plain": {
+   "detected": 120,
+   "present": 120,
+   "planted_but_absent": 0,
+   "recall": 1.0,
+   "ci": [
+    0.9689797289440706,
+    1.0
+   ]
+  },
+  "held_out": {
+   "detected": 80,
+   "present": 120,
+   "planted_but_absent": 0,
+   "recall": 0.6666666666666666,
+   "ci": [
+    0.5783093452093498,
+    0.744683897772007
+   ]
+  },
+  "real_programs": {
+   "detected": 0,
+   "present": 0,
+   "planted_but_absent": 0,
+   "recall": null,
+   "ci": [
+    0.0,
+    1.0
+   ]
+  },
+  "redaction_clean": 240,
+  "redaction_n": 240,
+  "throughput_mb_s": 8.846210294461727
+ },
+ "E4": {
+  "open_pairs": 27,
+  "total_pairs": 66,
+  "leverage": [
+   {
+    "control": "C09",
+    "level": "host",
+    "blocked_pairs": 8
+   },
+   {
+    "control": "C15",
+    "level": "vm",
+    "blocked_pairs": 5
+   },
+   {
+    "control": "C16",
+    "level": "vm",
+    "blocked_pairs": 5
+   },
+   {
+    "control": "C01",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C02",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C03",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C04",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C05",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C06",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C07",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C08",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C10",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C11",
+    "level": "vm",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C12",
+    "level": "vm",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C14",
+    "level": "vm",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C17",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C18",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C19",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C20",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C21",
+    "level": "host",
+    "blocked_pairs": 2
+   },
+   {
+    "control": "C25",
+    "level": "host",
+    "blocked_pairs": 0
+   },
+   {
+    "control": "C26",
+    "level": "host",
+    "blocked_pairs": 0
+   }
+  ],
+  "outsider_curve": [
+   5,
+   2,
+   0
+  ],
+  "outsider_plan": [
+   [
+    [
+     "vm",
+     "dev-sandbox",
+     "C11"
+    ]
+   ],
+   [
+    [
+     "host",
+     "host-a",
+     "C20"
+    ],
+    [
+     "vm",
+     "web-frontend",
+     "C11"
+    ]
+   ]
+  ],
+  "per_vm": {
+   "web-frontend": {
+    "risk": 58,
+    "open": 7,
+    "min_fix": 6
+   },
+   "ci-runner": {
+    "risk": 50,
+    "open": 6,
+    "min_fix": 5
+   },
+   "dev-sandbox": {
+    "risk": 64,
+    "open": 7,
+    "min_fix": 6
+   },
+   "legacy-erp": {
+    "risk": 56,
+    "open": 6,
+    "min_fix": 5
+   },
+   "payments-db": {
+    "risk": 8,
+    "open": 1,
+    "min_fix": 1
+   },
+   "monitoring": {
+    "risk": 0,
+    "open": 0,
+    "min_fix": 0
+   }
+  }
+ },
+ "E5": {
+  "0.1": {
+   "host_only": {
+    "hardened_host_breached": 36,
+    "n": 2000,
+    "ci": [
+     0.013029914582859979,
+     0.02481818678403449
+    ],
+    "mean_compromised": 0.481
+   },
+   "host_and_vms": {
+    "hardened_host_breached": 0,
+    "n": 2000,
+    "ci": [
+     0.0,
+     0.0019171176005129348
+    ],
+    "mean_compromised": 0.465
+   },
+   "host_vms_isolated": {
+    "hardened_host_breached": 0,
+    "n": 2000,
+    "ci": [
+     0.0,
+     0.0019171176005129348
+    ],
+    "mean_compromised": 0.442
+   }
+  },
+  "0.2": {
+   "host_only": {
+    "hardened_host_breached": 148,
+    "n": 2000,
+    "ci": [
+     0.06332601968754645,
+     0.08630736450809057
+    ],
+    "mean_compromised": 1.0535
+   },
+   "host_and_vms": {
+    "hardened_host_breached": 0,
+    "n": 2000,
+    "ci": [
+     0.0,
+     0.0019171176005129348
+    ],
+    "mean_compromised": 0.924
+   },
+   "host_vms_isolated": {
+    "hardened_host_breached": 0,
+    "n": 2000,
+    "ci": [
+     0.0,
+     0.0019171176005129348
+    ],
+    "mean_compromised": 0.9265
+   }
+  },
+  "0.3": {
+   "host_only": {
+    "hardened_host_breached": 355,
+    "n": 2000,
+    "ci": [
+     0.16137702059200562,
+     0.19485952026032524
+    ],
+    "mean_compromised": 1.6735
+   },
+   "host_and_vms": {
+    "hardened_host_breached": 0,
+    "n": 2000,
+    "ci": [
+     0.0,
+     0.0019171176005129348
+    ],
+    "mean_compromised": 1.4705
+   },
+   "host_vms_isolated": {
+    "hardened_host_breached": 0,
+    "n": 2000,
+    "ci": [
+     0.0,
+     0.0019171176005129348
+    ],
+    "mean_compromised": 1.4895
+   }
+  },
+  "0.5": {
+   "host_only": {
+    "hardened_host_breached": 939,
+    "n": 2000,
+    "ci": [
+     0.44770671196399503,
+     0.4914102322096362
+    ],
+    "mean_compromised": 3.1475
+   },
+   "host_and_vms": {
+    "hardened_host_breached": 0,
+    "n": 2000,
+    "ci": [
+     0.0,
+     0.0019171176005129348
+    ],
+    "mean_compromised": 2.535
+   },
+   "host_vms_isolated": {
+    "hardened_host_breached": 0,
+    "n": 2000,
+    "ci": [
+     0.0,
+     0.0019171176005129348
+    ],
+    "mean_compromised": 2.6245
+   }
+  }
+ },
+ "E6": {
+  "blocked": 27901,
+  "single_layer": 15983,
+  "ci": [
+   0.5670328145944945,
+   0.5786408307989988
+  ]
+ },
+ "runtime_s": 61.5
+}

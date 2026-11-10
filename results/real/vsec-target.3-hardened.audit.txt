@@ -1,0 +1,28 @@
+C01 FAIL iommu_cmdline          cmdline: initrd=\initrd.img WSL_ROOT_INIT=1 panic=-1 nr_cpus=8 hv_utils.timesync_implicit=1 console=hvc0 debug pty.legacy_count=0
+C02 NA   iommu_groups           IOMMU not testable on E0
+C03 PASS qemu_seccomp_config    seccomp_sandbox=1 (unset: libvirt default)
+C04 PASS qemu_seccomp_live      Seccomp: 2
+C05 NA   svirt_config           key unset, effective value unknown (see live check)
+C06 FAIL svirt_live             label: kernel
+C07 PASS qemu_not_root          user=libvirt-qemu
+C08 PASS clear_capabilities     clear_emulator_capabilities=1 (unset: libvirt default)
+C09 PASS ksm_off                ksm run=0
+C10 PASS nested_off             nested=N
+C11 PASS graphics_password      ok
+C12 PASS graphics_listen        ok
+C13 PASS no_usb_redirect        redirdev count=0
+C14 PASS unused_devices         ok
+C15 PASS network_mode           ok
+C16 PASS guest_reachability     host-verified (guest scan: none)
+C17 PASS image_permissions      ok
+C18 PASS socket_permissions     ok
+C19 PASS libvirtd_sock_perms    unix_sock_rw_perms=0770 (unset: libvirt default)
+C20 PASS libvirt_tcp            listen_tcp=0 auth_tcp=sasl (unset: libvirt default)
+C21 PASS savedir_permissions    ok
+C22 PASS disk_cache             ok
+C23 NA   qemu_cve               qemu 8.2.2: 3 of 3 qemu CVE entries are unverified: list not usable for results; distro version: backports ignored, use the distro tracker
+C24 NA   kernel_cve             kernel 6.6.114.1-microsoft-standard-WSL2: 2 of 2 kernel CVE entries are unverified: list not usable for results; distro version: backports ignored, use the distro tracker
+C25 PASS cpu_vulnerabilities    ok
+C26 PASS smt_state              smt=1 smt_vulnerable=False
+C27 PASS no_shared_memory       shmem count=0
+C28 PASS default_confined       security_default_confined=1 (unset: libvirt default)
