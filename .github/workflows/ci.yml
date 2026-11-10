@@ -1,0 +1,20 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Fast suite (runs the Linux-only symlink, POSIX-permission and bash tests too)
+        run: python -m pytest -q -m "not slow"
+      - name: The committed simulator.html must be current
+        run: |
+          python scripts/build_simulator.py /tmp/simulator.html
+          diff -q /tmp/simulator.html simulator.html
