@@ -1,0 +1,59 @@
+Name:	qemu-system-x86
+Umask:	0002
+State:	S (sleeping)
+Tgid:	3323
+Ngid:	0
+Pid:	3323
+PPid:	1
+TracerPid:	0
+Uid:	64055	64055	64055	64055
+Gid:	993	993	993	993
+FDSize:	64
+Groups:	993 64055 
+NStgid:	3323
+NSpid:	3323
+NSpgid:	3322
+NSsid:	3322
+Kthread:	0
+VmPeak:	 1413292 kB
+VmSize:	 1394872 kB
+VmLck:	       0 kB
+VmPin:	       0 kB
+VmHWM:	  201892 kB
+VmRSS:	  201892 kB
+RssAnon:	  179964 kB
+RssFile:	   21928 kB
+RssShmem:	       0 kB
+VmData:	  506388 kB
+VmStk:	     132 kB
+VmExe:	    7060 kB
+VmLib:	   15332 kB
+VmPTE:	     844 kB
+VmSwap:	       0 kB
+HugetlbPages:	       0 kB
+CoreDumping:	0
+THP_enabled:	1
+untag_mask:	0xffffffffffffffff
+Threads:	12
+SigQ:	0/31289
+SigPnd:	0000000000000000
+ShdPnd:	0000000000000000
+SigBlk:	0000000010002240
+SigIgn:	0000000000001000
+SigCgt:	0000000100004243
+CapInh:	0000000000000000
+CapPrm:	0000000000000000
+CapEff:	0000000000000000
+CapBnd:	000001ffffffffff
+CapAmb:	0000000000000000
+NoNewPrivs:	1
+Seccomp:	2
+Seccomp_filters:	1
+Speculation_Store_Bypass:	thread vulnerable
+SpeculationIndirectBranch:	conditional enabled
+Cpus_allowed:	ff
+Cpus_allowed_list:	0-7
+Mems_allowed:	00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001
+Mems_allowed_list:	0
+voluntary_ctxt_switches:	4354
+nonvoluntary_ctxt_switches:	15

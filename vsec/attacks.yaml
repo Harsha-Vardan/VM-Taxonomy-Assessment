@@ -29,7 +29,7 @@ attacks:
     impact: "Code execution on the host: every VM on the machine is exposed."
     steps:
       - {lane: guest, title: "Probe the virtual hardware", text: "An attacker with root inside the guest lists the emulated devices and finds a legacy floppy controller.", gates: []}
-      - {lane: device, title: "Send oversized FIFO command sequences", text: "Crafted commands drive the emulated controller into its vulnerable code path.", gates: [C14], why: "Unused virtual hardware is attack surface that buys nothing. With no floppy device defined, the vulnerable code cannot be reached."}
+      - {lane: device, title: "Send oversized FIFO command sequences", text: "Crafted commands drive the emulated controller into its vulnerable code path.", gates: [C14], why: "Unused virtual hardware is attack surface that buys nothing. The controller must be absent from the RUNNING QEMU: on the i440fx machine type QEMU builds it even with no floppy disk defined (observed on a real VM, paper 7.8 R4), so C14 checks the running device set, not only the XML. On q35 there is none, and the vulnerable code cannot be reached."}
       - {lane: device, title: "The overflow corrupts device-model memory", text: "The device model runs with VMM privilege, so this memory belongs to the trusted computing base.", gates: []}
       - {lane: host, title: "Attacker code runs inside the QEMU process", text: "The shellcode tries to spawn a shell and open sockets.", gates: [C04, C03], why: "A seccomp filter restricts which system calls QEMU may make, so the shellcode cannot freely exec or connect."}
       - {lane: host, title: "Read other VMs' disks and host files", text: "The compromised process walks the file system as the QEMU user.", gates: [C06, C05], why: "sVirt (AppArmor or SELinux) labels each QEMU process so it can only touch its own VM's files."}
@@ -171,7 +171,7 @@ attacks:
     impact: "Tenant isolation broken: the attacker reaches another VM's services."
     steps:
       - {lane: network, title: "Scan other VMs on the shared network", text: "On libvirt's default NAT network all guests share one bridge.", gates: [C15], why: "An isolated network (no forward, no shared bridge) removes the neighbours from view."}
-      - {lane: network, title: "Reach the neighbour's open services", text: "SSH, databases or web admin pages are reachable.", gates: [C16], why: "A host-side check that guests cannot reach each other shows the isolation actually works."}
+      - {lane: network, title: "Reach the neighbour's open services", text: "SSH, databases or web admin pages are reachable.", gates: [C16], why: "Guests on one bridge reach each other even on a libvirt 'isolated' network; only a separate network per VM or <port isolated='yes'/> on both ports blocks the path (validated on real VMs)."}
       - {lane: guest, title: "Exploit the neighbour", text: "Weak credentials or a service bug give access.", gates: []}
   - id: A11
     severity: 3

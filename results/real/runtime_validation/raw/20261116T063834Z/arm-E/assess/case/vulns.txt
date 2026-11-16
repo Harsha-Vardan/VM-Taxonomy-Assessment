@@ -1,0 +1,17 @@
+gather_data_sampling: Unknown: Dependent on hypervisor status
+indirect_target_selection: Mitigation: Aligned branch/return thunks
+itlb_multihit: Not affected
+l1tf: Not affected
+mds: Not affected
+meltdown: Not affected
+mmio_stale_data: Not affected
+reg_file_data_sampling: Not affected
+retbleed: Mitigation: Enhanced IBRS
+spec_rstack_overflow: Not affected
+spec_store_bypass: Mitigation: Speculative Store Bypass disabled via prctl
+spectre_v1: Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+spectre_v2: Mitigation: Enhanced / Automatic IBRS; IBPB: conditional; PBRSB-eIBRS: SW sequence; BHI: SW loop, KVM: SW loop
+srbds: Not affected
+tsa: Not affected
+tsx_async_abort: Not affected
+vmscape: Not affected

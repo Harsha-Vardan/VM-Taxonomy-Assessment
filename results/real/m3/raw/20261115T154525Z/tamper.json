@@ -1,0 +1,105 @@
+{
+ "source_dump_sha256": "f5519e7d44b21b7261729aa5f9a180ebd5f4139339ad10ca3f00d18bd683e4fe",
+ "source_record": "results/real/m3/raw/20261115T154525Z/r3/record.json",
+ "victim_pid": 475,
+ "victim_comm": "vsgt1",
+ "neighbours": {
+  "prev": 474,
+  "next": 476
+ },
+ "tasks_offset": 2120,
+ "truth_hidden": [
+  475
+ ],
+ "detected_hidden_raw": [
+  177,
+  419,
+  445,
+  446,
+  447,
+  448,
+  449,
+  475,
+  481
+ ],
+ "detected_hidden_exit_filtered": [
+  475
+ ],
+ "excluded_exited": [
+  {
+   "pid": 449,
+   "offset": 449,
+   "reason": "EXIT_STATE=EXIT_DEAD"
+  },
+  {
+   "pid": 448,
+   "offset": 448,
+   "reason": "EXIT_STATE=EXIT_DEAD"
+  },
+  {
+   "pid": 445,
+   "offset": 445,
+   "reason": "EXIT_STATE=EXIT_DEAD"
+  },
+  {
+   "pid": 177,
+   "offset": 177,
+   "reason": "EXIT_STATE=EXIT_DEAD"
+  },
+  {
+   "pid": 446,
+   "offset": 446,
+   "reason": "EXIT_STATE=EXIT_DEAD"
+  },
+  {
+   "pid": 447,
+   "offset": 447,
+   "reason": "EXIT_STATE=EXIT_DEAD"
+  },
+  {
+   "pid": 481,
+   "offset": 481,
+   "reason": "EXIT_STATE=EXIT_DEAD"
+  },
+  {
+   "pid": 419,
+   "offset": 419,
+   "reason": "EXIT_STATE=EXIT_DEAD"
+  }
+ ],
+ "eval_raw": {
+  "detected": 1,
+  "hidden_total": 1,
+  "detection_ci": [
+   0.025,
+   1.0
+  ],
+  "false_items": 8,
+  "clean_dumps": 0,
+  "clean_with_alarm": 0,
+  "clean_alarm_ci": [
+   0.0,
+   1.0
+  ],
+  "failures": []
+ },
+ "eval_exit_filtered": {
+  "detected": 1,
+  "hidden_total": 1,
+  "detection_ci": [
+   0.025,
+   1.0
+  ],
+  "false_items": 0,
+  "clean_dumps": 0,
+  "clean_with_alarm": 0,
+  "clean_alarm_ci": [
+   0.0,
+   1.0
+  ],
+  "failures": []
+ },
+ "lsmod_modules": 47,
+ "hidden_modules": [],
+ "label": "CONSTRUCTED positive control: a real dump with one task unlinked in a copy (DKOM-style)."
+}

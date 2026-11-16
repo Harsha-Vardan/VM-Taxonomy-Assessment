@@ -1,0 +1,2 @@
+own vnet9 bridge=virbr-rv isolated=1
+peer vnet8 bridge=virbr-rv isolated=0

@@ -6,7 +6,7 @@ Everything on the page comes from the project itself:
   controls  vsec/taxonomy.yaml (M1 controls only: the ones that can gate an attack)
   attacks   vsec/attacks.yaml  (validated by vsec.sim.validate; the build refuses to run on problems)
   fleet     vsec/fleet.yaml: hosts, VMs and their control states, produced by a REAL `vsec audit` of generated case
-            folders (scripts/make_demo_cases.py build_fleet); host-level controls come from the host, VM-level from the VM
+            folders (scripts/make_fleet_cases.py build_fleet); host-level controls come from the host, VM-level from the VM
 tests/test_simulator.py fails when the committed simulator.html is out of date.
 """
 import importlib.util
@@ -25,7 +25,7 @@ MARK = "null/*__DATA__*/"
 
 
 def _demo_builder():
-    spec = importlib.util.spec_from_file_location("make_demo_cases", ROOT / "scripts" / "make_demo_cases.py")
+    spec = importlib.util.spec_from_file_location("make_fleet_cases", ROOT / "scripts" / "make_fleet_cases.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod

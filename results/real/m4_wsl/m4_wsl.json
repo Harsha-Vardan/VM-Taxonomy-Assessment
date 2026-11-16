@@ -1,0 +1,675 @@
+{
+ "run": "20261116T053926Z",
+ "units_used": 40,
+ "per_workload": {
+  "cpu": [
+   {
+    "signal": "cpuid_tsc",
+    "group": "timing",
+    "host_median": 854.1024500000001,
+    "guest_median": 9229.26585,
+    "ratio_guest_host": 10.805806551661336,
+    "cliffs_delta": 1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.36204029153645434,
+    "guest_iqr_rel": 0.355045813313526,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "rdtsc_tsc",
+    "group": "timing",
+    "host_median": 22.0,
+    "guest_median": 24.5,
+    "ratio_guest_host": 1.1136363636363635,
+    "cliffs_delta": 0.0,
+    "single_auroc": 0.5,
+    "p_mwu": 1.0,
+    "host_iqr_rel": 0.3181818181818182,
+    "guest_iqr_rel": 0.16326530612244897,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "syscall_ns",
+    "group": "timing",
+    "host_median": 81.2949,
+    "guest_median": 347.7844,
+    "ratio_guest_host": 4.278059263250216,
+    "cliffs_delta": 1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.37742466009552855,
+    "guest_iqr_rel": 0.2987495988894268,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "pagefault_ns",
+    "group": "memory",
+    "host_median": 906.0365999999999,
+    "guest_median": 1518.09375,
+    "ratio_guest_host": 1.6755324784892798,
+    "cliffs_delta": 0.52,
+    "single_auroc": 0.76,
+    "p_mwu": 0.2222222222222222,
+    "host_iqr_rel": 0.5678966500911774,
+    "guest_iqr_rel": 0.34778721669857365,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "seq_ns",
+    "group": "memory",
+    "host_median": 11.6323,
+    "guest_median": 8.725200000000001,
+    "ratio_guest_host": 0.7500838183334336,
+    "cliffs_delta": 0.04,
+    "single_auroc": 0.52,
+    "p_mwu": 1.0,
+    "host_iqr_rel": 0.6861755628723468,
+    "guest_iqr_rel": 0.4125464172741024,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "stride_ns",
+    "group": "memory",
+    "host_median": 13.129999999999999,
+    "guest_median": 9.594850000000001,
+    "ratio_guest_host": 0.7307578065498859,
+    "cliffs_delta": -0.84,
+    "single_auroc": 0.9199999999999999,
+    "p_mwu": 0.031746031746031744,
+    "host_iqr_rel": 0.2061576542269611,
+    "guest_iqr_rel": 0.11676055383877793,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.25396825396825395
+   },
+   {
+    "signal": "rand_ns",
+    "group": "memory",
+    "host_median": 195.90045,
+    "guest_median": 199.6499,
+    "ratio_guest_host": 1.0191395680816455,
+    "cliffs_delta": 0.04,
+    "single_auroc": 0.52,
+    "p_mwu": 1.0,
+    "host_iqr_rel": 0.3816673213359132,
+    "guest_iqr_rel": 0.20856559407242387,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "sleep_jitter_us",
+    "group": "scheduler",
+    "host_median": 0.207,
+    "guest_median": 1.23,
+    "ratio_guest_host": 5.942028985507247,
+    "cliffs_delta": 0.76,
+    "single_auroc": 0.88,
+    "p_mwu": 0.05555555555555555,
+    "host_iqr_rel": 2.41304347826087,
+    "guest_iqr_rel": 0.9113821138211382,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.38888888888888884
+   },
+   {
+    "signal": "ipc",
+    "group": "perf",
+    "status": "NA (not measurable in both)",
+    "n_host": 5,
+    "n_guest": 0
+   },
+   {
+    "signal": "dtlb_miss",
+    "group": "perf",
+    "status": "NA (not measurable in both)",
+    "n_host": 5,
+    "n_guest": 0
+   }
+  ],
+  "idle": [
+   {
+    "signal": "cpuid_tsc",
+    "group": "timing",
+    "host_median": 855.79025,
+    "guest_median": 8079.7634,
+    "ratio_guest_host": 9.441289381364184,
+    "cliffs_delta": 1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.14852342615494865,
+    "guest_iqr_rel": 0.37500312818565956,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "rdtsc_tsc",
+    "group": "timing",
+    "host_median": 22.0,
+    "guest_median": 22.0,
+    "ratio_guest_host": 1.0,
+    "cliffs_delta": 0.0,
+    "single_auroc": 0.5,
+    "p_mwu": 1.0,
+    "host_iqr_rel": 0.09090909090909091,
+    "guest_iqr_rel": 0.29545454545454547,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "syscall_ns",
+    "group": "timing",
+    "host_median": 81.02145,
+    "guest_median": 300.1522,
+    "ratio_guest_host": 3.7046016826408312,
+    "cliffs_delta": 1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.13851887370566682,
+    "guest_iqr_rel": 0.3601686077929798,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "pagefault_ns",
+    "group": "memory",
+    "host_median": 845.7724499999999,
+    "guest_median": 1058.32815,
+    "ratio_guest_host": 1.2513154690720891,
+    "cliffs_delta": 0.68,
+    "single_auroc": 0.8400000000000001,
+    "p_mwu": 0.09523809523809523,
+    "host_iqr_rel": 0.18685770623055878,
+    "guest_iqr_rel": 0.4527201700153207,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.6666666666666666
+   },
+   {
+    "signal": "seq_ns",
+    "group": "memory",
+    "host_median": 4.00905,
+    "guest_median": 4.0916,
+    "ratio_guest_host": 1.0205909130592035,
+    "cliffs_delta": 0.2,
+    "single_auroc": 0.6,
+    "p_mwu": 0.6904761904761905,
+    "host_iqr_rel": 0.02663972761626825,
+    "guest_iqr_rel": 0.19367729005767909,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "stride_ns",
+    "group": "memory",
+    "host_median": 13.7589,
+    "guest_median": 8.748000000000001,
+    "ratio_guest_host": 0.6358066415193075,
+    "cliffs_delta": -0.84,
+    "single_auroc": 0.9199999999999999,
+    "p_mwu": 0.031746031746031744,
+    "host_iqr_rel": 0.24143281803051125,
+    "guest_iqr_rel": 0.1602080475537268,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.25396825396825395
+   },
+   {
+    "signal": "rand_ns",
+    "group": "memory",
+    "host_median": 99.6962,
+    "guest_median": 99.12780000000001,
+    "ratio_guest_host": 0.9942986793879807,
+    "cliffs_delta": 0.2,
+    "single_auroc": 0.6,
+    "p_mwu": 0.6904761904761905,
+    "host_iqr_rel": 0.1237654995877474,
+    "guest_iqr_rel": 0.16731935945315035,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "sleep_jitter_us",
+    "group": "scheduler",
+    "host_median": 1.155,
+    "guest_median": 1.3375,
+    "ratio_guest_host": 1.158008658008658,
+    "cliffs_delta": 0.04,
+    "single_auroc": 0.52,
+    "p_mwu": 1.0,
+    "host_iqr_rel": 3.0402597402597404,
+    "guest_iqr_rel": 1.850841121495327,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "ipc",
+    "group": "perf",
+    "status": "NA (not measurable in both)",
+    "n_host": 5,
+    "n_guest": 0
+   },
+   {
+    "signal": "dtlb_miss",
+    "group": "perf",
+    "status": "NA (not measurable in both)",
+    "n_host": 5,
+    "n_guest": 0
+   }
+  ],
+  "mem": [
+   {
+    "signal": "cpuid_tsc",
+    "group": "timing",
+    "host_median": 942.27805,
+    "guest_median": 9929.10735,
+    "ratio_guest_host": 10.537343356347948,
+    "cliffs_delta": 1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.09299203138606492,
+    "guest_iqr_rel": 0.12218104883315621,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "rdtsc_tsc",
+    "group": "timing",
+    "host_median": 25.5,
+    "guest_median": 26.0,
+    "ratio_guest_host": 1.0196078431372548,
+    "cliffs_delta": 0.0,
+    "single_auroc": 0.5,
+    "p_mwu": 1.0,
+    "host_iqr_rel": 0.0392156862745098,
+    "guest_iqr_rel": 0.07692307692307693,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "syscall_ns",
+    "group": "timing",
+    "host_median": 92.1146,
+    "guest_median": 349.2017,
+    "ratio_guest_host": 3.7909484489972276,
+    "cliffs_delta": 1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.12107635488836735,
+    "guest_iqr_rel": 0.1208967482117069,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "pagefault_ns",
+    "group": "memory",
+    "host_median": 1053.9214,
+    "guest_median": 1425.0117,
+    "ratio_guest_host": 1.3521043409878575,
+    "cliffs_delta": 0.68,
+    "single_auroc": 0.8400000000000001,
+    "p_mwu": 0.09523809523809523,
+    "host_iqr_rel": 0.07222099295070755,
+    "guest_iqr_rel": 0.145145124071613,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.5714285714285714
+   },
+   {
+    "signal": "seq_ns",
+    "group": "memory",
+    "host_median": 11.3782,
+    "guest_median": 11.157,
+    "ratio_guest_host": 0.9805593151816632,
+    "cliffs_delta": -0.36,
+    "single_auroc": 0.6799999999999999,
+    "p_mwu": 0.42063492063492064,
+    "host_iqr_rel": 0.026520011952681305,
+    "guest_iqr_rel": 0.010388097158734417,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "stride_ns",
+    "group": "memory",
+    "host_median": 14.989,
+    "guest_median": 9.105550000000001,
+    "ratio_guest_host": 0.6074821535792915,
+    "cliffs_delta": -1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.16700246847688324,
+    "guest_iqr_rel": 0.011635760607541552,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "rand_ns",
+    "group": "memory",
+    "host_median": 221.9556,
+    "guest_median": 211.0573,
+    "ratio_guest_host": 0.9508987383062197,
+    "cliffs_delta": -0.28,
+    "single_auroc": 0.64,
+    "p_mwu": 0.5476190476190477,
+    "host_iqr_rel": 0.09760465606634833,
+    "guest_iqr_rel": 0.08288294221521825,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "sleep_jitter_us",
+    "group": "scheduler",
+    "host_median": 0.7324999999999999,
+    "guest_median": 1.3955,
+    "ratio_guest_host": 1.9051194539249148,
+    "cliffs_delta": 0.76,
+    "single_auroc": 0.88,
+    "p_mwu": 0.05555555555555555,
+    "host_iqr_rel": 0.5651877133105802,
+    "guest_iqr_rel": 0.11214618416338236,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.38888888888888884
+   },
+   {
+    "signal": "ipc",
+    "group": "perf",
+    "status": "NA (not measurable in both)",
+    "n_host": 5,
+    "n_guest": 0
+   },
+   {
+    "signal": "dtlb_miss",
+    "group": "perf",
+    "status": "NA (not measurable in both)",
+    "n_host": 5,
+    "n_guest": 0
+   }
+  ],
+  "mixed": [
+   {
+    "signal": "cpuid_tsc",
+    "group": "timing",
+    "host_median": 945.74635,
+    "guest_median": 8813.487799999999,
+    "ratio_guest_host": 9.319082013903621,
+    "cliffs_delta": 1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.014467832733375093,
+    "guest_iqr_rel": 0.15244871615979322,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "rdtsc_tsc",
+    "group": "timing",
+    "host_median": 24.5,
+    "guest_median": 24.0,
+    "ratio_guest_host": 0.9795918367346939,
+    "cliffs_delta": -0.32,
+    "single_auroc": 0.66,
+    "p_mwu": 0.4619754310393841,
+    "host_iqr_rel": 0.02040816326530612,
+    "guest_iqr_rel": 0.16666666666666666,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "syscall_ns",
+    "group": "timing",
+    "host_median": 90.16635,
+    "guest_median": 329.4371,
+    "ratio_guest_host": 3.6536590424254727,
+    "cliffs_delta": 1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.027540207627346686,
+    "guest_iqr_rel": 0.1391626808273871,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "pagefault_ns",
+    "group": "memory",
+    "host_median": 1026.87595,
+    "guest_median": 1187.1709,
+    "ratio_guest_host": 1.1560996243022343,
+    "cliffs_delta": 0.68,
+    "single_auroc": 0.8400000000000001,
+    "p_mwu": 0.09523809523809523,
+    "host_iqr_rel": 0.11950688883111926,
+    "guest_iqr_rel": 0.10734558099427796,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.47619047619047616
+   },
+   {
+    "signal": "seq_ns",
+    "group": "memory",
+    "host_median": 11.7045,
+    "guest_median": 10.953949999999999,
+    "ratio_guest_host": 0.9358750907770516,
+    "cliffs_delta": -0.76,
+    "single_auroc": 0.88,
+    "p_mwu": 0.05555555555555555,
+    "host_iqr_rel": 0.01545132214105697,
+    "guest_iqr_rel": 0.49810798844252524,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.3333333333333333
+   },
+   {
+    "signal": "stride_ns",
+    "group": "memory",
+    "host_median": 14.71255,
+    "guest_median": 8.8638,
+    "ratio_guest_host": 0.6024652422591597,
+    "cliffs_delta": -1.0,
+    "single_auroc": 1.0,
+    "p_mwu": 0.007936507936507936,
+    "host_iqr_rel": 0.016910732673805766,
+    "guest_iqr_rel": 0.03844288002888151,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.07936507936507936
+   },
+   {
+    "signal": "rand_ns",
+    "group": "memory",
+    "host_median": 215.7141,
+    "guest_median": 201.27749999999997,
+    "ratio_guest_host": 0.9330753066211248,
+    "cliffs_delta": 0.04,
+    "single_auroc": 0.52,
+    "p_mwu": 1.0,
+    "host_iqr_rel": 0.12566007507158783,
+    "guest_iqr_rel": 0.08883059457713859,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 1.0
+   },
+   {
+    "signal": "sleep_jitter_us",
+    "group": "scheduler",
+    "host_median": 0.9829999999999999,
+    "guest_median": 2.0164999999999997,
+    "ratio_guest_host": 2.0513733468972535,
+    "cliffs_delta": 0.92,
+    "single_auroc": 0.96,
+    "p_mwu": 0.015873015873015872,
+    "host_iqr_rel": 0.5778229908443542,
+    "guest_iqr_rel": 0.2920902553930077,
+    "n_host": 5,
+    "n_guest": 5,
+    "p_holm": 0.1111111111111111
+   },
+   {
+    "signal": "ipc",
+    "group": "perf",
+    "status": "NA (not measurable in both)",
+    "n_host": 5,
+    "n_guest": 0
+   },
+   {
+    "signal": "dtlb_miss",
+    "group": "perf",
+    "status": "NA (not measurable in both)",
+    "n_host": 5,
+    "n_guest": 0
+   }
+  ]
+ },
+ "combined": {
+  "cpu": {
+   "features": [
+    "cpuid_tsc",
+    "rdtsc_tsc",
+    "syscall_ns",
+    "pagefault_ns",
+    "seq_ns",
+    "stride_ns",
+    "rand_ns",
+    "sleep_jitter_us"
+   ],
+   "auroc": 1.0,
+   "accuracy": 1.0,
+   "n_units": 10
+  },
+  "idle": {
+   "features": [
+    "cpuid_tsc",
+    "rdtsc_tsc",
+    "syscall_ns",
+    "pagefault_ns",
+    "seq_ns",
+    "stride_ns",
+    "rand_ns",
+    "sleep_jitter_us"
+   ],
+   "auroc": 1.0,
+   "accuracy": 1.0,
+   "n_units": 10
+  },
+  "mem": {
+   "features": [
+    "cpuid_tsc",
+    "rdtsc_tsc",
+    "syscall_ns",
+    "pagefault_ns",
+    "seq_ns",
+    "stride_ns",
+    "rand_ns",
+    "sleep_jitter_us"
+   ],
+   "auroc": 1.0,
+   "accuracy": 0.9,
+   "n_units": 10
+  },
+  "mixed": {
+   "features": [
+    "cpuid_tsc",
+    "rdtsc_tsc",
+    "syscall_ns",
+    "pagefault_ns",
+    "seq_ns",
+    "stride_ns",
+    "rand_ns",
+    "sleep_jitter_us"
+   ],
+   "auroc": 1.0,
+   "accuracy": 1.0,
+   "n_units": 10
+  },
+  "pooled_all_workloads": {
+   "features": [
+    "cpuid_tsc",
+    "rdtsc_tsc",
+    "syscall_ns",
+    "pagefault_ns",
+    "seq_ns",
+    "stride_ns",
+    "rand_ns",
+    "sleep_jitter_us"
+   ],
+   "auroc": 1.0,
+   "accuracy": 1.0,
+   "n_units": 40
+  }
+ },
+ "availability": {
+  "cpuid_tsc": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 20
+  },
+  "rdtsc_tsc": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 20
+  },
+  "syscall_ns": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 20
+  },
+  "pagefault_ns": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 20
+  },
+  "seq_ns": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 20
+  },
+  "stride_ns": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 20
+  },
+  "rand_ns": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 20
+  },
+  "sleep_jitter_us": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 20
+  },
+  "ipc": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 0
+  },
+  "dtlb_miss": {
+   "wsl2-host": 20,
+   "kvm-in-wsl2": 0
+  }
+ },
+ "host_meta": [
+  "# cpu_model=\"11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz\" hypervisor_bit=1 clocksource=tsc thp=\"always [madvise] never\" pinned_cpu=1 kernel=6.6.114.1-microsoft-standard-WSL2 llc_kb=8192 buf_mb=32 startup_ms=833.5"
+ ],
+ "guest_meta": [
+  "# cpu_model=\"QEMU Virtual CPU version 2.5+\" hypervisor_bit=1 clocksource=kvm-clock thp=\"always madvise [never]\" pinned_cpu=0 kernel=5.15.0-71-generic llc_kb=16384 buf_mb=32 startup_ms=2246.6"
+ ]
+}

@@ -30,6 +30,7 @@ GOOD = {
     "qconf.caps": "", "qconf.confined": "", "lconf.sock": "", "lconf.tcp": "",
     "x.graphics": "vnc|127.0.0.1|secret", "x.redirdev": "0", "x.devices": "", "x.iface": "isolated",
     "x.cache": "none", "x.shmem": "0",
+    "qemu_machine": "pc-q35-8.2",  # runtime machine type (C14): q35 builds no floppy controller
 }
 
 
@@ -103,6 +104,7 @@ def files_for(settings, e0):
     out = {
         "vm.xml": vm_xml(s), "cmdline": s["cmdline"], "ksm_run": s["ksm_run"], "nested": s["nested"],
         "smt": s["smt"], "qemu_status": s["qemu_status"], "qemu_label": s["qemu_label"], "vulns.txt": vulns,
+        "qemu_machine": s["qemu_machine"],
         "net_scan.txt": s["net_scan.txt"], "net_isolation.txt": s["net_isolation.txt"], "iommu_groups": s["iommu_groups"],
         "versions.txt": f"qemu {s['ver.qemu']}\nkernel {s['ver.kernel']}",
         "perms.txt": (f"image {s['perm.image']} 0 0 /var/lib/libvirt/images/a b.qcow2\n"

@@ -248,7 +248,6 @@ The team is responsible for all narrative content and interpretation.
 If the team has questions:
 
 1. Check the comments in `paper.md` (marked `[CHECK]` or `[PENDING ...]`).
-2. Refer to `FINAL_PROJECT_PLAN.md` for the overall structure and goals.
 3. Refer to code in `vsec/` and `scripts/` for implementation details.
 4. Run `python -m vsec run --help` for command-line documentation.
 

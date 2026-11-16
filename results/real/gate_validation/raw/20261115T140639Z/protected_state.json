@@ -1,0 +1,46 @@
+{
+ "before": {
+  "domains": [
+   "vsec-target"
+  ],
+  "networks": [
+   "default",
+   "isolated"
+  ],
+  "vm:vsec-target": {
+   "xml": "c77558a38fea242d1a8759bbe88e0c6c6f706d65e3f2fad72421b48f69e743cf",
+   "state": "shut off"
+  },
+  "net:default": "69142c3ca32aafb5e04b026381ec0e4d6d0837637d49355eea0b85e706dbce08",
+  "net:isolated": "ba201fba4bacbdfab19021f2ec339d6dc1dbfdef216688262ffc0ef9d19b5a7a",
+  "file:/etc/libvirt/qemu.conf": "6ff802273106e0a9b9a9e0dd106e3faafa42c40a93b6f296ca3f995d9facfe52",
+  "file:/etc/libvirt/libvirtd.conf": "2ab3945dcfd93317dab0a8074b52d9fe7953b2e86232cbeade7e6dfe9d488813",
+  "source_image": {
+   "mode": "0o640",
+   "uid": 64055,
+   "gid": 993
+  }
+ },
+ "after": {
+  "domains": [
+   "vsec-target"
+  ],
+  "networks": [
+   "default",
+   "isolated"
+  ],
+  "vm:vsec-target": {
+   "xml": "c77558a38fea242d1a8759bbe88e0c6c6f706d65e3f2fad72421b48f69e743cf",
+   "state": "shut off"
+  },
+  "net:default": "69142c3ca32aafb5e04b026381ec0e4d6d0837637d49355eea0b85e706dbce08",
+  "net:isolated": "ba201fba4bacbdfab19021f2ec339d6dc1dbfdef216688262ffc0ef9d19b5a7a",
+  "file:/etc/libvirt/qemu.conf": "6ff802273106e0a9b9a9e0dd106e3faafa42c40a93b6f296ca3f995d9facfe52",
+  "file:/etc/libvirt/libvirtd.conf": "2ab3945dcfd93317dab0a8074b52d9fe7953b2e86232cbeade7e6dfe9d488813",
+  "source_image": {
+   "mode": "0o640",
+   "uid": 64055,
+   "gid": 993
+  }
+ }
+}

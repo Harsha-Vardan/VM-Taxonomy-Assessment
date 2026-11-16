@@ -1,0 +1,857 @@
+[
+ {
+  "COMM": "rcu_gp",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19038208,
+  "PID": 3,
+  "PPID": 2,
+  "TID": 3,
+  "__children": []
+ },
+ {
+  "COMM": "slub_flushwq",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19044288,
+  "PID": 5,
+  "PPID": 2,
+  "TID": 5,
+  "__children": []
+ },
+ {
+  "COMM": "init",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19050368,
+  "PID": 1,
+  "PPID": 0,
+  "TID": 1,
+  "__children": []
+ },
+ {
+  "COMM": "rcu_par_gp",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19056448,
+  "PID": 4,
+  "PPID": 2,
+  "TID": 4,
+  "__children": []
+ },
+ {
+  "COMM": "kthreadd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19062528,
+  "PID": 2,
+  "PPID": 0,
+  "TID": 2,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/u2:0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19202048,
+  "PID": 9,
+  "PPID": 2,
+  "TID": 9,
+  "__children": []
+ },
+ {
+  "COMM": "netns",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19208128,
+  "PID": 6,
+  "PPID": 2,
+  "TID": 6,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/0:0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19214208,
+  "PID": 7,
+  "PPID": 2,
+  "TID": 7,
+  "__children": []
+ },
+ {
+  "COMM": "mm_percpu_wq",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19220288,
+  "PID": 10,
+  "PPID": 2,
+  "TID": 10,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/0:0H",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19226368,
+  "PID": 8,
+  "PPID": 2,
+  "TID": 8,
+  "__children": []
+ },
+ {
+  "COMM": "rcu_sched",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19234816,
+  "PID": 14,
+  "PPID": 2,
+  "TID": 14,
+  "__children": []
+ },
+ {
+  "COMM": "rcu_tasks_rude_",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19240896,
+  "PID": 11,
+  "PPID": 2,
+  "TID": 11,
+  "__children": []
+ },
+ {
+  "COMM": "rcu_tasks_trace",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19246976,
+  "PID": 12,
+  "PPID": 2,
+  "TID": 12,
+  "__children": []
+ },
+ {
+  "COMM": "migration/0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19253056,
+  "PID": 15,
+  "PPID": 2,
+  "TID": 15,
+  "__children": []
+ },
+ {
+  "COMM": "ksoftirqd/0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19259136,
+  "PID": 13,
+  "PPID": 2,
+  "TID": 13,
+  "__children": []
+ },
+ {
+  "COMM": "cpuhp/0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19529728,
+  "PID": 18,
+  "PPID": 2,
+  "TID": 18,
+  "__children": []
+ },
+ {
+  "COMM": "inet_frag_wq",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19535808,
+  "PID": 20,
+  "PPID": 2,
+  "TID": 20,
+  "__children": []
+ },
+ {
+  "COMM": "idle_inject/0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19541888,
+  "PID": 16,
+  "PPID": 2,
+  "TID": 16,
+  "__children": []
+ },
+ {
+  "COMM": "kdevtmpfs",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19547968,
+  "PID": 19,
+  "PPID": 2,
+  "TID": 19,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/0:1",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19554048,
+  "PID": 17,
+  "PPID": 2,
+  "TID": 17,
+  "__children": []
+ },
+ {
+  "COMM": "oom_reaper",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19693568,
+  "PID": 23,
+  "PPID": 2,
+  "TID": 23,
+  "__children": []
+ },
+ {
+  "COMM": "kcompactd0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19699648,
+  "PID": 25,
+  "PPID": 2,
+  "TID": 25,
+  "__children": []
+ },
+ {
+  "COMM": "kauditd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19705728,
+  "PID": 21,
+  "PPID": 2,
+  "TID": 21,
+  "__children": []
+ },
+ {
+  "COMM": "writeback",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19711808,
+  "PID": 24,
+  "PPID": 2,
+  "TID": 24,
+  "__children": []
+ },
+ {
+  "COMM": "khungtaskd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 19717888,
+  "PID": 22,
+  "PPID": 2,
+  "TID": 22,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_eh_4",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20348928,
+  "PID": 158,
+  "PPID": 2,
+  "TID": 158,
+  "__children": []
+ },
+ {
+  "COMM": "dhcpcd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20355008,
+  "PID": 255,
+  "PPID": 254,
+  "TID": 255,
+  "__children": []
+ },
+ {
+  "COMM": "ksmd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20361088,
+  "PID": 26,
+  "PPID": 2,
+  "TID": 26,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_tmf_4",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20367168,
+  "PID": 159,
+  "PPID": 2,
+  "TID": 159,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_tmf_3",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20373248,
+  "PID": 157,
+  "PPID": 2,
+  "TID": 157,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/u3:0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20676608,
+  "PID": 107,
+  "PPID": 2,
+  "TID": 107,
+  "__children": []
+ },
+ {
+  "COMM": "kstrp",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20682688,
+  "PID": 103,
+  "PPID": 2,
+  "TID": 103,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_eh_3",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20688768,
+  "PID": 156,
+  "PPID": 2,
+  "TID": 156,
+  "__children": []
+ },
+ {
+  "COMM": "zswap-shrink",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20694848,
+  "PID": 106,
+  "PPID": 2,
+  "TID": 106,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_tmf_2",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20700928,
+  "PID": 155,
+  "PPID": 2,
+  "TID": 155,
+  "__children": []
+ },
+ {
+  "COMM": "charger_manager",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20709376,
+  "PID": 112,
+  "PPID": 2,
+  "TID": 112,
+  "__children": []
+ },
+ {
+  "COMM": "ipv6_addrconf",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20715456,
+  "PID": 94,
+  "PPID": 2,
+  "TID": 94,
+  "__children": []
+ },
+ {
+  "COMM": "mld",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20721536,
+  "PID": 93,
+  "PPID": 2,
+  "TID": 93,
+  "__children": []
+ },
+ {
+  "COMM": "dropbear",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20727616,
+  "PID": 389,
+  "PPID": 1,
+  "TID": 389,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_eh_2",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20733696,
+  "PID": 154,
+  "PPID": 2,
+  "TID": 154,
+  "__children": []
+ },
+ {
+  "COMM": "acpid",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20742144,
+  "PID": 226,
+  "PPID": 1,
+  "TID": 226,
+  "__children": []
+ },
+ {
+  "COMM": "vsgt2\n",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20748224,
+  "PID": 477,
+  "PPID": 474,
+  "TID": 477,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/u2:7",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20754304,
+  "PID": 166,
+  "PPID": 2,
+  "TID": 166,
+  "__children": []
+ },
+ {
+  "COMM": "sleep",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20760384,
+  "PID": 478,
+  "PPID": 477,
+  "TID": 478,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/u2:6",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20766464,
+  "PID": 165,
+  "PPID": 2,
+  "TID": 165,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/u2:5",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20774912,
+  "PID": 164,
+  "PPID": 2,
+  "TID": 164,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/u2:3",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20780992,
+  "PID": 162,
+  "PPID": 2,
+  "TID": 162,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_tmf_5",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20787072,
+  "PID": 161,
+  "PPID": 2,
+  "TID": 161,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/u2:4",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20793152,
+  "PID": 163,
+  "PPID": 2,
+  "TID": 163,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_eh_5",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20799232,
+  "PID": 160,
+  "PPID": 2,
+  "TID": 160,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_eh_1",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20807680,
+  "PID": 152,
+  "PPID": 2,
+  "TID": 152,
+  "__children": []
+ },
+ {
+  "COMM": "dhcpcd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20813760,
+  "PID": 254,
+  "PPID": 1,
+  "TID": 254,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_eh_0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20819840,
+  "PID": 150,
+  "PPID": 2,
+  "TID": 150,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_tmf_0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20825920,
+  "PID": 151,
+  "PPID": 2,
+  "TID": 151,
+  "__children": []
+ },
+ {
+  "COMM": "scsi_tmf_1",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20832000,
+  "PID": 153,
+  "PPID": 2,
+  "TID": 153,
+  "__children": []
+ },
+ {
+  "COMM": "irq/25-aerdrv",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20840448,
+  "PID": 88,
+  "PPID": 2,
+  "TID": 88,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/u2:2",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20846528,
+  "PID": 91,
+  "PPID": 2,
+  "TID": 91,
+  "__children": []
+ },
+ {
+  "COMM": "acpi_thermal_pm",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20852608,
+  "PID": 90,
+  "PPID": 2,
+  "TID": 90,
+  "__children": []
+ },
+ {
+  "COMM": "vfio-irqfd-clea",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20858688,
+  "PID": 92,
+  "PPID": 2,
+  "TID": 92,
+  "__children": []
+ },
+ {
+  "COMM": "irq/26-aerdrv",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20864768,
+  "PID": 89,
+  "PPID": 2,
+  "TID": 89,
+  "__children": []
+ },
+ {
+  "COMM": "ecryptfs-kthrea",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20938752,
+  "PID": 84,
+  "PPID": 2,
+  "TID": 84,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/0:1H",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20944832,
+  "PID": 82,
+  "PPID": 2,
+  "TID": 82,
+  "__children": []
+ },
+ {
+  "COMM": "irq/24-aerdrv",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20950912,
+  "PID": 87,
+  "PPID": 2,
+  "TID": 87,
+  "__children": []
+ },
+ {
+  "COMM": "kswapd0",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20956992,
+  "PID": 83,
+  "PPID": 2,
+  "TID": 83,
+  "__children": []
+ },
+ {
+  "COMM": "kthrotld",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 20963072,
+  "PID": 86,
+  "PPID": 2,
+  "TID": 86,
+  "__children": []
+ },
+ {
+  "COMM": "md",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25165824,
+  "PID": 77,
+  "PPID": 2,
+  "TID": 77,
+  "__children": []
+ },
+ {
+  "COMM": "watchdogd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25171904,
+  "PID": 80,
+  "PPID": 2,
+  "TID": 80,
+  "__children": []
+ },
+ {
+  "COMM": "devfreq_wq",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25177984,
+  "PID": 79,
+  "PPID": 2,
+  "TID": 79,
+  "__children": []
+ },
+ {
+  "COMM": "kworker/u2:1",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25184064,
+  "PID": 81,
+  "PPID": 2,
+  "TID": 81,
+  "__children": []
+ },
+ {
+  "COMM": "edac-poller",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25190144,
+  "PID": 78,
+  "PPID": 2,
+  "TID": 78,
+  "__children": []
+ },
+ {
+  "COMM": "blkcg_punt_bio",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25264128,
+  "PID": 74,
+  "PPID": 2,
+  "TID": 74,
+  "__children": []
+ },
+ {
+  "COMM": "tpm_dev_wq",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25270208,
+  "PID": 75,
+  "PPID": 2,
+  "TID": 75,
+  "__children": []
+ },
+ {
+  "COMM": "kintegrityd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25276288,
+  "PID": 72,
+  "PPID": 2,
+  "TID": 72,
+  "__children": []
+ },
+ {
+  "COMM": "ata_sff",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25282368,
+  "PID": 76,
+  "PPID": 2,
+  "TID": 76,
+  "__children": []
+ },
+ {
+  "COMM": "kblockd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 25288448,
+  "PID": 73,
+  "PPID": 2,
+  "TID": 73,
+  "__children": []
+ },
+ {
+  "COMM": "dropbearkey",
+  "EXIT_STATE": "EXIT_DEAD",
+  "OFFSET (P)": 63143936,
+  "PID": 451,
+  "PPID": 445,
+  "TID": 451,
+  "__children": []
+ },
+ {
+  "COMM": "dropbearkey",
+  "EXIT_STATE": "EXIT_DEAD",
+  "OFFSET (P)": 63150016,
+  "PID": 450,
+  "PPID": 445,
+  "TID": 450,
+  "__children": []
+ },
+ {
+  "COMM": "syslogd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 63156096,
+  "PID": 198,
+  "PPID": 1,
+  "TID": 198,
+  "__children": []
+ },
+ {
+  "COMM": "readlink",
+  "EXIT_STATE": "EXIT_DEAD",
+  "OFFSET (P)": 63162176,
+  "PID": 446,
+  "PPID": 445,
+  "TID": 446,
+  "__children": []
+ },
+ {
+  "COMM": "sshd",
+  "EXIT_STATE": "EXIT_DEAD",
+  "OFFSET (P)": 63168256,
+  "PID": 445,
+  "PPID": 478,
+  "TID": 445,
+  "__children": []
+ },
+ {
+  "COMM": "sleep",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 66387968,
+  "PID": 480,
+  "PPID": 479,
+  "TID": 480,
+  "__children": []
+ },
+ {
+  "COMM": "jbd2/vda1-8",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 66394048,
+  "PID": 173,
+  "PPID": 2,
+  "TID": 173,
+  "__children": []
+ },
+ {
+  "COMM": "vsgtx\n",
+  "EXIT_STATE": "EXIT_DEAD",
+  "OFFSET (P)": 66400128,
+  "PID": 481,
+  "PPID": 474,
+  "TID": 481,
+  "__children": []
+ },
+ {
+  "COMM": "vsgt3\n",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 66406208,
+  "PID": 479,
+  "PPID": 474,
+  "TID": 479,
+  "__children": []
+ },
+ {
+  "COMM": "ext4-rsv-conver",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 66412288,
+  "PID": 174,
+  "PPID": 2,
+  "TID": 174,
+  "__children": []
+ },
+ {
+  "COMM": "cirros-per",
+  "EXIT_STATE": "EXIT_DEAD",
+  "OFFSET (P)": 67567616,
+  "PID": 447,
+  "PPID": 445,
+  "TID": 447,
+  "__children": []
+ },
+ {
+  "COMM": "mkdir",
+  "EXIT_STATE": "EXIT_DEAD",
+  "OFFSET (P)": 67573696,
+  "PID": 449,
+  "PPID": 445,
+  "TID": 449,
+  "__children": []
+ },
+ {
+  "COMM": "dhcpcd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 67579776,
+  "PID": 256,
+  "PPID": 254,
+  "TID": 256,
+  "__children": []
+ },
+ {
+  "COMM": "dhcpcd",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 67585856,
+  "PID": 257,
+  "PPID": 254,
+  "TID": 257,
+  "__children": []
+ },
+ {
+  "COMM": "getopt",
+  "EXIT_STATE": "EXIT_DEAD",
+  "OFFSET (P)": 67591936,
+  "PID": 448,
+  "PPID": 447,
+  "TID": 448,
+  "__children": []
+ },
+ {
+  "COMM": "vsgt1\n",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 68354048,
+  "PID": 475,
+  "PPID": 474,
+  "TID": 475,
+  "__children": []
+ },
+ {
+  "COMM": "getty",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 68360128,
+  "PID": 470,
+  "PPID": 1,
+  "TID": 470,
+  "__children": []
+ },
+ {
+  "COMM": "sleep",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 68366208,
+  "PID": 476,
+  "PPID": 475,
+  "TID": 476,
+  "__children": []
+ },
+ {
+  "COMM": "sh",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 68372288,
+  "PID": 474,
+  "PPID": 469,
+  "TID": 474,
+  "__children": []
+ },
+ {
+  "COMM": "sh",
+  "EXIT_STATE": "TASK_RUNNING",
+  "OFFSET (P)": 68378368,
+  "PID": 469,
+  "PPID": 1,
+  "TID": 469,
+  "__children": []
+ }
+]

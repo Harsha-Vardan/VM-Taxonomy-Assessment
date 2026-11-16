@@ -14,7 +14,6 @@ summarised below. Open a deeper file only when the task needs it (see "Where to 
 - **Deliverables:** (1) a working framework, (2) a research paper, (3) slides and a demo video.
 - **Source paper:** Sierra-Arriaga, Branco, Lee, "Security Issues and Challenges for Virtualization Technologies," ACM CSUR 53(2) Art. 45, 2020, doi:10.1145/3382190. The file is `3382190 (1).pdf`.
 - **Our case study of it:** `Virtualization_Security_Case_Study_Report.pdf` (desk analysis, 20 Sep 2026). Its **Table 9** (control checklist per threat class) is what this project makes executable.
-- **Condensed version of both PDFs:** `docs/SOURCES_SUMMARY.md`. It has section/table numbers, the 6 findings, the survey's limits (= our research gap), and the T9 coverage gaps.
 
 **Research question:** can the survey's threats and controls become experimentally testable controls on a modern KVM stack? Which of them hold, which fail, and which cannot be tested on this hardware?
 
@@ -62,7 +61,6 @@ python -m vsec pilot --data data/m4/pilot  # pick T_short from pilot data
 python scripts/make_paper_tables.py out/report.json [--allow-draft]
 gcc -O2 -Wall -o bench vsec/m4_detect/bench.c -lm   # on Linux only
 python docs/slides/build_deck.py           # regenerate the pptx
-python scripts/make_submission_zip.py      # build dist/vsec_submission.zip
 ```
 
 ## Status (update this block when something changes)
@@ -73,8 +71,6 @@ python scripts/make_submission_zip.py      # build dist/vsec_submission.zip
   - The only real hardware run: `bench.c` once in WSL2 (a functional check, not a result).
 - **2026-11-06:**
   - Each `vsec/taxonomy.yaml` `survey:` field is filled (survey § + case-study table). No code reads it.
-  - Added `docs/SOURCES_SUMMARY.md` and `docs/ROADMAP.md`.
-- **Next steps:** see `docs/ROADMAP.md`. Hardware Tasks A–J are in `docs/YOUR_TASKS.md`. Order: B → A → C → D (tag prereg) → F, E, G, H, I.
 
 ## Known issues to fix in the paper and slides
 
@@ -82,22 +78,14 @@ python scripts/make_submission_zip.py      # build dist/vsec_submission.zip
 2. DONE 2026-11-06: `build_deck.py` text now says controls are traced to survey sections. **`vsec_deck.pptx` not yet regenerated** (run `python docs/slides/build_deck.py`).
 3. DONE 2026-11-06: paper §4.3.1 holds the survey-to-control traceability table (31 rows) and T9 coverage note.
 4. Open markers in `paper.md` and `references.md`: `[PENDING REAL DATA]`, `[CITE]`, `[VERIFY]`, `[CHECK]` (about 90). Results and the Abstract wait for real data.
-5. Case-study T9 recommendations that are not covered yet (ACS, DMAR lock, Secure Boot/measured launch, SEV/TDX, CAT, kernel integrity, a threat-model doc). They are listed in `docs/SOURCES_SUMMARY.md` §3. Either implement them as C32+ or list them as "not covered" in the paper.
-6. The untracked `demo_dashboard.html`, `demo_visual.py`, `index.html` and `run_simulation.bat` are demo-only. Any number they show must be labelled simulated. As of 2026-11-06 they carry an ILLUSTRATIVE banner, but `demo_visual.py` and the dashboard still contain invented numbers (e.g. AUROC 0.988). Never present them as results. Prefer the real commands in `docs/DEMO_SCRIPT.md` Part 1.
 
 ## Where to look (only when needed)
 
 | Need | File |
 |---|---|
 | Complete explanation of the whole project (read this to explain or defend it) | `PROJECT.md` |
-| Full design, hypotheses H1–H4, risks, change log | `FINAL_PROJECT_PLAN.md` (long) |
 | Pre-registered M4 analysis | `prereg.md` |
-| Hands-on hardware steps | `docs/YOUR_TASKS.md`, `docs/E1_CHECKLIST.md` |
-| Evidence checklist per module | `docs/DEFINITION_OF_DONE.md` |
-| Plan, timeline, team roles | `docs/ROADMAP.md` |
 | Paper draft and how to fill it | `docs/paper/paper.md`, `docs/paper/README.md`, `docs/paper/references.md` |
-| Datasets and third-party tools | `docs/DATA_SOURCES.md`, `THIRD_PARTY.md` |
-| Demo flow | `docs/DEMO_SCRIPT.md` |
 
 ## Update 2026-11-08 (demo and report)
 - `scripts/make_demo_cases.py` builds `demo_cases/{weak,hardened,weak-fixed}` (constructed, not captured). `tests/test_demo_cases.py` guards the before/after story.
@@ -109,7 +97,6 @@ python scripts/make_submission_zip.py      # build dist/vsec_submission.zip
 - Host-level controls are shared by every VM on a host (shared fate); VM-level ones (`vm_level` in fleet.yaml) belong to the VM. Control states come from a REAL `vsec audit` of generated folders (`scripts/make_demo_cases.py build_fleet`).
 - Engine: `vsec/sim.py` (evaluate, risk, minimal_fix_set, campaign, blast, containment_advice). The same rules are in the template's `ENGINE-START/END` block. Build: `python scripts/build_simulator.py`. `tests/test_simulator.py` checks data, real-audit equality, campaign stories, and JS == Python parity on random fleet states.
 - It is a MODEL of the survey logic, not a measurement. Severity/origin/scope/criticality are the project's own judgement. The fleet scenario is invented. Never add timing numbers, AUROC or accuracy claims to it.
-- `demo_dashboard.html` (older, invented numbers) is superseded: do not present it.
 
 ## Update 2026-11-08 (paper and slides)
 - Paper: all `[CITE]`, `[CHECK]`, `[VERIFY]`, `TODO` markers resolved. New references come from the survey's and case study's own reference lists plus official libvirt/kernel docs. **Documentation URLs were written from memory and not opened: click each before submission.** New section 4.7 describes the Attack Lab, with figures in `docs/paper/figures/`.
@@ -128,7 +115,6 @@ python scripts/make_submission_zip.py      # build dist/vsec_submission.zip
 ## Update 2026-11-10
 - UI restyled (design-system CSS block at end of <style> in the template; app bar, underline tabs, collapsible notice, footer, no emoji glyphs). Paper figs 1-4 regenerated from the new UI.
 - Paper: new 3.1.1 novelty comparison table, 9.6 threats to validity.
-- EXPLANATION.md = presentation guide (what is real vs model, demo script, 12 viva Q&A, rubric map).
 - M2 scanner v2: scan/redact/evaluate(decode=True) add UTF-16LE + base64 passes (v1 = default, pre-specified). E3b in paper 7.7: held-out 0/120 -> 80/120, split still 0, FP 0; v2 scored on seed+1 dumps.
 - scripts/real_host_check.sh <vm>: collect + audit + Lynis + compare table into results/real/ (needs a real Linux KVM host; none available here).
 
@@ -137,9 +123,50 @@ python scripts/make_submission_zip.py      # build dist/vsec_submission.zip
 - scripts/real_host_check.sh, real_hardening_demo.py (default 8 FAIL -> weakened 11 -> hardened 2, env E0), real_snapshot_test.py (virsh dump 272 MiB; v1 plain 4/4 b64 0/4 utf16 0/3; v2 all; 13 FP = kernel hex constants). Outputs in results/real/. Paper Section 7.8; abstract/7 intro/9.6/10.1 updated. Deck 21 slides.
 
 ## Update 2026-11-10 (4th author, PDF, presentation guide)
-- Fourth author L. Sahith Akash Manikanta (23BDS031) added to paper, deck, README/SUBMISSION/PROJECT/EXPLANATION/CLAUDE; "three students" -> four; stale "no real measurements" statements fixed (paper header/status, deck, README, SUBMISSION).
-- Paper PDF: docs/paper/vsec_research_paper.pdf via `python scripts/make_paper_pdf.py` (markdown + Playwright/Chromium; no pandoc). project_present.md = presentation script (4 presenters).
 
 ## Update 2026-11-10 (IEEE paper)
 - IEEE-format paper: docs/paper/ieee/paper_ieee.tex (IEEEtran, conference), figs/ from scripts/make_ieee_figures.py + scripts/capture_sim_figure.js, PDF built in WSL Ubuntu (texlive installed there). tests/test_experiments.py checks its numbers against results/. Long paper stays in docs/paper/paper.md.
 - Fixed claims: Lynis DOES check AppArmor/SELinux presence and rates libvirtd/virtlockd/virtlogd (no mention of qemu/kvm/seccomp/ksm/nested/vnc); only 5 of 13 hex false positives inspected; audit time is ~40 ms (JSON), not 75; A11 is gated by C10.
+
+## Update 2026-11-15 (Attack Lab gate validation, REAL, E0)
+- `vsec/gate_probe.py` (pure probes/parsers/scoring) + `scripts/real_gate_validation.py setup|run|cleanup --i-really-mean-it` (root in WSL, from /root/vsec; it syncs nothing itself). Touches ONLY vsec-gate-a/b (marked in <description>), network vsec-gate-iso (bridge virbr-gate), images /var/lib/libvirt/images/vsec-gate-{a,b}.qcow2; hashes vsec-target, other networks, qemu.conf, libvirtd.conf before/after. Cleanup is never automatic; the resources still exist.
+- Result (run 20261115T140639Z, 5 arms x 3 reps): C11, C12, C17 gates 15/15 each; C14 9/15, all 6 disagreements unsafe: on i440fx without a floppy disk M1 says PASS but the running QEMU still has isa-fdc and the guest reads MSR 0x3F4 = 0x80; q35 has no FDC (0xFF). Legit QEMU access OK at image 0600 (libvirt chowns to libvirt-qemu). Coverage 4/18 gated stages. Repeats are deterministic: report as qualitative, not 60 independent samples. Paper 7.8 R4. `tests/test_gate_probe.py`.
+
+## Update 2026-11-15 (C14 runtime fix, timing sync)
+- C14 now checks the RUNNING QEMU: collect always stores `qemu_machine` (machine type token only, from /proc/<pid>/cmdline; a LIVE file); `collect --qemu-devices` (opt-in, taints the domain) stores `qemu_devices` (`info qtree` device types). Rule: declared floppy/sound/parallel -> FAIL; else qemu_devices decides; else machine type (i440fx FAIL, q35 PASS, other NA); no runtime evidence -> NA. Fixtures/demo_cases carry `qemu_machine: pc-q35-8.2`, so E1-E6 counts are unchanged (verified by a full re-run).
+- Post-fix gate run: results/real/gate_validation_postfix/ (1 rep x 5 arms, 20/20, collect used --qemu-devices). The original R4 run in results/real/gate_validation/ is kept as recorded (XML-only C14). R1 (results/real/hardening.json) also used XML-only C14 and was not re-run (would modify vsec-target).
+- Timing: committed results/experiments.json is the 2026-11-13 run (audit 24.1 ms median / 40.5 p95). A 2026-11-15 re-run gave 22.7 / 32.8 ms with identical counts; the 11-13 run is kept. paper.md 7.7, prose and paper_ieee.tex now use 24 ms.
+- `real_gate_validation.py run --out <new dir>` refuses to overwrite an existing run.
+
+## Update 2026-11-15 (M3 real acquisition)
+- WSL: Volatility 3 2.26.2 in /opt/vol3 (VOL=/opt/vol3/bin/vol). Disposable VM `vsec-m3` (q35, no NIC, marked) + /var/lib/libvirt/images/vsec-m3.qcow2 STILL EXIST (cleanup: `real_m3_test.py cleanup --i-really-mean-it`). Guest kernel 5.15.0-71-generic.
+- Acquisition works: results/real/m3/acquisition_check.json (256 MiB ELF core in 0.4 s, 2 PT_LOAD cover RAM; guest ground truth 87 procs, 47 modules, markers vsgt1-3 + exited vsgtx each found once as bytes). Dump deleted.
+- NOT done: ISF build (scripts/m3_fetch_symbols.sh: 1 GB ddeb from Launchpad, sha256 from Launchpad API; dwarf2json v0.9.0 TOFU) was blocked by the session's permission check, so no Volatility result on a real dump yet. Then: `real_m3_test.py run --symbols .local/m3/symbols --sha <isf sha> --reps 3 --keep-dump` and `tamper` (constructed DKOM-style unlink in a dump COPY = positive control). Pure helpers: vsec/m3_dump.py, tests/test_m3_dump.py. Paper 7.5 updated.
+
+## Update 2026-11-15 (M3 REAL Volatility results)
+- ISF: .local/m3/symbols/ubuntu-5.15.0-71-generic.json, sha256 859e60f5849858e940fd1e98554b03d8358bdf39cdcd3aeb496bae4389819964 (ddeb sha from Launchpad devel API; dwarf2json built from source v0.9.0 commit 9f14607e with Go 1.26.11 as nobody: scripts/m3_build_dwarf2json.sh, scripts/m3_fetch_symbols.sh). Verified: results/real/m3/isf_verification.json (banner match, pslist 81 rows).
+- Run 20261115T154525Z (3 boots): pslist = guest PIDs 3/3, names 3/3, lsmod = /proc/modules 3/3, hidden_modules 0; raw psscan-only 8/dump all EXIT_DEAD -> 0 with exclude_exited. Tamper (copy of r3, PID 475 unlinked): exit-filtered detect = [475]; raw adds the 8 exited. Constructed positive, NOT rootkit detection. Results: results/real/m3/ (*.analysed.json = recomputed after parser fixes). Dumps kept in /root/vsec/.local/m3/dumps (4 x 256 MiB) until `real_m3_test.py cleanup --i-really-mean-it` (also removes vsec-m3 + image).
+- Fixed: m3_forensics module_name ("Module Name" in vol 2.26), vol_version (banner on exit 2), m3_dump VA 48-bit compare, kworker /proc comm suffix. Paper 7.5 updated.
+
+## Update 2026-11-16 (limited M4 run, REAL, E0, nested)
+- `bench.c`: `#ifndef BUF_SIZE` guard only (default 256 MiB unchanged). `scripts/real_m4_wsl_test.py run` (root in WSL from /root/vsec; uses vsec-m3, fresh boot per session, static binary over serial, sha256 checked) and `scripts/analyse_m4_wsl.py <raw dir>` (Windows ok).
+- Run 20261116T053926Z: 5 sessions x 2 envs x 4 workloads x 30 windows, all exit 0. CPUID 9-11x, syscall 3.7-4.3x (Cliff 1.0 everywhere); RDTSC same; perf counters NA in guest; LOSO logreg AUROC 1.0 -> H1 untestable (ceiling). Holm can't pass with 5v5. Confounds: kernel 5.15 vs 6.6, QEMU CPU model, THP, 1 vCPU. NEVER call it native vs VM.
+- Docs: paper.md 7.6.0, paper_ieee.tex sec:m4wsl (IEEE PDF rebuilt; long-paper PDF not rebuilt), PROJECT.md M4. Test: tests/test_m4_wsl.py.
+
+## Update 2026-11-16 (Phase A + start of B: provenance, live-first, runtime validation)
+- `vsec/provenance.py`: tags live-runtime / live-config / constructed / model. Every M1 finding now has `provenance` (case folder with collect_manifest.json and no PROVENANCE file = live; else constructed). demo_cases/*/PROVENANCE marks the fixtures (make_demo_cases.py writes it). `vsec audit` on a constructed folder prints a stderr warning.
+- PRIMARY workflow: `python -m vsec assess <domain> [--qemu-devices] [--env E0|E1]` (collect + audit, findings.json + meta.json in .local/assess/, never overwrites).
+- `vsec/runtime_check.py` (pure: obs_c04/c06/c11/c12/c14/c16, compare, markdown) + `scripts/real_runtime_validation.py setup|run|cleanup --i-really-mean-it` (reuses real_gate_validation machinery re-pointed at vsec-rv-a/b, network vsec-rv-iso / virbr-rv). Resources STILL EXIST.
+- Run 20261116T060915Z (3 arms, E0): 16 agree / 2 disagree / 0 unobserved; protected state unchanged. Disagreement: C16 PASS ("isolated" libvirt network) but the two guests on that network ping each other (arms B, C) -> libvirt network isolation is host/outside isolation, not guest-to-guest. Arm A C16 agrees but M1's reason was the open VNC listen, not the network (right for the wrong reason). C04/C06 checks are only "partial" independent (same /proc interface). One run, deterministic configs: qualitative, not a rate.
+- demo.py order: [live] real host -> [live] runtime validation -> [constructed] fixtures -> [model] Attack Lab. Papers NOT yet updated for this run.
+
+## Update 2026-11-16 (Phase B: C16 fix, X1 10 configs)
+- C16 FIXED: collect writes `net_peers.txt` (live: guest tap ports, co-resident bridge ports, kernel brport/isolated flag; only while the VM runs). `m1_audit.peer_paths`: FAIL if any co-resident pair is not isolated on BOTH sides; live case without net_peers cannot PASS (NA); constructed fixtures keep the old host-only rule (E1-E6 unchanged). Provenance: C16 live-runtime when net_peers present. Fix text (taxonomy C16, attacks.yaml A10, simulator rebuilt): own network per VM or `<port isolated='yes'/>` on every interface; a no-<forward> network isolates from host/outside only.
+- `scripts/real_runtime_validation.py`: 10 arms A-J (prediction = `vsec assess --qemu-devices` subprocess; C11/C12 no-console via QEMU TCP listeners; C16 with NIC-up check; second network vsec-rv-iso2/virbr-rv2). Resources vsec-rv-a/b, vsec-rv-iso, vsec-rv-iso2 STILL EXIST (cleanup --i-really-mean-it removes both networks).
+- Runs: 20261116T060915Z (3 arms, old C16: 16/2) kept as history; 20261116T063834Z (10 arms) 60/60 agree; 20261116T065524Z repeat D,E 12/12. Protected state unchanged in all. C04 always PASS, C06 always FAIL (no LSM) -> not seen in both states; both only partial independence. nwfilter isolation not evaluated.
+- Papers: paper.md 7.8 R5, paper_ieee.tex sec:rv + C16 table row + lessons wording; IEEE PDF trimmed back to 8 pages (Operating Workflow subsection removed, M4 confound sentence shortened). Deck slide text updated. tests/test_runtime_check.py pins the recorded runs.
+
+## Update 2026-11-16 (fixed demo configurations REMOVED, at the professor's request)
+- Deleted `demo_cases/` (weak / weak-fixed / hardened), `tests/test_demo_cases.py`, `scripts/make_demo_cases.py`. The Attack Lab's example-fleet builder survives as `scripts/make_fleet_cases.py` (model input, writes a PROVENANCE file; used by build_simulator.py and test_simulator.py).
+- `demo.py` now shows only real evidence: real vsec-target audits -> runtime validation (10-arm run) -> `vsec run` report built from two REAL collected cases (results/real/runtime_validation/raw/20261116T063834Z/arm-A and arm-D assess/case, env E0) -> Attack Lab (model).
+- Docs (README, PROJECT, TALK_30MIN, deck) no longer reference demo_cases. Test fixtures in tests/ (E1/E2 fault injection) remain as regression tests, tag `constructed`. Older CLAUDE.md entries above mentioning demo_cases are historical.

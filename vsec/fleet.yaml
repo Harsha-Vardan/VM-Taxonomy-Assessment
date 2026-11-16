@@ -1,6 +1,6 @@
 # Example fleet for the what-if simulator. ILLUSTRATIVE SCENARIO: the VM names, roles and criticality are invented to make
 # the lessons visible; the control states are produced by running the real M1 auditor (vsec audit) on generated case folders
-# (scripts/make_demo_cases.py build_fleet). Nothing here was captured from a real machine.
+# (scripts/make_fleet_cases.py build_fleet). Nothing here was captured from a real machine.
 #
 # vm_level controls live in a VM's own definition (libvirt XML); every other M1 control is a property of the HOST, so all VMs on
 # a host share it: fixing a host control once protects every VM on that host (the "shared fate" lesson).

@@ -484,7 +484,7 @@ def test_collect_end_to_end_redacts_and_writes_host_isolation(tmp_path, monkeypa
     xml = (out / "vm.xml").read_text()
     assert "hunter2" not in xml and "passwd='REDACTED'" in xml
     assert (out / "net_isolation.txt").read_text() == "isolated"
-    assert status(out, "C11") == "PASS" and status(out, "C16") == "PASS"  # a password still exists; host-verified
+    assert status(out, "C11") == "PASS" and status(out, "C16") == "NA"  # a password still exists; C16: VM not running -> no live bridge evidence, cannot PASS
 
 
 @pytest.mark.parametrize("nets,vm_xml,verdict,reason", [
@@ -632,3 +632,35 @@ def test_c16_evidence_shows_every_scan_line_so_the_failing_one_is_visible(tmp_pa
 def test_an_indented_not_isolated_line_still_counts(tmp_path, host):
     f = c16(tmp_path, host, None)
     assert f["status"] == "FAIL" and "not-isolated: x" in f["evidence"]
+
+
+# ---- C14 uses what the running QEMU builds, not only the XML (paper 7.8 R4) ----
+@pytest.mark.parametrize("machine,want", [
+    ("pc-q35-8.2", "PASS"), ("q35", "PASS"),
+    ("pc-i440fx-noble", "FAIL"), ("pc-i440fx-8.2", "FAIL"), ("pc", "FAIL"), ("pc-1.2", "FAIL"),
+    ("virt-9.0", "NA"), ("microvm", "NA"),
+])
+def test_c14_clean_xml_is_judged_by_the_machine_type(tmp_path, machine, want):
+    assert status(write_case(tmp_path, override={"qemu_machine": machine}), "C14") == want
+
+
+def test_c14_without_runtime_evidence_is_na_not_pass(tmp_path):
+    d = write_case(tmp_path, drop=("qemu_machine",))
+    f = st(d)["C14"]
+    assert f["status"] == "NA" and "runtime" in f["evidence"]
+
+
+def test_c14_declared_device_fails_even_without_runtime_evidence(tmp_path):
+    d = write_case(tmp_path, settings={"x.devices": "floppy"}, drop=("qemu_machine",))
+    assert status(d, "C14") == "FAIL"
+
+
+@pytest.mark.parametrize("devices,want", [
+    ("i440FX-pcihost\nPIIX3\nisa-fdc\nisa-pcspk", "FAIL"),   # the R4 case: no floppy disk, controller built in
+    ("q35-pcihost\nICH9-LPC\nisa-pcspk", "PASS"),             # the PC speaker is not a sound card
+    ("q35-pcihost\nich9-intel-hda\nhda-duplex", "FAIL"),
+    ("q35-pcihost\nisa-parallel", "FAIL"),
+])
+def test_c14_device_types_override_the_machine_type(tmp_path, devices, want):
+    d = write_case(tmp_path, override={"qemu_machine": "pc-q35-8.2", "qemu_devices": devices})
+    assert status(d, "C14") == want

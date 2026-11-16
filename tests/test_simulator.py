@@ -22,7 +22,7 @@ def _load(name, rel):
 
 
 build_sim = _load("build_simulator", "scripts/build_simulator.py")
-demo = _load("make_demo_cases", "scripts/make_demo_cases.py")
+demo = _load("make_fleet_cases", "scripts/make_fleet_cases.py")
 ATTACKS, FLEET = sim.load_attacks(), sim.load_fleet()
 VM_LEVEL = set(FLEET["vm_level"])
 M1 = [c["id"] for c in load_taxonomy()["controls"] if c["module"] == "M1"]

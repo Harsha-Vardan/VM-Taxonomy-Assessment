@@ -6,8 +6,6 @@
   .local\venv\Scripts\python -m pip install -r requirements-dev.txt   # includes python-pptx
   .local\venv\Scripts\python docs\slides\build_deck.py
   ```
-  Facts come from `FINAL_PROJECT_PLAN.md`, `README.md`, `prereg.md`, `docs/YOUR_TASKS.md` and `vsec/taxonomy.yaml` (control counts are read from the yaml at build time). The build prints a loud WARNING while the name or course line is still a placeholder, but it does not fail.
-- `../DEMO_SCRIPT.md`: timed script for the demo recording.
 
 ## Before presenting
 - Set your name and course line: at the top of `build_deck.py`, edit `STUDENT = "[STUDENT NAME]"` and `COURSE_LINE = "[COURSE / DATE]"`, then rebuild. The name appears on slide 1, in every footer, in the speaker notes and in the file properties (author).
@@ -20,5 +18,4 @@
 - Two facts to fill in: the full citation of the 2020 survey (slide 2 shows "[2020 survey: full citation to be supplied]"), and the commit and tag of `prereg.md` (the deck calls it a draft, not yet committed).
 
 ## Limits
-- **The assistant cannot record video.** The demo video is yours to record; follow `docs/DEMO_SCRIPT.md`.
 - The deck was checked only by reopening it with python-pptx (titles, notes, shapes inside the slide, no overlapping shapes, font sizes, at most 6 bullets). It was **never rendered** to images (no LibreOffice or PowerPoint was used), so text fit and table row heights are estimates until you open it in PowerPoint.

@@ -1,0 +1,5 @@
+dwarf2json source: https://github.com/volatilityfoundation/dwarf2json.git tag v0.9.0 commit 9f14607e0d339d463ea725fbd5c08aa7b7d40f75 (pinned)
+go: go1.26.11.linux-amd64.tar.gz sha256 9849f4e04ee35303714e34fbc3ac8ab44ea3e448a95aa182f91e3b9b79c710ec (pinned, equals go.dev published)
+go mod verify: ok (deps checked against go.sum / sum.golang.org)
+built as: nobody, flags -trimpath
+dwarf2json_sha256: 1405fde4fa80b7e84475235f6f85ff179357c8597eadaae10b2604c8675e5466

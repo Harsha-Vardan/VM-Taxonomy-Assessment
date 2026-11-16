@@ -1,0 +1,64 @@
+{
+ "vm": "vsec-gate-b",
+ "created_utc": "2026-11-15T14:13:08Z",
+ "files": {
+  "cmdline": {
+   "status": "ok",
+   "reason": ""
+  },
+  "iommu_groups": {
+   "status": "ok",
+   "reason": ""
+  },
+  "ksm_run": {
+   "status": "ok",
+   "reason": ""
+  },
+  "libvirtd.conf": {
+   "status": "ok",
+   "reason": ""
+  },
+  "nested": {
+   "status": "ok",
+   "reason": ""
+  },
+  "net_isolation.txt": {
+   "status": "ok",
+   "reason": ""
+  },
+  "perms.txt": {
+   "status": "ok",
+   "reason": ""
+  },
+  "qemu.conf": {
+   "status": "redacted",
+   "reason": ""
+  },
+  "qemu_label": {
+   "status": "ok",
+   "reason": ""
+  },
+  "qemu_status": {
+   "status": "ok",
+   "reason": ""
+  },
+  "smt": {
+   "status": "ok",
+   "reason": ""
+  },
+  "versions.txt": {
+   "status": "ok",
+   "reason": ""
+  },
+  "vm.xml": {
+   "status": "redacted",
+   "reason": ""
+  },
+  "vulns.txt": {
+   "status": "ok",
+   "reason": ""
+  }
+ },
+ "skipped_items": [],
+ "live_problems": []
+}

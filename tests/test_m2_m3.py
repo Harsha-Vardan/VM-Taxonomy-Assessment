@@ -966,6 +966,10 @@ def test_vol_version_is_none_when_unavailable(monkeypatch):
     assert m3.vol_version("vol") is None
     monkeypatch.setattr(m3.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a, 0, "", "Volatility 3 Framework 2.5.0\n"))
     assert m3.vol_version("vol") == "2.5.0"
+    # Volatility 3 2.26.2 (real, E0): banner printed, exit code 2 for --version
+    monkeypatch.setattr(m3.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(
+        a, 2, "", "Volatility 3 Framework 2.26.2\nusage: vol [-h] ..."))
+    assert m3.vol_version("vol") == "2.26.2"
 
 
 @pytest.mark.skipif(os.name == "nt" or shutil.which("bash") is None, reason="needs POSIX bash")

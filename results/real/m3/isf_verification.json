@@ -1,0 +1,35 @@
+{
+ "isf": "ubuntu-5.15.0-71-generic.json",
+ "sha256_ok": true,
+ "types_ok": {
+  "task_struct": true,
+  "module": true,
+  "list_head": true
+ },
+ "symbols_ok": {
+  "init_task": true,
+  "modules": true,
+  "linux_banner": true
+ },
+ "counts": {
+  "user_types": 12047,
+  "symbols": 194490,
+  "base_types": 19
+ },
+ "tasks_offset": 2120,
+ "isf_banner": "Linux version 5.15.0-71-generic (buildd@lcy02-amd64-044) (gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #78-Ubuntu SMP Tue Apr 18 09:00:29 UTC 2023 (Ubuntu 5.15.0-71.78-generic 5.15.92)\n",
+ "verify_dump": {
+  "path": ".local/m3/dumps/verify-isf.elf",
+  "bytes": 268698787,
+  "sha256": "f1c27e6dd80129df0a84151289eafcf3f4af3346ead808319d4d8fcafc8fd6a8"
+ },
+ "dump_banners": [
+  "Linux version 5.15.0-71-generic (buildd@lcy02-amd64-044) (gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #78-Ubuntu SMP Tue Apr 18 09:00:29 UTC 2023 (Ubuntu 5.15.0-71.78-generic 5.15.92)",
+  "Linux version 5.15.0-71-generic (buildd@lcy02-amd64-044) (gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #78-Ubuntu SMP Tue Apr 18 09:00:29 UTC 2023 (Ubuntu 5.15.0-71.78-generic 5.15.92)2)"
+ ],
+ "banner_match": true,
+ "pslist_rows": 81,
+ "pslist_has_init": true,
+ "pslist_stderr": "Volatility 3 Framework 2.26.2",
+ "ok": true
+}

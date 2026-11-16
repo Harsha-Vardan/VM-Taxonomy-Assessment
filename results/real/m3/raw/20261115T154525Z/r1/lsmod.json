@@ -1,0 +1,425 @@
+[
+ {
+  "Code Size": 45056,
+  "File Output": null,
+  "Load Arguments": "mobile_lpm_policy=None, marvell_enable=None",
+  "Module Name": "ahci",
+  "Offset": 281473908730560,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 45056,
+  "File Output": null,
+  "Load Arguments": "devslp_idle_timeout=None, ahci_em_messages=None, ignore_sss=None, skip_host_reset=None",
+  "Module Name": "libahci",
+  "Offset": 281473908673152,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 393216,
+  "File Output": null,
+  "Load Arguments": "no_checksums=None",
+  "Module Name": "sctp",
+  "Offset": 281473908574144,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "libcrc32c",
+  "Offset": 281473908232256,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "ip6_udp_tunnel",
+  "Offset": 281473908211712,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "udp_tunnel",
+  "Offset": 281473908191680,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 32768,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "ip_tables",
+  "Offset": 281473908168576,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 53248,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "x_tables",
+  "Offset": 281473908120128,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 36864,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "8021q",
+  "Offset": 281473908070208,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "garp_join_time=None",
+  "Module Name": "garp",
+  "Offset": 281473908032192,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "stp",
+  "Offset": 281473908007232,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "llc",
+  "Offset": 281473907986880,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "mrp_periodic_time=None, mrp_join_time=None",
+  "Module Name": "mrp",
+  "Offset": 281473907966848,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "nls_utf8",
+  "Offset": 281473907941568,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "nls_iso8859_1",
+  "Offset": 281473907921152,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "nls_ascii",
+  "Offset": 281473907900672,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 53248,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "isofs",
+  "Offset": 281473907873536,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "hid_generic",
+  "Offset": 281473907822912,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 65536,
+  "File Output": null,
+  "Load Arguments": "quirks=None,None,None,None, ignoreled=None, kbpoll=None, jspoll=None, mousepoll=None",
+  "Module Name": "usbhid",
+  "Offset": 281473907795136,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 151552,
+  "File Output": null,
+  "Load Arguments": "ignore_special_drivers=None, debug=None",
+  "Module Name": "hid",
+  "Offset": 281473907717376,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "virtio_rng",
+  "Offset": 281473907577280,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 73728,
+  "File Output": null,
+  "Load Arguments": "modeset=None, virglhack=None",
+  "Module Name": "virtio_gpu",
+  "Offset": 281473907545088,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "virtio_dma_buf",
+  "Offset": 281473907478528,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 311296,
+  "File Output": null,
+  "Load Arguments": "dp_aux_i2c_transfer_size=None, dp_aux_i2c_speed_khz=None, poll=None, edid_firmware=None, drm_fbdev_overalloc=None, fbdev_emulation=None, drm_dp_cec_unregister_delay=None",
+  "Module Name": "drm_kms_helper",
+  "Offset": 281473907360960,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "syscopyarea",
+  "Offset": 281473907142656,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "sysfillrect",
+  "Offset": 281473907123392,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "sysimgblt",
+  "Offset": 281473907097856,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "fb_sys_fops",
+  "Offset": 281473907077184,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 61440,
+  "File Output": null,
+  "Load Arguments": "debug_phys_addr=None, debug=None",
+  "Module Name": "cec",
+  "Offset": 281473907048832,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 65536,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "rc_core",
+  "Offset": 281473906981568,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 622592,
+  "File Output": null,
+  "Load Arguments": "edid_fixup=None, debug=None, timestamp_precision_usec=None, vblankoffdelay=None, edid_firmware=",
+  "Module Name": "drm",
+  "Offset": 281473906710976,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 24576,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "virtio_scsi",
+  "Offset": 281473906296192,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 61440,
+  "File Output": null,
+  "Load Arguments": "napi_tx=None, gso=None, csum=None, napi_weight=None",
+  "Module Name": "virtio_net",
+  "Offset": 281473906265152,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "net_failover",
+  "Offset": 281473906200704,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "failover",
+  "Offset": 281473906176256,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "virtio_input",
+  "Offset": 281473906155968,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "queue_depth=None",
+  "Module Name": "virtio_blk",
+  "Offset": 281473906131840,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "qemu_fw_cfg",
+  "Offset": 281473906107200,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "9pnet_virtio",
+  "Offset": 281473906082624,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 90112,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "9pnet",
+  "Offset": 281473906042368,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 45056,
+  "File Output": null,
+  "Load Arguments": "homepna=None,None,None,None,None,None,None,None, full_duplex=None,None,None,None,None,None,None,None, options=None,None,None,None,None,None,None,None, pcnet32vlb=None, tx_start_pt=None, rx_copybreak=None, max_interrupt_work=None, debug=None",
+  "Module Name": "pcnet32",
+  "Offset": 281473905959744,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 40960,
+  "File Output": null,
+  "Load Arguments": "multicast_filter_limit=None, debug=None",
+  "Module Name": "8139cp",
+  "Offset": 281473905912192,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 16384,
+  "File Output": null,
+  "Load Arguments": "",
+  "Module Name": "mii",
+  "Offset": 281473905868800,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 20480,
+  "File Output": null,
+  "Load Arguments": "full_duplex=None,None,None,None,None,None,None,None, options=None,None,None,None,None,None,None,None, msg_enable=None",
+  "Module Name": "ne2k_pci",
+  "Offset": 281473905849152,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 24576,
+  "File Output": null,
+  "Load Arguments": "msg_enable=None",
+  "Module Name": "8390",
+  "Offset": 281473905824384,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 299008,
+  "File Output": null,
+  "Load Arguments": "CrcStripping=None, WriteProtectNVM=None, KumeranLockLoss=None, SmartPowerDownEnable=None, IntMode=None, InterruptThrottleRate=None, RxAbsIntDelay=None, RxIntDelay=None, TxAbsIntDelay=None, TxIntDelay=None, copybreak=None, debug=None",
+  "Module Name": "e1000e",
+  "Offset": 281473905751872,
+  "Taints": "",
+  "__children": []
+ },
+ {
+  "Code Size": 159744,
+  "File Output": null,
+  "Load Arguments": "debug=None, copybreak=None, SmartPowerDownEnable=None, InterruptThrottleRate=None, RxAbsIntDelay=None, RxIntDelay=None, TxAbsIntDelay=None, TxIntDelay=None, XsumRX=None, FlowControl=None, AutoNeg=None, Duplex=None, Speed=None, RxDescriptors=None, TxDescriptors=None",
+  "Module Name": "e1000",
+  "Offset": 281473905471680,
+  "Taints": "",
+  "__children": []
+ }
+]

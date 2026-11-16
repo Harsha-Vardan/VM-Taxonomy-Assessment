@@ -1,6 +1,7 @@
 """collect.py hardening: redaction forms and fail-closed verifier, manifest, cleanup on failure, missing virsh,
 host-side net_isolation texts."""
 import json
+from types import SimpleNamespace
 import os
 import subprocess
 import sys
@@ -249,6 +250,7 @@ def host(monkeypatch):
     files, globs = {}, {}
     monkeypatch.setattr(collect, "read_file_ex", lambda src: (files[str(src)], "ok", "") if str(src) in files
                         else (None, "missing", "does not exist"))
+    monkeypatch.setattr(collect, "read_raw", lambda src: files.get(str(src)))
     monkeypatch.setattr(collect.glob, "glob", lambda pat: globs.get(pat, []))
     monkeypatch.setattr(collect, "sh", lambda *cmd: "")
     return files, globs
@@ -262,6 +264,7 @@ def complete_host(files, tmp_path, globs):
     files["/run/libvirt/qemu/vm1.pid"] = b"123\n"
     files["/proc/123/status"] = b"Name: qemu\n"
     files["/proc/123/attr/current"] = b"libvirt-1 (enforce)"
+    files["/proc/123/cmdline"] = b"/usr/bin/qemu-system-x86_64\0-name\0guest=vm1\0-machine\0pc-i440fx-8.2,usb=off,dump-guest-core=off\0-object\0secret,id=s0,data=abcSECRET\0"
     files["/etc/libvirt/qemu.conf"] = b'vnc_password = "abc12345"\nuser = "root"\n'
 
 
@@ -622,3 +625,51 @@ def test_versions_txt_records_the_full_qemu_version_line_text(host, monkeypatch,
     banner["qemu-system-x86_64"] = "QEMU emulator version 8.2.2\n"  # no suffix: no parentheses
     out = collect.collect("vm1", tmp_path / "case2")
     assert (out / "versions.txt").read_text().splitlines()[0] == "qemu 8.2.2"
+
+
+# ---- C14 runtime evidence: machine type (always) and device types (opt-in) ----
+def test_machine_type_is_the_only_part_of_the_qemu_command_line_kept(host, monkeypatch, tmp_path):
+    files, globs = host
+    complete_host(files, tmp_path, globs)
+    fake_virsh(monkeypatch, dom())
+    out = collect.collect("vm1", tmp_path / "case")
+    assert (out / "qemu_machine").read_text() == "pc-i440fx-8.2"
+    assert not any("abcSECRET" in p.read_text(errors="replace") for p in out.iterdir())
+    man = json.loads((out / "collect_manifest.json").read_text())
+    assert man["files"]["qemu_devices"]["explained"] is True and "not requested" in man["files"]["qemu_devices"]["reason"]
+
+
+def test_machine_type_parsing():
+    assert collect.machine_type(b"qemu\0-machine\0pc-q35-8.2,usb=off\0") == "pc-q35-8.2"
+    assert collect.machine_type(b"qemu\0-machine\0accel=kvm,type=pc-i440fx-9.0\0") == "pc-i440fx-9.0"
+    assert collect.machine_type(b"qemu\0-M\0q35\0") == "q35"
+    assert collect.machine_type(b"qemu\0-name\0x\0") is None
+    assert collect.machine_type(b"qemu\0-machine\0bad name;rm\0") is None
+
+
+def test_stopped_vm_explains_missing_machine_type(host, monkeypatch, tmp_path):
+    files, globs = host
+    complete_host(files, tmp_path, globs)
+    del files["/run/libvirt/qemu/vm1.pid"]
+    fake_virsh(monkeypatch, dom())
+    out = collect.collect("vm1", tmp_path / "case", qemu_devices=True)
+    man = json.loads((out / "collect_manifest.json").read_text())
+    assert man["files"]["qemu_machine"]["explained"] is True and man["files"]["qemu_devices"]["explained"] is True
+    assert man["live_problems"] == []
+
+
+def test_opt_in_device_types_keep_only_type_names(host, monkeypatch, tmp_path):
+    files, globs = host
+    complete_host(files, tmp_path, globs)
+    fake_virsh(monkeypatch, dom())
+    seen = []
+    qtree = 'bus: main-system-bus\n  dev: i440FX-pcihost, id ""\n      dev: isa-fdc, id ""\n        drive = "secretdrive"\n'
+
+    def fake(*args, timeout=60):
+        seen.append(args)
+        return SimpleNamespace(returncode=0, stdout=qtree, stderr="")
+    monkeypatch.setattr(collect.guards, "virsh", fake)
+    out = collect.collect("vm1", tmp_path / "case", qemu_devices=True)
+    assert seen == [("qemu-monitor-command", "--hmp", "vm1", "info qtree")]
+    assert (out / "qemu_devices").read_text() == "i440FX-pcihost\nisa-fdc"
+    assert collect.main(["--qemu-devices"]) == 2  # still needs <vm> <out>

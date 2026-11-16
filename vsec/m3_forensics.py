@@ -143,7 +143,12 @@ def vol_version(vol):
         r = subprocess.run([vol, "--version"], capture_output=True, text=True, timeout=60)
     except (OSError, subprocess.SubprocessError):
         return None
-    m = re.search(r"\d+\.\d+(?:\.\d+)*", f"{r.stdout}\n{r.stderr}") if r.returncode == 0 else None
+    text = f"{r.stdout}\n{r.stderr}"
+    # Volatility 3 2.26 prints its banner but exits 2 for --version: the banner counts whatever the exit code
+    banner = re.search(r"Volatility 3 Framework (\d+\.\d+(?:\.\d+)*)", text)
+    if banner:
+        return banner.group(1)
+    m = re.search(r"\d+\.\d+(?:\.\d+)*", text) if r.returncode == 0 else None
     return m.group() if m else None
 
 
@@ -215,8 +220,20 @@ def is_exited(row):
     return exit_reason(row) is not None
 
 
+MODULE_NAME_KEYS = ("Module Name", "Name")  # Volatility 3 2.26 lsmod/hidden_modules: "Module Name"; older: "Name"
+
+
+def module_name(row):
+    """The module name of an lsmod/hidden_modules row (key differs between Volatility releases); the whole row as text
+    if no known key is present, so an unknown format is visible instead of silently empty."""
+    for k in MODULE_NAME_KEYS:
+        if k in row:
+            return row[k]
+    return row
+
+
 def _names(rows):
-    return sorted(_safe(m.get("Name", m), 128) for m in rows)
+    return sorted(_safe(module_name(m), 128) for m in rows)
 
 
 def _split_exited(rows, column):

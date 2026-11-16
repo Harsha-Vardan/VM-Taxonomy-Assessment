@@ -1,0 +1,2 @@
+own vnet18 bridge=virbr-rv isolated=1
+peer vnet17 bridge=virbr-rv isolated=1

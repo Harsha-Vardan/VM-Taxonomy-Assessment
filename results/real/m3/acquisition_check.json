@@ -1,0 +1,76 @@
+{
+ "dump_bytes": 268698787,
+ "dump_seconds": 0.4,
+ "dump_sha256": "6472cb3bb21ca69c2b8fa32bda9d6950827cfd4e9b89bd8c00c674b34b6d40e1",
+ "pt_load_segments": 2,
+ "phys_bytes_covered": 268697600,
+ "guest_ram_bytes": 268435456,
+ "gt_processes": 87,
+ "gt_markers": {
+  "vsgt1": [
+   476
+  ],
+  "vsgt2": [
+   478
+  ],
+  "vsgt3": [
+   480
+  ]
+ },
+ "gt_exited_pid": 482,
+ "gt_modules": [
+  "8021q",
+  "8139cp",
+  "8390",
+  "9pnet",
+  "9pnet_virtio",
+  "ahci",
+  "cec",
+  "drm",
+  "drm_kms_helper",
+  "e1000",
+  "e1000e",
+  "failover",
+  "fb_sys_fops",
+  "garp",
+  "hid",
+  "hid_generic",
+  "ip6_udp_tunnel",
+  "ip_tables",
+  "isofs",
+  "libahci",
+  "libcrc32c",
+  "llc",
+  "mii",
+  "mrp",
+  "ne2k_pci",
+  "net_failover",
+  "nls_ascii",
+  "nls_iso8859_1",
+  "nls_utf8",
+  "pcnet32",
+  "qemu_fw_cfg",
+  "rc_core",
+  "sctp",
+  "stp",
+  "syscopyarea",
+  "sysfillrect",
+  "sysimgblt",
+  "udp_tunnel",
+  "usbhid",
+  "virtio_blk",
+  "virtio_dma_buf",
+  "virtio_gpu",
+  "virtio_input",
+  "virtio_net",
+  "virtio_rng",
+  "virtio_scsi",
+  "x_tables"
+ ],
+ "marker_bytes_in_dump": {
+  "vsgt1": 1,
+  "vsgt2": 1,
+  "vsgt3": 1,
+  "vsgtx": 1
+ }
+}

@@ -11,7 +11,7 @@ import time
 import traceback
 from pathlib import Path
 
-from . import ROOT, clean_text, finding, jsonable, m1_audit, m2_snapshot, m3_forensics, report, score
+from . import ROOT, clean_text, finding, jsonable, m1_audit, m2_snapshot, m3_forensics, provenance, report, score
 
 FAST = {"reps": 200, "repeats": 1}
 FAST_NOTE = "FAST mode: 200 bootstrap reps, 1 CV repeat: not citable"
@@ -392,9 +392,42 @@ def cmd_audit(args):
     except FileNotFoundError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
+    if provenance.case_kind(args.folder) == "constructed":
+        print("# provenance: constructed (fixture or hand-built folder): regression testing only, not evidence "
+              "about a real system. Use `vsec assess <domain>` on a KVM host for a live assessment.", file=sys.stderr)
     for f in findings:
         print(f"{f['id']} {f['status']:4} {f['control']:22} {clean_text(f['evidence'])}")
     return 1 if any(f["status"] == "FAIL" for f in findings) else 0
+
+
+def cmd_assess(args):
+    """PRIMARY WORKFLOW: collect live evidence from a running domain on this KVM host, audit it, save both."""
+    from datetime import datetime, timezone
+
+    from . import collect as collect_mod
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out = Path(args.out) if args.out else ROOT / ".local" / "assess" / f"{args.domain}-{ts}"
+    if out.exists():
+        print(f"error: {out} exists (results are never overwritten)", file=sys.stderr)
+        return 2
+    case = out / "case"
+    try:
+        collect_mod.collect(args.domain, str(case), qemu_devices=args.qemu_devices)
+    except SystemExit as e:
+        print(f"error: collect failed ({e})", file=sys.stderr)
+        return 2
+    findings = m1_audit.audit(str(case), env=args.env, vm=args.domain)
+    print(f"{'ID':4} {'STATUS':6} {'SOURCE':13} {'CONTROL':22} EVIDENCE")
+    for f in findings:
+        print(f"{f['id']:4} {f['status']:6} {f['provenance']:13} {f['control']:22} {clean_text(f['evidence'])[:90]}")
+    meta = {"domain": args.domain, "collected_utc": ts, "env": args.env, "qemu_devices": args.qemu_devices,
+            "host_kernel": os.uname().release if hasattr(os, "uname") else "", "case": str(case)}
+    (out / "findings.json").write_text(json.dumps(findings, indent=1))
+    (out / "meta.json").write_text(json.dumps(meta, indent=1))
+    n = {s: sum(f["status"] == s for f in findings) for s in ("FAIL", "PASS", "NA")}
+    print()
+    print(f"{n['FAIL']} FAIL / {n['PASS']} PASS / {n['NA']} NA   saved: {out}")
+    return 1 if n["FAIL"] else 0
 
 
 def _truth_ids(text):
@@ -515,6 +548,12 @@ def main(argv=None):
     a = sub.add_parser("audit", help="audit one captured case folder (exit 1 if any FAIL, 2 if folder missing)")
     a.add_argument("folder")
     a.add_argument("--env", default="E0")
+    s = sub.add_parser("assess", help="PRIMARY: live assessment of a running domain on this KVM host (collect + audit)")
+    s.add_argument("domain")
+    s.add_argument("--env", default="E0", help="E0 (WSL2/nested: C02 N/A) or E1 (native)")
+    s.add_argument("--qemu-devices", action="store_true",
+                   help="also read the running QEMU device tree (info qtree) for C14; marks the domain as tainted")
+    s.add_argument("--out", help="output folder (default .local/assess/<domain>-<utc>)")
     pl = sub.add_parser("pilot", help="choose T_short from M4 pilot sessions (value goes into prereg.md PILOT)")
     pl.add_argument("--data", required=True)
     pl.add_argument("--per-class-min", type=_positive_int, default=5)
@@ -537,7 +576,7 @@ def main(argv=None):
             ap.error("--simulate and --m4-data cannot be used together")
         if args.m4_data and args.t_short is None:
             ap.error("--t-short is required with --m4-data: pass --t-short from `python -m vsec pilot`")
-    return {"run": cmd_run, "audit": cmd_audit, "m3": cmd_m3, "pilot": cmd_pilot}[args.cmd](args)
+    return {"run": cmd_run, "audit": cmd_audit, "assess": cmd_assess, "m3": cmd_m3, "pilot": cmd_pilot}[args.cmd](args)
 
 
 if __name__ == "__main__":

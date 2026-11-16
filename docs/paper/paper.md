@@ -10,7 +10,7 @@
 
 ## Abstract
 
-This paper presents a framework designed to evaluate the 2020 virtualization-security survey's taxonomy on a modern KVM stack. The framework is structured around four modules: (M1) configuration and live security controls auditor; (M2) snapshot privacy and secret leakage analysis; (M3) offline detection of hidden processes in memory forensics; and (M4) multi-signal hypervisor detection against indicator-masked environments. Each module is designed with defined test procedures and ground truth. The centrepiece is a pre-specified analysis plan (M4, recorded in `prereg.md`: DRAFT, not yet committed or tagged) designed to test whether combining behaviour signals would detect a hidden hypervisor faster or more reliably than any single signal alone. Every one of the 31 controls is traced to a section of the survey and of our case study (Section 4.3.1). The framework is implemented in Python and validated by an automated test suite of about one thousand tests on synthetic and simulated data. We also report six reproducible experiments that run without KVM hardware (Section 7.7). Fault injection into 400 constructed configuration folders (10,400 control decisions) shows the auditor reports exactly the seeded faults (precision and recall 100%, 95% CI lower bound 99.9%) in about 40 ms per folder. The snapshot scanner finds every plainly stored planted secret (120/120) with no false positives but none of the base64, UTF-16 or split secrets (0/120). We report this gap and then close most of it: a second scanner version with decoding passes, scored on fresh dumps, finds every UTF-16 and base64 secret (80/120 held-out) with no false positives, while page-split secrets stay undetected. A Monte Carlo study of the Attack Lab model (2,000 random fleets per cell) shows that hardening a host does not protect its VMs: with a 30% fault rate elsewhere, an outsider still reaches a VM on the fully hardened host in 17.8% of fleets, and in 0% once those VMs' own settings are hardened. These are checks of the tool and of the model on known ground truth, not measurements of real hosts. **Real-host results (Section 7.8).** On a real KVM host (WSL2 + KVM on a laptop, QEMU 8.2.2, libvirt 10.0.0), a stock `virt-install` guest fails 8 of 28 configuration controls. After vsec's printed fixes only 2 remain, both platform limits (no IOMMU, no AppArmor in WSL2). Lynis, run on the same host, has no check for these virtualization settings. In a real `virsh dump` snapshot, scanner v2 found all 11 planted secrets (v1: only the 4 plain ones), and redaction removed them. **Not yet measured:** native-hardware experiments (M4), Volatility runs on real dumps (M3) and statistics across many hosts; the M4 analysis plan is not yet committed and tagged. The contribution is the taxonomy-to-test mapping, the working and evaluated implementation, real-host evidence on one platform, and an explicit account of what remains untested.
+This paper presents a framework designed to evaluate the 2020 virtualization-security survey's taxonomy on a modern KVM stack. The framework is structured around four modules: (M1) configuration and live security controls auditor; (M2) snapshot privacy and secret leakage analysis; (M3) offline detection of hidden processes in memory forensics; and (M4) multi-signal hypervisor detection against indicator-masked environments. Each module is designed with defined test procedures and ground truth. The centrepiece is a pre-specified analysis plan (M4, recorded in `prereg.md`: DRAFT, not yet committed or tagged) designed to test whether combining behaviour signals would detect a hidden hypervisor faster or more reliably than any single signal alone. Every one of the 31 controls is traced to a section of the survey and of our case study (Section 4.3.1). The framework is implemented in Python and validated by an automated test suite of about one thousand tests on synthetic and simulated data. We also report six reproducible experiments that run without KVM hardware (Section 7.7). Fault injection into 400 constructed configuration folders (10,400 control decisions) shows the auditor reports exactly the seeded faults (precision and recall 100%, 95% CI lower bound 99.9%) in about 24 ms per folder. The snapshot scanner finds every plainly stored planted secret (120/120) with no false positives but none of the base64, UTF-16 or split secrets (0/120). We report this gap and then close most of it: a second scanner version with decoding passes, scored on fresh dumps, finds every UTF-16 and base64 secret (80/120 held-out) with no false positives, while page-split secrets stay undetected. A Monte Carlo study of the Attack Lab model (2,000 random fleets per cell) shows that hardening a host does not protect its VMs: with a 30% fault rate elsewhere, an outsider still reaches a VM on the fully hardened host in 17.8% of fleets, and in 0% once those VMs' own settings are hardened. These are checks of the tool and of the model on known ground truth, not measurements of real hosts. **Real-host results (Section 7.8).** On a real KVM host (WSL2 + KVM on a laptop, QEMU 8.2.2, libvirt 10.0.0), a stock `virt-install` guest fails 8 of 28 configuration controls. After vsec's printed fixes only 2 remain, both platform limits (no IOMMU, no AppArmor in WSL2). Lynis, run on the same host, has no check for these virtualization settings. In a real `virsh dump` snapshot, scanner v2 found all 11 planted secrets (v1: only the 4 plain ones), and redaction removed them. **Not yet measured:** native-hardware experiments (M4), Volatility runs on real dumps (M3) and statistics across many hosts; the M4 analysis plan is not yet committed and tagged. The contribution is the taxonomy-to-test mapping, the working and evaluated implementation, real-host evidence on one platform, and an explicit account of what remains untested.
 
 ---
 
@@ -106,7 +106,7 @@ The 2020 virtualization-security survey (referenced as [SURVEY-2020] below) iden
 **Threat:** VM A gains network or memory access to VM B.
 
 **Key controls:**
-- Network isolation: guests on different libvirt networks or with nwfilter rules are not reachable from each other. [LIBVIRT-NET]
+- Network isolation: guests on different libvirt networks are not reachable from each other; guests on the same network are, even without `<forward>`, unless their bridge ports are isolated (`<port isolated='yes'/>`, verified on real VMs in 7.8 R5). [LIBVIRT-NET]
 - No shared memory: no <shmem> devices between VMs. [LIBVIRT-DOM]
 
 **Test type:** Config + live reachability scan.
@@ -876,9 +876,78 @@ Sections 7.1 to 7.6 are the pre-specified result tables for the full study (nati
 
 **Scan time:** [PENDING REAL DATA]
 
+**Real acquisition on E0 (2026-11-15).** Taking a VM's memory works on this host. We used a disposable CirrOS 0.6.2 VM (`vsec-m3`: q35, 256 MiB, no network interface; guest kernel 5.15.0-71-generic):
+- `virsh dump --memory-only` wrote a 256 MiB ELF core in 0.4 s. Its two PT_LOAD segments cover all guest RAM.
+- Just before the dump, a root shell in the guest recorded the ground truth using shell builtins only, so no extra processes appeared: 87 processes from `/proc` and 47 modules from `/proc/modules`. It also started three marker processes (`vsgt1`–`vsgt3`) and one that had already exited (`vsgtx`).
+- Each marker name occurs exactly once in the dump. This is a byte search only; it shows the data is there, not that a plugin recovers it.
+
+The evidence is in `results/real/m3/acquisition_check.json`; the dump was deleted after the check.
+
+**Real analysis with Volatility 3 (2026-11-15).**
+
+*Symbol table.* The symbol table (ISF) for 5.15.0-71-generic was built from Ubuntu's debug package (1.06 GB from Launchpad). The package's SHA-256 matched the value published by the Launchpad API. `dwarf2json` was not taken as a release binary: it was built from source at tag v0.9.0, pinned to commit `9f14607e`, with Go 1.26.11 (whose SHA-256 matched go.dev), its dependencies verified by `go mod verify`, and both the build and `dwarf2json` itself running as `nobody`.
+
+Before any analysis, we checked the ISF:
+- its SHA-256 (`859e60f5…`);
+- that the types and symbols the tests need are present;
+- that its kernel banner equals the banner Volatility finds in a real dump;
+- that `pslist` returns 81 tasks including PID 1.
+
+Provenance and the check are in `results/real/m3/symbols_provenance.txt`, `dwarf2json_provenance.txt` and `isf_verification.json`.
+
+*Clean-dump experiment.* We booted the VM three times from scratch. In each boot the guest's ground truth was recorded, the memory was dumped (256 MiB in 0.6–0.7 s), and Volatility 3 2.26.2 ran `pslist`, `psscan`, `lsmod` and `hidden_modules` (66–83 s per dump).
+
+| Check against the guest's ground truth | Result (3 dumps) |
+|---|---|
+| `pslist` PIDs = guest `/proc` PIDs (87) | 3/3 equal |
+| Process names equal (kernel workers compared without the workqueue suffix `/proc` appends) | 3/3 |
+| Live markers `vsgt1`–`vsgt3` in `pslist` and in `psscan` | 3/3 |
+| Exited marker `vsgtx`: in `psscan`, not in `pslist` | 3/3 |
+| `lsmod` modules = guest `/proc/modules` (47) | 3/3 equal |
+| `hidden_modules` reports | 0 in every dump |
+| `psscan` PIDs not in `pslist` (the detector's raw "hidden" set) | 8 per dump, all `EXIT_DEAD` |
+| The same after the detector's exited-task filter | 0 in every dump |
+
+On these clean dumps the views agree with the guest. The raw "in `psscan` but not in `pslist`" rule raises 8 false alarms per dump. All of them are tasks that had already exited (boot scripts and the `vsgtx` marker), whose task structures are still in memory. With the existing `exclude_exited` option they all disappear. The cost is that this option trusts a field the guest controls, which is why the CLI reports C30 as NA when the filter has removed anything.
+
+*Positive control (constructed).* Working on a copy of the boot-3 dump, we removed marker PID 475 from the kernel's task list by rewriting its neighbours' `prev->next` and `next->prev` pointers, DKOM-style. The original dump stayed unchanged; its SHA-256 was rechecked. Results:
+- With the exited-task filter, the detector reported exactly `[475]`: 1/1 detected and no other alarm.
+- Without the filter, it reported 475 plus the 8 exited tasks.
+
+This shows the pipeline catches an unlinked task in real kernel memory. It does not show detection of a real rootkit: nothing ran in the guest, only list pointers were changed, and a rootkit may hide in other ways, for example by also clearing the task's scan signature. Raw plugin output, ground truth, console transcripts and `tamper.json` are in `results/real/m3/raw/20261115T154525Z/`; the dumps are kept outside git in `.local/m3/dumps/`.
+
+*Defects the real data exposed (fixed).*
+- Volatility 2.26 names the module column `Module Name`, so the existing parser recorded whole rows instead of names.
+- `vol --version` prints the version but exits with code 2, so the version was recorded as unknown.
+- Volatility prints kernel virtual addresses without their sign extension, so the tamper code compares the low 48 bits.
+
+The comparison was recomputed from the saved raw output (`m3_real_20261115T154525Z.analysed.json`); the run as first recorded is kept.
+
+*Limits.* One guest kernel (CirrOS 0.6.2, 5.15.0-71-generic) on one host (E0), three boots, and clean memory except for the one constructed unlink. Exited tasks are separated from hidden ones only through a field the guest controls. No loaded-module hiding was tested, because a positive control for modules would need page-table translation for module memory; `hidden_modules` was only shown to stay silent on clean dumps.
+
 ### 7.6 M4 Results (Multi-Signal Detection)
 
 *Not yet measured: Full hypothesis test results, once 45 boot sessions (15 per class) are collected on E1.*
+
+#### 7.6.0 Limited run on E0: WSL2 vs a KVM guest inside WSL2 (EXPLORATORY, not native vs VM)
+
+No native baseline exists on this hardware (the WSL2 "host" is itself a Hyper-V guest), so H1-H4 are **not tested**. We measured the only boundary we control: WSL2 against a KVM guest running inside WSL2 (one extra, nested layer). Run `20261116T053926Z`: the same static `bench` binary (built from `vsec/m4_detect/bench.c` with `BUF_SIZE` 32 MiB so it fits the 256 MiB guest `vsec-m3`; SHA-256 verified inside the guest), workloads idle/cpu/mem/mixed, 30 windows each, 5 interleaved sessions per environment, a fresh guest boot per session. All 40 runs completed (exit 0). Unit of analysis: the median per run. Scripts: `scripts/real_m4_wsl_test.py`, `scripts/analyse_m4_wsl.py`; raw CSVs and results: `results/real/m4_wsl/`.
+
+| Signal (idle) | WSL2 | KVM in WSL2 | ratio | Cliff's delta |
+|---|---|---|---|---|
+| CPUID latency (TSC ticks) | 856 | 8,080 | 9.4 | +1.00 |
+| syscall (ns) | 81 | 300 | 3.7 | +1.00 |
+| page fault (ns) | 846 | 1,058 | 1.25 | +0.68 |
+| stride read (ns) | 13.8 | 8.7 | 0.64 | -0.84 |
+| sleep jitter (us) | 1.16 | 1.34 | 1.16 | +0.04 |
+| RDTSC (ticks) | 22 | 22 | 1.0 | 0.00 |
+| IPC, dTLB miss (perf counters) | measured | not available (no vPMU) | - | NA |
+
+- CPUID (9-11x) and syscall cost (3.7-4.3x) separated the environments in every session and every workload. RDTSC did not differ (TSC not intercepted). Sleep jitter differed only under load (cpu, mixed).
+- A leave-one-session-out logistic regression on the 8 available signals separated them too (AUROC 1.0 per workload and pooled). Because single signals already reach the ceiling, **H1 is untestable here** (pre-specified ceiling rule), not supported.
+- With 5 vs 5 sessions the smallest exact two-sided Mann-Whitney p is 0.0079, so no single signal can pass Holm correction over 10 signals; effect sizes are reported instead.
+- **Confounds:** guest kernel 5.15 vs WSL2 6.6, CPU model "QEMU Virtual CPU version 2.5+", THP never vs madvise, 1 vCPU (bench pins CPU 0) vs 8 CPUs (CPU 1). Syscall, page-fault and stride differences may come from these, not from the extra layer. The CPUID gap is the expected cost of a nested VM exit (L2 exit handled through Hyper-V and KVM).
+- **What this does not show:** native-vs-VM detection, detection of a masked hypervisor, or any general detection claim.
 
 #### 7.6.1 H1: Combined vs Best Single Signal
 
@@ -962,7 +1031,7 @@ Sections 7.1 to 7.6 are the pre-specified result tables for the full study (nati
 
 **Setup.** All six experiments are produced by one command, `python scripts/run_experiments.py` (Python 3.12, Windows 11 laptop, fixed seed), which writes `results/experiments.json`, this section's tables (`docs/paper/results_experiments.md`) and Figures 6 to 8. E1 and E2 build case folders with the same layout that `vsec collect` writes, seed known faults into them (three textual variants per control, from `tests/make_fixtures.py`) and compare the audit with the seeded truth. E3 uses the M2 generator: dumps of zero, text-like and random pages with one planted secret each (AWS key, 32-hex token, JWT, SSH key) in three memory states and three held-out encodings. E4 to E6 evaluate the Attack Lab model of Section 4.7. Confidence intervals are 95% Wilson intervals.
 
-Seed 20261109; 2026-11-10. All six experiments run on this repository without KVM hardware. E1 to E3 use constructed inputs with known ground truth; E4 to E6 evaluate the Attack Lab model. None of them is a measurement of a real host.
+Seed 20261109; 2026-11-13. All six experiments run on this repository without KVM hardware. E1 to E3 use constructed inputs with known ground truth; E4 to E6 evaluate the Attack Lab model. None of them is a measurement of a real host.
 
 **E1. Single-fault injection (M1).** Each of the 26 testable configuration controls was broken in each of its seeded variants, one at a time, in an otherwise hardened folder (78 cases; C23 and C24 are NA by design because the shipped CVE list is unverified). The hardened baseline audits all-PASS: True. The seeded fault was reported as FAIL in 78/78 cases (95% Wilson CI [95.3, 100.0]), and in 78/78 cases no other control changed state ([95.3, 100.0]).
 
@@ -975,7 +1044,7 @@ Seed 20261109; 2026-11-10. All six experiments run on this repository without KV
 | Recall | 100.0% | [99.9, 100.0] |
 | F1 | 100.0% | |
 | False-positive rate | 0.0% | |
-| Audit time per folder (median / p95) | 40.3 ms / 72.8 ms | n = 400 |
+| Audit time per folder (median / p95) | 24.1 ms / 40.5 ms | n = 400 |
 
 | Fault probability p | Folders | Folders with every control correct | 95% CI |
 |---|---|---|---|
@@ -1020,7 +1089,7 @@ Controls with any error: none.
 | ssh_key/live/split | 0 / 10 | 0.0% |
 | ssh_key/live/utf16 | 0 / 10 | 0.0% |
 
-False positives: 0 (0.0 per GiB). Scan throughput 23.5 MiB/s on this laptop. After redaction, 240/240 planted dumps rescanned with zero hits; redaction adds 0 bytes.
+False positives: 0 (0.0 per GiB). Scan throughput 39.3 MiB/s on this laptop. After redaction, 240/240 planted dumps rescanned with zero hits; redaction adds 0 bytes.
 
 **E3b. Scanner v2: fixing the gap.** After E3, we added two decoding passes (UTF-16LE text and base64 runs are decoded and the same rules run on the result; hits are reported as the encoded byte span). v2 is scored on freshly generated dumps (seed + 1), not on the dumps that revealed the gap.
 
@@ -1035,7 +1104,7 @@ False positives: 0 (0.0 per GiB). Scan throughput 23.5 MiB/s on this laptop. Aft
 | base64 | 0 / 40 | 40 / 40 |
 | split | 0 / 40 | 0 / 40 |
 
-v2 false positives: 0 (0.0 per GiB); throughput 8.8 MiB/s; after v2 redaction 240/240 dumps rescan clean. Secrets split across pages remain undetected: a pattern needs the whole secret in one place.
+v2 false positives: 0 (0.0 per GiB); throughput 16.6 MiB/s; after v2 redaction 240/240 dumps rescan clean. Secrets split across pages remain undetected: a pattern needs the whole secret in one place.
 
 **E4. Attack Lab: control leverage and containment (model, example fleet).** 27 of 66 (VM, attack) pairs are open. Fixing a single control everywhere it fails blocks this many open pairs:
 
@@ -1082,7 +1151,7 @@ Outsider campaign, VMs compromised after each greedy containment step: 5 -> 2 ->
 
 **Analysis.**
 
-- *M1 is exact on its own fault model (E1, E2).* No seeded fault was missed and no healthy control was flagged, also when up to 70% of controls were broken at once in the same files, which tests that the checks do not interfere with each other. The limit is that the faults come from the same team that wrote the checks; an independent comparison with Lynis/OpenSCAP on real hosts is still needed (Section 9.2). One audit takes about 40 ms, so auditing a whole fleet is cheap.
+- *M1 is exact on its own fault model (E1, E2).* No seeded fault was missed and no healthy control was flagged, also when up to 70% of controls were broken at once in the same files, which tests that the checks do not interfere with each other. The limit is that the faults come from the same team that wrote the checks; an independent comparison with Lynis/OpenSCAP on real hosts is still needed (Section 9.2). One audit takes about 24 ms, so auditing a whole fleet is cheap.
 - *M2 had a clear blind spot, and the evaluation closed most of it (E3, E3b).* Scanner v1 finds every plainly stored secret in live, freed and exited memory with zero false positives, but none of the secrets stored as base64, UTF-16 or split across pages. These encodings were held out by design, and the result shows why: a pattern scanner reports only what it was built to see. We then added two decoding passes (v2) and scored them on newly generated dumps, so the fix is not tuned to the dumps that exposed the gap. v2 finds all UTF-16 and base64 secrets (80/120 held-out, 66.7%) with still zero false positives, at a small cost in speed. Secrets split across pages remain invisible, because no single place in memory holds the whole secret; a clean scan is therefore still not proof that a snapshot is free of secrets. Redaction removed every secret each version found and kept the dump size unchanged. Both versions are kept: v1 is the pre-specified design, v2 is a post-hoc improvement and is labelled as such.
 - *A few controls carry most of the protection (E4).* In the example fleet, turning off KSM (C09) blocks 8 open (VM, attack) pairs, more than any other control, because it gates both the deduplication side channel and rowhammer with deduplication. Next come the two VM network settings (C15, C16). Two well-chosen fixes stop the outsider campaign completely (5, then 2, then 0 compromised VMs).
 - *A hardened host does not protect a badly attached VM (E5).* A host's own controls do not include its VMs' network and console settings. With those left to chance, a VM on the hardened host is breached in 1.8% to 46.9% of random fleets, depending on the fault rate. When the VMs on that host are hardened as well, the rate is 0% (upper CI bound 0.2%) at every fault rate, and isolating every network adds nothing further for those VMs. In the model, a VM's own settings decide whether lateral movement can reach it.
@@ -1135,7 +1204,7 @@ Everything in this section was measured on a real KVM host, not on constructed i
 | Weakened | 11 | 12 | 5 |
 | Hardened | 2 | 22 | 4 |
 
-The default install already fails 8 controls. Among them: the VNC console has no password (C11); the guest sits on the NAT network with a host-side channel (C15, C16); the disk image and the save and dump directories are world-readable (C17, C21); and nested virtualization is on (C10). Every seeded weakness was detected (C12, C14, C22 turned FAIL), and every FAIL that a configuration change can fix turned PASS after the printed fix. The two that remain are properties of the platform: no IOMMU on the kernel command line inside WSL2 (C01), and no AppArmor or SELinux in the WSL2 kernel, so QEMU runs unconfined (C06). They would need native hardware (E1).
+The default install already fails 8 controls. Among them: the VNC console has no password (C11); the guest sits on the NAT network with a host-side channel (C15, C16); the disk image and the save and dump directories are world-readable (C17, C21); and nested virtualization is on (C10). Every seeded weakness was detected (C12, C14, C22 turned FAIL; C14 in this audit is the original XML-only check, see R4), and every FAIL that a configuration change can fix turned PASS after the printed fix. The two that remain are properties of the platform: no IOMMU on the kernel command line inside WSL2 (C01), and no AppArmor or SELinux in the WSL2 kernel, so QEMU runs unconfined (C06). They would need native hardware (E1).
 
 During the first hardening attempt, C16 still failed. Our own "isolated" network had an `<ip>` element, which gives the guest a path to services on the host bridge. vsec reported this, we removed the address, and C16 passed. The auditor caught a hardening mistake made by its own authors.
 
@@ -1153,7 +1222,94 @@ The real dump confirms the synthetic result (E3, E3b). v1 finds every plain secr
 
 One more leak path appeared during setup. Secrets typed in an earlier run were still in guest memory after a reboot, because the guest's shell had saved them to `~/.ash_history` and loaded them again at login. A secret typed at a shell prompt therefore ends up in every later snapshot of that VM. The final run wiped the history and rebooted before planting.
 
-**What these real results do and do not show.** They show that the auditor works on a real libvirt/QEMU host, that its fix commands really remove the findings, that a default install is not hardened, that a general hardening tool does not cover these controls, and that a real VM snapshot leaks secrets that the scanner finds and removes. They come from one host on one platform (WSL2 under Hyper-V), so they are not statistics about KVM hosts in general. M3 (Volatility on real dumps) and M4 (native timing) are still not run.
+**R4. Attack Lab gate validation.** The Attack Lab (Section 4.7) assumes that a stage of an attack chain is stopped when one of its gate controls is PASS. Until now this was taken from the survey and never checked. We tested it on real VMs for the four gated stages we can observe on E0. For each, we compare the model's prediction with what an independent probe observes. The probe never reads M1's verdict.
+
+| Control | Attack stage | Independent observation |
+|---|---|---|
+| C12 | A02 s0: scan the network for console ports | TCP connect and RFB banner on the host's `eth0` address (not loopback) |
+| C11 | A02 s1: connect to the guest console | RFB handshake: does the server offer security type 1 (None)? |
+| C14 | A01 s1: send FIFO commands to the floppy controller | root in the guest reads the controller's status register (port 0x3F4 via `/dev/port`; 0xFF = no device answers); `info qtree` on the host as corroboration |
+| C17 | A09 s2: read the VM's disk image | the unprivileged user `nobody` reads the first 16 bytes of the image (qcow2 magic) |
+
+*Setup.* Two disposable CirrOS 0.6.2 VMs (copies of the test image) ran on a new network with no forwarding and no IP. QEMU was 8.2.2 and libvirt 10.0.0, on WSL2 kernel 6.6.114.1. We used five configurations ("arms"); only one VM ran at a time. Across the four arms on the default machine type, each gate is PASS in two arms and FAIL in two, so no gate is confounded with another:
+- W: everything weak.
+- M1: VNC on all interfaces with a password, no floppy disk, image 0644.
+- M2: VNC on loopback without a password, floppy disk, image 0600.
+- H: everything hardened.
+- H-q35: H on the q35 machine type instead of i440fx.
+
+Each arm ran three times, each from a fresh boot. In every run, `vsec collect` and the M1 audit of the running VM gave the prediction, using the simulator's own stage rule. The probes gave the observation. Before and after the experiment, the script hashed the existing VM, the existing networks, `qemu.conf` and `libvirtd.conf`; they were unchanged. Raw evidence for every run is in `results/real/gate_validation/` (console transcripts, `info qtree`, redacted domain XML, file modes, M1 findings).
+
+| Control | n | Model and observation agree | Model says blocked, stage open | Model says open, stage blocked |
+|---|---|---|---|---|
+| C11 | 15 | 15 | 0 | 0 |
+| C12 | 15 | 15 | 0 | 0 |
+| C14 | 15 | 9 | 6 | 0 |
+| C17 | 15 | 15 | 0 | 0 |
+| All | 60 | 54 (Wilson 95% CI 0.80-0.95) | 6 | 0 |
+
+The gates for C11, C12 and C17 behaved exactly as the model assumes, in both states. C14 did not. On the default i440fx machine type, removing the floppy disk makes M1 report C14 PASS, so the model treats the floppy-controller stage of A01 as blocked. But the running QEMU still contains the controller (`isa-fdc` at I/O base 0x3F0), and code in the guest reads its status register as 0x80, meaning the controller is ready. That is the I/O-port code path a VENOM-style attack drives. On q35, the same hardened configuration has no controller (`info qtree` shows none and the register reads 0xFF), and model and observation agree. All six disagreements are this one case (arms M1 and H, three runs each), and all are in the unsafe direction.
+
+*Legitimate access after the C17 fix.* In all nine runs with the image at mode 0600, the VM booted from its image, the guest wrote and read back a file on its root disk, and QEMU issued about 1,300 read requests. Making the image private did not stop QEMU from using it. Note why: libvirt (with its default `dynamic_ownership`) gives the image to the `libvirt-qemu` user while the VM runs, and we observed owner uid 64055 at run time.
+
+*What this shows and does not show.*
+- The 60 observations are not 60 independent samples. Within an arm, the outcome was identical in every repetition, so the repetitions show stability, not statistical power. The finding is qualitative: the model is right for three of the four gates we tested and unsafe for C14 on i440fx, because M1 checks the declared XML and not the device the running QEMU actually exposes.
+- Reaching the controller is the precondition for this stage, not an exploit. QEMU 8.2.2 contains the VENOM fix, and we sent no malformed commands.
+- Coverage is 4 of the 18 gated stages. C21 was not tested, because it would mean changing the permissions of existing host directories. C18, C19 and C20 need changes to the libvirt daemon. The stages gated by C01–C08, C25 and C26 need an exploit or hardware that E0 does not have.
+- The C12 probe comes from the host's own `eth0` address, not from a second machine.
+- One host, one guest OS, one QEMU version.
+
+*Fixing C14 and checking the fix.* The tables above are the run made with the original, XML-only C14, and they are kept as recorded (`results/real/gate_validation/`). After that run we changed C14 so it also checks what the running QEMU builds:
+- The collector now always stores the machine type from the QEMU process's command line. It keeps only that token, because the rest of the command line can hold secrets.
+- With the opt-in `--qemu-devices` option, it also stores the device types listed by `info qtree`. This option is off by default because libvirt marks a domain as tainted when the monitor is used.
+- C14 fails if a floppy disk, sound card or parallel port is declared in the XML, or if the running QEMU builds one of them.
+- With no device list, it falls back to the machine type: i440fx fails, q35 passes, and any other type is NA.
+- With no runtime evidence at all, C14 is NA, never PASS.
+
+We then repeated the experiment once per arm with the corrected C14, writing to a separate folder (`results/real/gate_validation_postfix/`):
+- Model and observation agreed in 20 of 20 cases, with no unsafe disagreement.
+- The i440fx arms without a floppy disk (M1, H) now FAIL C14 with the device-list evidence `isa-fdc`. H-q35 passes.
+- Auditing the same collected cases with the device list removed gave the same verdicts from the machine type alone.
+
+This check is not independent of the probe in the way the first run was. Both C14 and the host-side corroboration now read the device tree, so the agreement is expected. Only the guest's port read is a separate observation. The other three gates did not change.
+
+R1 above was also audited with the XML-only C14. The `vsec-target` VM uses the i440fx machine type, so on a re-collection the corrected C14 would be expected to FAIL for it too. We did not re-run R1, because that would mean modifying `vsec-target`.
+
+**R5. Runtime validation of M1 on real disposable VMs (X1).** The auditor's verdicts are predictions from collected evidence. We tested them against the running system, not against inputs we wrote. Two disposable CirrOS VMs (`vsec-rv-a`, `vsec-rv-b`, marked, on our own networks `vsec-rv-iso` and `vsec-rv-iso2` without `<forward>` or `<ip>`) were booted in ten configurations, chosen so that each validated control appears in both states. Prediction: the primary workflow `vsec assess <domain> --qemu-devices`, with every finding tagged `live-runtime` or `live-config`. Observation, by separate code (`vsec/runtime_check.py`, `scripts/real_runtime_validation.py`):
+
+| Control | Observation | Independence |
+|---|---|---|
+| C11 | RFB handshake on loopback: is security type None offered? (no console: QEMU TCP listeners) | independent |
+| C12 | TCP + RFB connect from the host's non-loopback address | independent |
+| C14 | guest reads floppy-controller status port 0x3F4 (0xFF = absent) + QEMU `info qtree` | independent |
+| C16 | guest pings the second VM, both NICs verified up; reachable = FAIL | independent |
+| C04 | validator reads `/proc/<qemu-pid>/status` (Seccomp, Seccomp_filters) | **partial**: same kernel interface as M1 |
+| C06 | validator reads `/proc/<qemu-pid>/attr/current` and whether an LSM is enabled | **partial**: same kernel interface as M1 |
+
+*First run (`20261116T060915Z`, 3 configurations): 16 agree, 2 disagree.* Both disagreements were C16. M1 passed a VM on a libvirt network without `<forward>`, but the two guests on that network pinged each other. Such a network isolates guests from the host and outside, **not from each other**. In the third configuration M1's FAIL matched, but for another reason (VNC listening on all interfaces).
+
+*Fix.* The collector now records the live bridge state (`net_peers.txt`: the guest's tap ports, the co-resident ports and the kernel `brport/isolated` flag of each). C16 FAILs if any co-resident port pair is not isolated on both sides; a live case without this evidence cannot PASS; constructed fixtures keep the earlier rule, so E1-E6 are unchanged. The printed fix is now "own network per VM, or `<port isolated='yes'/>` on every interface of the shared network" (taxonomy, Attack Lab A10 text).
+
+*Ten-configuration run (`20261116T063834Z`): 60 of 60 comparisons agree, 0 not observable.*
+
+| Arm | Machine | VNC | Floppy | Network (arm / peer) | C11 | C12 | C14 | C16 |
+|---|---|---|---|---|---|---|---|---|
+| A | i440fx | 0.0.0.0, no password | yes | shared | FAIL | FAIL | FAIL | FAIL |
+| B | i440fx | loopback, password | no | shared | PASS | PASS | FAIL (isa-fdc built) | FAIL |
+| C | q35 | loopback, password | no | shared | PASS | PASS | PASS | FAIL |
+| D | q35 | loopback, password | no | shared, both ports isolated | PASS | PASS | PASS | PASS |
+| E | q35 | loopback, password | no | shared, only arm port isolated | PASS | PASS | PASS | FAIL |
+| F | q35 | loopback, password | no | separate networks | PASS | PASS | PASS | PASS |
+| G | q35 | none | no | no NIC | PASS | PASS | PASS | PASS |
+| H | q35 | 0.0.0.0, password | no | shared | PASS | FAIL | PASS | FAIL |
+| I | q35 | loopback, no password | no | shared | FAIL | PASS | PASS | FAIL |
+| J | i440fx | loopback, password | yes | shared, both ports isolated | PASS | PASS | FAIL | PASS |
+
+C04 PASS and C06 FAIL in every arm (seccomp active; no LSM in the WSL2 kernel), so they were not observed in both states. A repeat of arms D and E (the two that decide the C16 rule; run `20261116T065524Z`) gave the same result, 12 of 12. The protected state was unchanged in every run; VNC passwords are random per run and redacted in all saved files.
+
+*Limits.* One host (WSL2), configurations chosen by us, one repetition of eight arms: qualitative evidence that the checks track the running system, **not an accuracy estimate**. C04/C06 are only partially independent and C06 was never PASS. Isolation through nwfilter rules is not evaluated (reported NA would need a further check). The hardened `vsec-target` result in R1 used the earlier C16 rule; it was alone on its network, which the new rule also passes.
+
+**What these real results do and do not show.** They show that the auditor works on a real libvirt/QEMU host, that its fix commands really remove the findings, that a default install is not hardened, that a general hardening tool does not cover these controls, and that a real VM snapshot leaks secrets that the scanner finds and removes. They come from one host on one platform (WSL2 under Hyper-V), so they are not statistics about KVM hosts in general. M3 has now run on three real dumps of one disposable VM (Section 7.5: clean-dump agreement and one constructed unlink, no real rootkit); M4 (native timing) is still not run.
 
 ## 8. Discussion
 
@@ -1338,7 +1494,7 @@ This work presents a framework designed to evaluate the 2020 virtualization-secu
 
 5. **M4 (Multi-Signal Detection):** A pre-specified experiment (analysis plan in `prereg.md`, a draft that must be committed and tagged before any real data collection, so it is not yet a pre-registration) designed to test hypotheses H1–H4 comparing single vs combined behaviour signals for detecting a hidden hypervisor on E1. What this framework will answer remains to be measured once real data is collected on native hardware (W1+ timeline).
 
-**What has been measured without hardware (Section 7.7):** the auditor reported exactly the seeded faults in 78 single-fault and 400 multi-fault folders (10,400 decisions, about 40 ms per folder); scanner v1 found 120/120 plainly stored secrets with zero false positives and 0/120 encoded ones, and v2 with decoding passes found 80/120 (all UTF-16 and base64, no page-split secret); and in the model a hardened host's VMs were breached in up to 46.9% of random fleets unless the VMs themselves were hardened.
+**What has been measured without hardware (Section 7.7):** the auditor reported exactly the seeded faults in 78 single-fault and 400 multi-fault folders (10,400 decisions, about 24 ms per folder); scanner v1 found 120/120 plainly stored secrets with zero false positives and 0/120 encoded ones, and v2 with decoding passes found 80/120 (all UTF-16 and base64, no page-split secret); and in the model a hardened host's VMs were breached in up to 46.9% of random fleets unless the VMs themselves were hardened.
 
 **What has been measured on a real host (Section 7.8):** a stock libvirt guest fails 8 controls, 2 after vsec's fixes (both platform limits); Lynis does not cover these controls; a real `virsh dump` snapshot leaked every planted secret, scanner v2 found all of them (v1 only the plain ones), and redaction removed them.
 

@@ -1,0 +1,55 @@
+ uninitialized urandom read (112 bytes read)
+[    2.724086] 8021q: adding VLAN 0 to HW filter on device eth0
+[    3.198386] IPv6: ADDRCONF(NETDEV_CHANGE): eth0: link becomes ready
+[   60.321594] random: crng init done
+[   60.323141] random: 1 urandom warning(s) missed due to ratelimiting
+### tail -n 25 /var/log/messages
+Nov 15 14:44:03 cirros daemon.info dhcpcd[240]: eth0: using IPv4LL address 169.254.88.251
+Nov 15 14:44:03 cirros daemon.info dhcpcd[240]: eth0: adding route to 169.254.0.0/16
+Nov 15 14:44:03 cirros daemon.info dhcpcd[240]: eth0: adding default route
+Nov 15 14:44:03 cirros daemon.warn dhcpcd[240]: eth0: no IPv6 Routers available
+Nov 15 14:44:47 cirros authpriv.info dropbear[395]: Running in background
+Nov 15 14:44:48 cirros daemon.info : reloading /etc/inittab
+Nov 15 14:44:48 cirros daemon.info : starting pid 475, tty '/dev/ttyS0': '/sbin/getty -L 115200 ttyS0 vt100 '
+Nov 15 14:44:48 cirros daemon.info : starting pid 476, tty '/dev/tty1': '/sbin/getty 115200 tty1'
+Nov 15 14:44:53 cirros authpriv.notice sudo:   cirros : TTY=ttyS0 ; PWD=/home/cirros ; USER=root ; COMMAND=/bin/sh
+Nov 15 14:45:03 cirros syslog.info syslogd started: BusyBox v1.35.0
+Nov 15 14:45:03 cirros daemon.info dhcpcd[253]: dhcpcd-9.4.1 starting
+Nov 15 14:45:03 cirros daemon.info dhcpcd[256]: DUID 00:04:fc:54:ad:fc:c9:6d:4f:ce:a9:61:25:0b:7f:11:bd:ae
+Nov 15 14:45:03 cirros daemon.warn dhcpcd[256]: no interfaces have a carrier
+Nov 15 14:45:03 cirros daemon.info dhcpcd[256]: eth0: waiting for carrier
+Nov 15 14:45:03 cirros daemon.info dhcpcd[256]: eth0: carrier acquired
+Nov 15 14:45:03 cirros daemon.info dhcpcd[256]: eth0: IAID 00:d7:94:cc
+Nov 15 14:45:03 cirros daemon.info dhcpcd[256]: eth0: adding address fe80::5054:ff:fed7:94cc
+Nov 15 14:45:04 cirros daemon.info dhcpcd[256]: eth0: soliciting an IPv6 router
+Nov 15 14:45:05 cirros daemon.info dhcpcd[256]: eth0: soliciting a DHCP lease
+Nov 15 14:45:10 cirros daemon.info dhcpcd[256]: eth0: probing for an IPv4LL address
+Nov 15 14:45:15 cirros daemon.info dhcpcd[256]: eth0: using IPv4LL address 169.254.107.195
+Nov 15 14:45:15 cirros daemon.info dhcpcd[256]: eth0: adding route to 169.254.0.0/16
+Nov 15 14:45:15 cirros daemon.info dhcpcd[256]: eth0: adding default route
+Nov 15 14:45:17 cirros daemon.warn dhcpcd[256]: eth0: no IPv6 Routers available
+Nov 15 14:46:01 cirros authpriv.info dropbear[411]: Running in background
+############ debug end   ##############
+  ____               ____  ____
+ / __/ __ ____ ____ / __ \/ __/
+/ /__ / // __// __// /_/ /\ \ 
+\___//_//_/  /_/   \____/___/ 
+   http://cirros-cloud.net
+
+
+login as 'cirros' user. default password: 'gocubsgo'. use 'sudo' for root.
+cirros login: cirros
+Password: 
+$ sudo -s
+$ id -u; echo UID"-END"
+0
+UID-END
+$ echo MSR"<$(dd if=/dev/port bs=1 skip=1012 count=1 2>/dev/null | od -An -tx1)>
+"
+MSR< ff>
+$ echo vsec-$$ > /root/.vsec-probe && sync && cat /root/.vsec-probe && echo DISK
+"OK"
+vsec-496
+DISKOK
+$ exit
+$ exit

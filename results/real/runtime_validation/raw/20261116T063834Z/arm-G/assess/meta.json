@@ -1,0 +1,8 @@
+{
+ "domain": "vsec-rv-b",
+ "collected_utc": "20261116T064927Z",
+ "env": "E0",
+ "qemu_devices": true,
+ "host_kernel": "6.6.114.1-microsoft-standard-WSL2",
+ "case": "/root/vsec/.local/rv/20261116T063834Z/arm-G/case"
+}

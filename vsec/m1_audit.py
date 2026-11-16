@@ -16,7 +16,7 @@ from pathlib import Path
 
 import yaml
 
-from . import HERE, clean_text, finding
+from . import HERE, clean_text, finding, provenance
 
 MAX_BYTES = 1_000_000
 CVES_PATH = HERE / "cves.yaml"  # tests (or audit(cves_path=...)) point this at a verified list
@@ -270,11 +270,47 @@ def c13(c):
     return r(n == 0, f"redirdev count={n}")
 
 
+# QEMU device types that C14 forbids: floppy controllers and drives, parallel ports, sound cards (not the PC speaker)
+_C14_DEV = re.compile(r"(?i)^(isa-fdc|sysbus-fdc|SUNW,fdtwo|floppy|isa-parallel|AC97|ES1370|sb16|cs4231a|adlib|gus"
+                      r"|intel-hda|ich9-intel-hda|hda-.*|usb-audio|virtio-sound.*)$")
+
+
+def _machine_family(m):
+    """'i440fx' | 'q35' | None. A plain 'pc' or 'pc-<version>' is the i440fx board."""
+    m = m.lower()
+    if "q35" in m:
+        return "q35"
+    if "i440fx" in m or re.fullmatch(r"pc(-\d[\w.-]*)?", m):
+        return "i440fx"
+    return None
+
+
 @needs_xml
 def c14(c):
+    """Declared devices (vm.xml) AND what the running QEMU builds. The XML alone is not enough: on i440fx QEMU builds
+    an ISA floppy controller even with no floppy disk defined (seen with `info qtree` on QEMU 8.2.2, paper 7.8 R4).
+    Runtime evidence, best first: qemu_devices (opt-in `info qtree` device types), then qemu_machine (machine type
+    from the QEMU command line). Without either, a clean XML gives NA, never PASS."""
     bad = [t for t in ("sound", "parallel") if list(c.xml.iter(t))]
     bad += ["floppy" for d in c.xml.iter("disk") if d.get("device") == "floppy"]
-    return r(not bad, f"unused devices: {bad}" if bad else "ok")
+    if bad:
+        return ("FAIL", f"declared unused devices: {bad}")
+    devs = c.read("qemu_devices")
+    if devs is not None:
+        found = sorted({d.strip() for d in devs.splitlines() if _C14_DEV.match(d.strip())})
+        return r(not found, f"running QEMU builds: {found}" if found
+                 else "running QEMU builds no floppy controller, parallel port or sound device (info qtree)")
+    machine = c.read("qemu_machine")
+    if machine is None:
+        return ("NA", "no runtime device evidence (VM not running or no qemu_machine): the XML cannot show built-in devices")
+    family = _machine_family(machine)
+    if family == "i440fx":
+        return ("FAIL", f"machine {machine[:40]}: i440fx builds an ISA floppy controller even with no floppy disk "
+                        "(seen with info qtree on QEMU 8.2.2); confirm with collect --qemu-devices")
+    if family == "q35":
+        return ("PASS", f"machine {machine[:40]}: q35 has no built-in floppy controller (seen on QEMU 8.2.2) and no "
+                        "unused device is declared")
+    return ("NA", f"machine {machine[:40]}: built-in devices of this machine type unknown; use collect --qemu-devices")
 
 
 @needs_xml
@@ -318,8 +354,58 @@ def _host_isolation(host):
     return "PASS", "host-verified"
 
 
+def peer_paths(text):
+    """(status, evidence) from net_peers.txt. Two ports on one Linux bridge can exchange frames unless BOTH have the
+    kernel's `isolated` flag set (an isolated port still talks to non-isolated ports)."""
+    lines = [ln.split() for ln in (text or "").splitlines() if ln.strip()]
+    if not lines:
+        return "NA", "net_peers.txt empty"
+    if lines[0][0] == "no-interfaces":
+        return "PASS", "no network interface"
+    if lines[0][0].startswith("unknown"):
+        return "NA", " ".join(lines[0])[:80]
+    own, open_, blocked = {}, [], 0
+    rows = []
+    for parts in lines:
+        kv = dict(p.split("=", 1) for p in parts[2:] if "=" in p)
+        rows.append((parts[0], parts[1], kv.get("bridge"), kv.get("isolated")))
+    for kind, dev, br, iso in rows:
+        if kind == "own":
+            own[dev] = (br, iso)
+    for kind, dev, br, iso in rows:
+        if kind != "peer":
+            continue
+        for odev, (obr, oiso) in own.items():
+            if obr != br:
+                continue
+            if "?" in (iso, oiso):
+                return "NA", f"isolation flag unreadable for {dev} or {odev}"
+            if iso == "1" and oiso == "1":
+                blocked += 1
+            else:
+                open_.append(f"{odev}(isolated={oiso})<->{dev}(isolated={iso}) on {br}")
+    if open_:
+        return "FAIL", f"guest-to-guest path: {open_[:3]}"
+    return "PASS", f"{blocked} co-resident port(s), all port-isolated" if blocked else "no other port on the guest's bridge(s) now"
+
+
 def c16(c):
-    """Host-written net_isolation.txt is the proof; the guest-written net_scan.txt can only add a FAIL."""
+    """Guest-to-guest reachability from LIVE bridge state (net_peers.txt), combined with the host-written exit check
+    (net_isolation.txt). A libvirt 'isolated' network (no <forward>) cuts the host/outside path only: guests on the
+    same bridge still reach each other. Live cases without net_peers.txt cannot PASS; constructed fixtures keep the
+    older host-only rule. The guest-written net_scan.txt can only add a FAIL."""
+    peers = c.read("net_peers.txt")
+    if peers is not None:
+        p_status, p_ev = peer_paths(peers)
+        host = c.read("net_isolation.txt")
+        h_status, h_ev = _host_isolation(host) if host else ("NA", "net_isolation.txt missing")
+        if "FAIL" in (p_status, h_status):
+            return "FAIL", "; ".join(e for s, e in ((h_status, h_ev), (p_status, p_ev)) if s == "FAIL")
+        if "NA" in (p_status, h_status):
+            return "NA", "; ".join(e for s, e in ((h_status, h_ev), (p_status, p_ev)) if s == "NA")
+        return "PASS", f"{h_ev}; {p_ev}"
+    if provenance.case_kind(c.folder) == "live":
+        return "NA", "guest-to-guest path not verified (no net_peers.txt; VM not running when collected?)"
     host, scan = c.read("net_isolation.txt"), c.read("net_scan.txt")
     scan_fail = scan is not None and _REACHABLE.search(scan) is not None
     status, ev = _host_isolation(host) if host else (None, "")
@@ -478,6 +564,7 @@ def audit(folder, env="E0", vm="", cves_path=None):
     if not Path(folder).is_dir():
         raise FileNotFoundError(f"case folder not found: {folder}")
     case = Case(folder, cves_path)
+    kind = provenance.case_kind(folder)
     out = []
     for cid, fn in sorted(CHECKS.items()):
         if env == "E0" and cid == "C02":
@@ -487,5 +574,6 @@ def audit(folder, env="E0", vm="", cves_path=None):
                 status, ev = fn(case)
             except Exception as e:  # a crashing check must never turn into a PASS
                 status, ev = "NA", f"check error: {e}"
-        out.append(finding(cid, status, ev, env=env, vm=vm or Path(folder).name))
+        out.append(finding(cid, status, ev, env=env, vm=vm or Path(folder).name,
+                           provenance=provenance.control_source(cid, folder, kind)))
     return out

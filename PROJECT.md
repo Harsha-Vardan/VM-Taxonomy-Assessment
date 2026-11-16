@@ -3,12 +3,10 @@
 **vsec: a taxonomy-driven security assessment framework for KVM virtualization**
 Course: Cloud Security & Vulnerabilities. Submitted to: Malay Kumar. Team: A. Doni Aditya (23BDS007), B. Harsha Vardan (23BDS015), E. Hariteja (23BDS019), L. Sahith Akash Manikanta (23BDS031). Built with an AI coding assistant (Claude) under the team's direction.
 
-This file explains the whole project in one place: what it is, why it exists, how every part works, how to run it, what is finished, what is not, and how to defend it. Short operating notes for the AI assistant are in `CLAUDE.md`; the plan and history are in `FINAL_PROJECT_PLAN.md`; the paper is `docs/paper/paper.md`.
 
 ---
 
 
-> **Update (real host):** the project now has real measurements on one real KVM host (WSL2 + KVM on the team's laptop): audit before/after hardening, Lynis comparison and a real memory-snapshot test. See paper Section 7.8, `results/real/` and `scripts/real_*.{sh,py}`. `EXPLANATION.md` is the presentation guide.
 ## 1. The project in one minute
 
 Virtualization (running many virtual machines on one physical server) is the base of cloud computing. A 2020 survey in *ACM Computing Surveys* lists the security problems this creates and the defences recommended against them. A survey, though, is only a list. It does not say **which of those defences can actually be checked on a real KVM system, which hold, and which fail.**
@@ -29,7 +27,6 @@ The honest status: the framework, the tests and the simulator are built and veri
 ### 2.1 The two source documents
 - **The survey** (`3382190 (1).pdf`): F. Sierra-Arriaga, R. Branco, B. Lee, "Security Issues and Challenges for Virtualization Technologies", *ACM Computing Surveys* 53(2), Article 45, May 2020, doi:10.1145/3382190. A literature survey with no experiments.
 - **Our case study** (`Virtualization_Security_Case_Study_Report.pdf`, 20 Sep 2026): a desk analysis of the survey. Its Table 9 is a control checklist per threat class. This project makes that checklist executable.
-- A condensed version of both, with exact section and table numbers, is in `docs/SOURCES_SUMMARY.md`.
 
 ### 2.2 What the survey says (the parts this project uses)
 - Attacks are classified by **source and target**: Guest to VMM, Guest to Host, Host to VMM, Guest to Guest, Guest/Host to Self (survey section 3.1).
@@ -123,6 +120,8 @@ M1 holds 28 controls; M2, M3 and M4 each add one centrepiece control (31 in tota
 **Limits stated.** It only looks when a dump is taken, and only finds *unlinked* processes and modules. It is not live introspection.
 **Status.** Wrapper, symbol-hash checks, sandbox and scoring are built and tested against mocked Volatility output. **Volatility has never been run on a real image.**
 
+**Runtime validation (2026-11-16, real disposable VMs, E0).** `vsec assess` predictions vs independent runtime observations for C04, C06, C11, C12, C14, C16 in 10 configurations: 60/60 agree after fixing C16 (the first run showed guests on a libvirt network without <forward> still reach each other; C16 now reads live bridge-port isolation). Qualitative, one host, configurations chosen by us. See `results/real/runtime_validation/` and paper 7.8 R5.
+
 ### M4: multi-signal hypervisor detection (`vsec/m4_detect/`)
 **The experiment.** On one machine, compare three classes: `native`, `kvm-plain`, and `kvm-masked` (a KVM guest that hides its static indicators with standard libvirt options). The primary comparison is native versus kvm-masked.
 **Signals.** Timing (CPUID latency, RDTSC, syscall and page-fault cost), memory (sequential and random latency, a TLB proxy), performance counters, scheduler jitter. Static indicators (CPUID hypervisor bit, DMI strings, device models) are reported separately in an "indicator-leak" table, not used in the hypothesis.
@@ -137,6 +136,8 @@ H2 to H4 and the secondary tests use Holm correction. With 15 versus 15 sessions
 **Threat model limits.** A *non-adaptive* hypervisor (it does not fake time), one CPU model, one machine. A time-faking hypervisor is out of scope (survey section 7.2.2, "TSC offsetting") and listed as future work.
 **Status.** Benchmark program, feature extraction, nested CV, bootstrap, Holm, simulator and pipeline are built and tested on simulated data. `bench.c` ran once in WSL2 as a functional check only. **No real native-versus-VM session exists**, and `prereg.md` is not yet committed and tagged.
 
+
+**Limited real run (2026-11-16, E0).** WSL2 vs a KVM guest inside WSL2 (nested; NOT native vs VM): CPUID 9-11x and syscall 3.7-4.3x slower in the guest in all 5 sessions and 4 workloads; combined AUROC 1.0 but single signals are at ceiling, so H1 is untestable here; perf counters not available in the guest; kernel/CPU-model confounds. See `results/real/m4_wsl/m4_wsl.md` and paper 7.6.0.
 ---
 
 ## 6. The common framework
@@ -201,7 +202,6 @@ It is a **model of the survey's logic, not a measurement**. It runs no exploit a
 PROJECT.md            this file
 README.md             quick start and status table
 CLAUDE.md             operating notes for the AI assistant (context, rules, status)
-FINAL_PROJECT_PLAN.md full design, hypotheses, risks, change log
 prereg.md             M4 analysis plan (DRAFT until committed and tagged)
 simulator.html        the Attack Lab (generated; do not edit by hand)
 vsec/
@@ -212,14 +212,10 @@ vsec/
   m1_audit.py m2_snapshot.py m3_forensics.py   modules
   m4_detect/          bench.c, features.py, classify.py, stats.py, simulate.py
   report.py score.py collect.py guards.py __main__.py   framework
-scripts/              build_simulator.py, make_demo_cases.py, plan_sessions.py,
+scripts/              build_simulator.py, make_fleet_cases.py, plan_sessions.py,
                       run_session.sh, preflight_target.py, make_paper_tables.py,
-                      make_submission_zip.py, build_symbols.sh, ...
-demo_cases/           hand-built weak / hardened / weak-fixed targets (generated)
 vms/                  libvirt XML for kvm-plain, kvm-masked, isolated network
 tests/                about 1,000 tests
-docs/                 paper/, slides/, SOURCES_SUMMARY.md, ROADMAP.md, DEMO_SCRIPT.md,
-                      YOUR_TASKS.md, E1_CHECKLIST.md, DATA_SOURCES.md, DEFINITION_OF_DONE.md
 .github/workflows/    CI: tests on Linux, simulator freshness
 ```
 
@@ -235,17 +231,13 @@ python -m venv .local/venv && .local/venv/Scripts/pip install -r requirements.tx
 start simulator.html
 
 # the command-line tool
-python scripts/make_demo_cases.py                                     # weak / hardened / weak-fixed targets
-python -m vsec audit demo_cases/weak --env E1                         # M1 on one case (exit 1 if any FAIL)
-python -m vsec run --fast --simulate --env E1 \
-    --vm weak=demo_cases/weak --vm hardened=demo_cases/hardened --vm weak-fixed=demo_cases/weak-fixed \
-    --out .local/work/out                                             # full report (M2/M4 simulated, not citable)
+sudo python -m vsec assess <domain> --qemu-devices                   # PRIMARY: live assessment on a KVM host
+python -m vsec run --env E0 --vm open=results/real/runtime_validation/raw/20261116T063834Z/arm-A/assess/case \
+    --vm isolated=results/real/runtime_validation/raw/20261116T063834Z/arm-D/assess/case --out out                  # report from two real collected cases
 python scripts/build_simulator.py                                     # rebuild simulator.html after editing the YAML files
 python -m pytest -q -m "not slow"                                     # fast suite, about 4 minutes
 python docs/slides/build_deck.py                                      # rebuild the slide deck
-python scripts/make_submission_zip.py                                 # build dist/vsec_submission.zip
 ```
-Real-hardware steps (building the native machine, the pilot, real dumps, Volatility, Lynis and OpenSCAP) are in `docs/YOUR_TASKS.md` (tasks A to J) and `docs/E1_CHECKLIST.md`.
 
 ---
 
@@ -270,12 +262,10 @@ Real-hardware steps (building the native machine, the pilot, real dumps, Volatil
 | M3 on a real image | **Not done** | needs Volatility and an image |
 | M4 pipeline and statistics | Done on simulated data | `tests/test_m4.py` |
 | M4 real data, tagged `prereg.md` | **Not done** | needs the native machine E1 |
-| Report dashboard, demo targets | Done | `tests/test_report.py`, `tests/test_demo_cases.py` |
+| Report dashboard | Done | `tests/test_report.py` |
 | Attack Lab fleet simulator | Done | `tests/test_simulator.py` |
 | Paper (10 chapters) | Draft complete, results chapters say "not yet measured" | `docs/paper/paper.md` |
-| Slides (19) and demo script | Done (layout not visually checked) | `docs/slides/`, `docs/DEMO_SCRIPT.md` |
 
-The checklist with proof requirements is `docs/DEFINITION_OF_DONE.md`.
 
 ---
 
@@ -292,7 +282,6 @@ The checklist with proof requirements is `docs/DEFINITION_OF_DONE.md`.
 
 ## 14. Plan and realistic timeline
 
-Full plan with ideal, minimum and realistic versions, and the split across the team's three roles, is in `docs/ROADMAP.md`. In short: the bottleneck is **real data on a native Linux machine**, not code. Minimum credible path (about 4 weeks at partial allocation): build the native machine, run the pilot, tag `prereg.md`, collect at least 10 sessions per class, run Lynis and OpenSCAP on the demo hosts, run M3 on one public image, and fill the paper's results chapters from `scripts/make_paper_tables.py`. The ideal path adds the missing survey controls (PCIe ACS, Secure Boot, SEV/TDX, cache partitioning), a short IEEE-format paper, and an independent review of the attack rules.
 
 ---
 

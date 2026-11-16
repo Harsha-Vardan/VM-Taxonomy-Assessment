@@ -1,6 +1,6 @@
 {
  "seed": 20261109,
- "generated": "2026-11-10",
+ "generated": "2026-11-13",
  "quick": false,
  "labels": "(repeated in every output):\n  E1, E2  M1 auditor on CONSTRUCTED case folders with known seeded faults (fault injection). This measures whether\n          the checker reports exactly the faults that were seeded, including when many faults interact in one\n          folder. It is NOT accuracy on real hosts (same team wrote checker and fixtures).\n  E3      M2 secret scanner on SYNTHETIC memory dumps with planted secrets (ground truth by construction).\n  E4-E6   The Attack Lab MODEL (vsec/attacks.yaml + fleet.yaml): what the survey's attack logic implies, not a\n          measurement of real attacks.\nNothing here uses or replaces the pending real-hardware results (M3, M4, Sections 7.1-7.6).",
  "E1": {
@@ -361,8 +361,8 @@
    }
   },
   "audit_ms": {
-   "median": 40.28535005636513,
-   "p95": 72.80540000647306,
+   "median": 24.087699996016454,
+   "p95": 40.543900002376176,
    "n": 400
   }
  },
@@ -616,7 +616,7 @@
   "false_positives": 0,
   "gb_scanned": 0.0634765625,
   "fp_per_gb": 0.0,
-  "scan_seconds": 2.7630425984971225,
+  "scan_seconds": 1.6556726999842795,
   "size_overhead_bytes": 0,
   "dump_errors": [],
   "plain": {
@@ -651,7 +651,7 @@
   },
   "redaction_clean": 240,
   "redaction_n": 240,
-  "throughput_mb_s": 23.524791125317748
+  "throughput_mb_s": 39.2589670655421
  },
  "E3v2": {
   "cells": {
@@ -903,7 +903,7 @@
   "false_positives": 0,
   "gb_scanned": 0.0634765625,
   "fp_per_gb": 0.0,
-  "scan_seconds": 7.347779199946672,
+  "scan_seconds": 3.9238561000383925,
   "size_overhead_bytes": 0,
   "dump_errors": [],
   "plain": {
@@ -938,7 +938,7 @@
   },
   "redaction_clean": 240,
   "redaction_n": 240,
-  "throughput_mb_s": 8.846210294461727
+  "throughput_mb_s": 16.5653373474537
  },
  "E4": {
   "open_pairs": 27,
@@ -1240,5 +1240,5 @@
    0.5786408307989988
   ]
  },
- "runtime_s": 61.5
+ "runtime_s": 33.5
 }

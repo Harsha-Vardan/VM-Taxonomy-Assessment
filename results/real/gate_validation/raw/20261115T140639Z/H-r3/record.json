@@ -1,0 +1,155 @@
+{
+ "arm": {
+  "name": "H",
+  "vm": "vsec-gate-b",
+  "listen": "127.0.0.1",
+  "passwd": true,
+  "floppy": false,
+  "mode": 384,
+  "machine": "pc"
+ },
+ "rep": 3,
+ "vm": "vsec-gate-b",
+ "started_utc": "2026-11-15T14:23:17Z",
+ "boot_seconds": 73.5,
+ "guest": {
+  "login": true,
+  "msr_raw": "80",
+  "msr": 128,
+  "disk_ok": true,
+  "root": true
+ },
+ "image_runtime": {
+  "mode": "0o600",
+  "uid": 64055,
+  "gid": 993
+ },
+ "blkstat": {
+  "rd_req": 1312,
+  "rd_bytes": 36042752,
+  "wr_req": 57,
+  "wr_bytes": 401408,
+  "flush_operations": 15,
+  "rd_total_times": 456276098,
+  "wr_total_times": 68802984,
+  "flush_total_times": 9455197
+ },
+ "legit_access": {
+  "booted": true,
+  "guest_disk_rw": true,
+  "qemu_read_requests": 1312,
+  "ok": true
+ },
+ "rows": [
+  {
+   "arm": "H",
+   "rep": 3,
+   "control": "C12",
+   "attack": "A02",
+   "stage": 0,
+   "stage_title": "Scan the network for console ports",
+   "m1": "PASS",
+   "m1_evidence": "ok",
+   "predicted_blocked": true,
+   "observed_blocked": true,
+   "agree": true,
+   "note": "",
+   "observation": {
+    "host": "172.31.132.198",
+    "port": 5900,
+    "connected": false,
+    "error": "ConnectionRefusedError: [Errno 111] Connection refused",
+    "version": "",
+    "types": [],
+    "none_offered": false,
+    "reason": ""
+   }
+  },
+  {
+   "arm": "H",
+   "rep": 3,
+   "control": "C11",
+   "attack": "A02",
+   "stage": 1,
+   "stage_title": "Connect to the guest console",
+   "m1": "PASS",
+   "m1_evidence": "ok",
+   "predicted_blocked": true,
+   "observed_blocked": true,
+   "agree": true,
+   "note": "",
+   "observation": {
+    "host": "127.0.0.1",
+    "port": 5900,
+    "connected": true,
+    "error": "",
+    "version": "RFB 003.008",
+    "types": [
+     2
+    ],
+    "none_offered": false,
+    "reason": ""
+   }
+  },
+  {
+   "arm": "H",
+   "rep": 3,
+   "control": "C14",
+   "attack": "A01",
+   "stage": 1,
+   "stage_title": "Send oversized FIFO command sequences",
+   "m1": "PASS",
+   "m1_evidence": "ok",
+   "predicted_blocked": true,
+   "observed_blocked": false,
+   "agree": false,
+   "note": "",
+   "observation": {
+    "msr": "0x80",
+    "qtree": {
+     "isa_fdc": true,
+     "floppy_drives": 0
+    }
+   }
+  },
+  {
+   "arm": "H",
+   "rep": 3,
+   "control": "C17",
+   "attack": "A09",
+   "stage": 2,
+   "stage_title": "Read the VM disk or memory image",
+   "m1": "PASS",
+   "m1_evidence": "ok",
+   "predicted_blocked": true,
+   "observed_blocked": true,
+   "agree": true,
+   "note": "",
+   "observation": {
+    "rc": 1,
+    "magic_read": "",
+    "stderr": "head: cannot open '/var/lib/libvirt/images/vsec-gate-b.qcow2' for reading: Permission denied"
+   }
+  }
+ ],
+ "chain_prediction": {
+  "A01": {
+   "blocked": true,
+   "stage": 1,
+   "by": "C14",
+   "layers": 5
+  },
+  "A02": {
+   "blocked": true,
+   "stage": 0,
+   "by": "C12",
+   "layers": 2
+  },
+  "A09": {
+   "blocked": true,
+   "stage": 1,
+   "by": "C21",
+   "layers": 2
+  }
+ }
+}

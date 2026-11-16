@@ -1,0 +1,26 @@
+{
+ "run_id": "20261116T053926Z",
+ "sessions": 5,
+ "windows": 30,
+ "window_ms": 100,
+ "buf": "(32*MB)",
+ "workloads": [
+  "idle",
+  "cpu",
+  "mem",
+  "mixed"
+ ],
+ "binary_sha256": [
+  "22a26388e5e44f74deeb9573dc6b596f1b8105d008dd21d4fb535919f7a114cf"
+ ],
+ "host": {
+  "kernel": "6.6.114.1-microsoft-standard-WSL2",
+  "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+  "nproc": "8",
+  "clocksource": "tsc",
+  "perf_event_paranoid": "2",
+  "qemu": "QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.18)",
+  "guest_xml_cpu": "<memory unit='KiB'>262144</memory>\n  <vcpu placement='static'>1</vcpu>\n  <cpu mode='custom' match='exact' check='none'>"
+ },
+ "note": "wsl2-host vs kvm-in-wsl2 (nested). Not native vs VM."
+}

@@ -1,0 +1,33 @@
+ID   STATUS SOURCE        CONTROL                EVIDENCE
+C01  FAIL   live-runtime  iommu_cmdline          cmdline: initrd=\initrd.img WSL_ROOT_INIT=1 panic=-1 nr_cpus=8 hv_utils.timesync_implicit=
+C02  NA     live-runtime  iommu_groups           IOMMU not testable on E0
+C03  PASS   live-config   qemu_seccomp_config    seccomp_sandbox=1 (unset: libvirt default)
+C04  PASS   live-runtime  qemu_seccomp_live      Seccomp: 2
+C05  NA     live-config   svirt_config           key unset, effective value unknown (see live check)
+C06  FAIL   live-runtime  svirt_live             label: kernel
+C07  PASS   live-config   qemu_not_root          user=libvirt-qemu
+C08  PASS   live-config   clear_capabilities     clear_emulator_capabilities=1 (unset: libvirt default)
+C09  PASS   live-runtime  ksm_off                ksm run=0
+C10  FAIL   live-runtime  nested_off             nested=Y
+C11  PASS   live-config   graphics_password      ok
+C12  PASS   live-config   graphics_listen        ok
+C13  PASS   live-config   no_usb_redirect        redirdev count=0
+C14  PASS   live-runtime  unused_devices         running QEMU builds no floppy controller, parallel port or sound device (info qtree)
+C15  PASS   live-config   network_mode           ok
+C16  PASS   live-runtime  guest_reachability     host-verified; 1 co-resident port(s), all port-isolated
+C17  PASS   live-runtime  image_permissions      ok
+C18  PASS   live-runtime  socket_permissions     ok
+C19  PASS   live-runtime  libvirtd_sock_perms    unix_sock_rw_perms=0770 (unset: libvirt default)
+C20  PASS   live-config   libvirt_tcp            listen_tcp=0 auth_tcp=sasl (unset: libvirt default)
+C21  PASS   live-runtime  savedir_permissions    ok
+C22  PASS   live-config   disk_cache             ok
+C23  NA     live-config   qemu_cve               qemu 8.2.2: 3 of 3 qemu CVE entries are unverified: list not usable for results; distro ve
+C24  NA     live-config   kernel_cve             kernel 6.6.114.1-microsoft-standard-WSL2: 2 of 2 kernel CVE entries are unverified: list n
+C25  PASS   live-runtime  cpu_vulnerabilities    ok
+C26  PASS   live-runtime  smt_state              smt=1 smt_vulnerable=False
+C27  PASS   live-config   no_shared_memory       shmem count=0
+C28  PASS   live-config   default_confined       security_default_confined=1 (unset: libvirt default)
+
+3 FAIL / 21 PASS / 4 NA   saved: /root/vsec/.local/rv/20261116T063834Z/arm-D
+
+# exit=1

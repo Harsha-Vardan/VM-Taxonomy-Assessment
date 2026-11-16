@@ -52,7 +52,9 @@
 #define LINE 64
 #define PAGE 4096
 /* 256 MB: well above any LLC, so probes hit DRAM. Power of two (the load child masks offsets). */
+#ifndef BUF_SIZE /* override only for small guests: gcc -DBUF_SIZE='(32*MB)'; must stay a power of two */
 #define BUF_SIZE (256 * MB)
+#endif
 
 static double now_ns(void) {
     struct timespec t;

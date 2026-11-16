@@ -1,6 +1,10 @@
 """Capture the host files M1 needs into a case folder (run on the KVM host, Linux only).
 
-    python -m vsec.collect <vm-name> <out-folder>
+    python -m vsec.collect [--qemu-devices] <vm-name> <out-folder>
+
+--qemu-devices (opt-in) also records the device types the running QEMU built (`info qtree` via
+`virsh qemu-monitor-command`, which makes libvirt mark the domain as tainted). Without it, C14 relies on the
+machine type read from /proc/<qemu-pid>/cmdline (only that token is stored).
 
 The out folder must be inside <repo>/cases or <repo>/.local and must not be a symlink. VNC/SPICE password
 VALUES, every password/passwd/secret/token value in <qemu:arg>/<qemu:env> and in the conf files, libvirtd.conf and
@@ -34,9 +38,10 @@ VM_NAME = guards.VM_NAME
 MAX_BYTES = 1_000_000
 ALLOWED_OUT = (ROOT / "cases", ROOT / ".local")
 MANIFEST = "collect_manifest.json"
-LIVE_FILES = ("qemu_status", "qemu_label", "perms.txt", "libvirtd.conf", "net_isolation.txt")
+LIVE_FILES = ("qemu_status", "qemu_label", "qemu_machine", "perms.txt", "libvirtd.conf", "net_isolation.txt")
 EXPECTED_FILES = ("vm.xml", "net_isolation.txt", "qemu.conf", "libvirtd.conf", "cmdline", "ksm_run", "nested",
-                  "iommu_groups", "smt", "vulns.txt", "qemu_status", "qemu_label", "perms.txt", "versions.txt")
+                  "iommu_groups", "smt", "vulns.txt", "qemu_status", "qemu_label", "qemu_machine", "qemu_devices",
+                  "perms.txt", "versions.txt", "net_peers.txt")
 BAD_STATUS = ("missing", "unreadable", "symlink-skipped", "dropped")
 REDACTED = "REDACTED"
 MIN_VERIFY_LEN = 4  # shorter originals ("1", "on") would match unrelated text; the structural check covers them
@@ -102,6 +107,16 @@ def virsh_net_dumpxml(name):
 def read_file_ex(src):
     """(bytes up to 1 MB with NULs removed, status, reason). status: ok | missing | symlink-skipped | unreadable;
     data is None unless ok. Never follows a symlink."""
+    data, status, reason = _read_bytes(src)
+    return (data.replace(b"\0", b"") if data is not None else None), status, reason  # attr/current ends with a NUL
+
+
+def read_raw(src):
+    """Like read_file_ex but NUL bytes kept (/proc/<pid>/cmdline separates arguments with NUL); None if not ok."""
+    return _read_bytes(src)[0]
+
+
+def _read_bytes(src):
     try:
         if stat.S_ISLNK(os.lstat(src).st_mode):
             return None, "symlink-skipped", "is a symlink"
@@ -115,7 +130,7 @@ def read_file_ex(src):
     try:
         if not stat.S_ISREG(os.fstat(fd).st_mode):
             return None, "unreadable", "not a regular file"
-        return os.read(fd, MAX_BYTES).replace(b"\0", b""), "ok", ""  # /proc/<pid>/attr/current ends with a NUL
+        return os.read(fd, MAX_BYTES), "ok", ""
     except OSError as e:
         return None, "unreadable", f"{type(e).__name__}: {e.strerror or e}"
     finally:
@@ -523,6 +538,49 @@ def net_isolation(vm_xml, read_network=None):
     return "isolated"
 
 
+def _iface_targets(vm_xml):
+    """tap device names (<target dev=...>) of the domain's interfaces, from the LIVE domain XML."""
+    import xml.etree.ElementTree as ET
+    try:
+        root = ET.fromstring(vm_xml)
+    except ET.ParseError:
+        return None
+    devs = []
+    for i in root.iter("interface"):
+        t = i.find("target")
+        devs.append(t.get("dev") if t is not None else None)
+    return devs
+
+
+def net_peers(vm_xml, sys_net="/sys/class/net"):
+    """C16 runtime evidence from the kernel bridge, not from libvirt network XML. One line per bridge port the guest's
+    taps share a bridge with: 'own <dev> bridge=<br> isolated=<0|1>' / 'peer <dev> bridge=<br> isolated=<0|1>'.
+    'no-interfaces' if the domain has no NIC; 'unknown: <reason>' if the state cannot be read (VM not running, no
+    target dev, a tap that is not a bridge port such as macvtap)."""
+    devs = _iface_targets(vm_xml)
+    if devs is None:
+        return "unknown: vm.xml unparseable"
+    if not devs:
+        return "no-interfaces"
+    base, lines = Path(sys_net), []
+    for dev in devs:
+        if not dev or not VM_NAME.fullmatch(dev):
+            return "unknown: interface without a live target device (VM not running?)"
+        link = base / dev / "brport" / "bridge"
+        if not link.exists():
+            return f"unknown: {dev} is not a bridge port"
+        br = os.path.basename(os.readlink(link))
+
+        def iso(port):
+            v = (read_file(str(base / port / "brport" / "isolated")) or b"").decode("ascii", "replace").strip()
+            return v if v in ("0", "1") else "?"
+        lines.append(f"own {dev} bridge={br} isolated={iso(dev)}")
+        for port in sorted(os.listdir(base / br / "brif")):
+            if port not in devs:
+                lines.append(f"peer {port} bridge={br} isolated={iso(port)}")
+    return "\n".join(lines)
+
+
 def _cleanup(out, created):
     """Remove only what this run made: the folder if it created it, else the files inside an empty one."""
     if created:
@@ -532,7 +590,7 @@ def _cleanup(out, created):
             p.unlink(missing_ok=True)
 
 
-def _run(vm, out, allow_anywhere=False):
+def _run(vm, out, allow_anywhere=False, qemu_devices=False):
     if not VM_NAME.fullmatch(vm):
         raise ValueError(f"invalid VM name: {vm!r}")
     out = Path(out)
@@ -556,6 +614,17 @@ def _run(vm, out, allow_anywhere=False):
         _store_redacted(out, man, "vm.xml", xml, "xml")
         _store(out, man, "net_isolation.txt", net_isolation(xml), "empty")
         _collect_host(vm, out, man)
+        if man.files.get("qemu_status", {}).get("status") != "ok":
+            man.record("net_peers.txt", "missing", f"VM {vm} not running (bridge ports exist only while it runs)",
+                       explained=True)
+        else:
+            _store(out, man, "net_peers.txt", net_peers(xml), "empty")
+        if not qemu_devices:
+            man.record("qemu_devices", "missing", "not requested (--qemu-devices)", explained=True)
+        elif man.files.get("qemu_status", {}).get("status") != "ok":
+            man.record("qemu_devices", "missing", f"VM {vm} not running", explained=True)
+        else:
+            _collect_devices(vm, out, man)
         man.report()
         (out / MANIFEST).write_text(json.dumps(man.as_dict(), indent=1), encoding="utf-8")
     except BaseException as e:
@@ -568,10 +637,11 @@ def _run(vm, out, allow_anywhere=False):
     return out, man
 
 
-def collect(vm, out, allow_anywhere=False):
-    """allow_anywhere=True lifts the cases/.local restriction (tests only). Returns the output folder; the
+def collect(vm, out, allow_anywhere=False, qemu_devices=False):
+    """allow_anywhere=True lifts the cases/.local restriction (tests only). qemu_devices=True: also record the
+    running QEMU's device types (taints the domain, see the module docstring). Returns the output folder; the
     manifest is written to <out>/collect_manifest.json."""
-    return _run(vm, out, allow_anywhere)[0]
+    return _run(vm, out, allow_anywhere, qemu_devices)[0]
 
 
 def _nested_value():
@@ -619,6 +689,41 @@ def _qemu_version():
     return f"{m.group(1)} ({text})" if text else m.group(1)
 
 
+_MACHINE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
+
+
+def machine_type(cmdline):
+    """The machine type from a QEMU /proc/<pid>/cmdline (NUL-separated): the value of -machine/-M, either its first
+    comma field or its type= option. Only this token is kept (the rest of the command line may hold secrets).
+    None if absent or not a plain name."""
+    args = cmdline.decode("utf-8", "replace").split("\0")
+    for flag, value in zip(args, args[1:]):
+        if flag in ("-machine", "-M", "--machine"):
+            fields = value.split(",")
+            name = next((f[5:] for f in fields if f.startswith("type=")), fields[0])
+            return name if _MACHINE.fullmatch(name) else None
+    return None
+
+
+def device_types(qtree):
+    """`info qtree` text -> the device type of every `dev: <type>, id ...` node, one per line (nothing else kept)."""
+    return "\n".join(m.group(1) for m in re.finditer(r"^\s*dev:\s*([A-Za-z0-9._,-]+?),\s*id\b", qtree, re.M))
+
+
+def _collect_devices(vm, out, man):
+    """OPT-IN (--qemu-devices): the device types the running QEMU really built, via the monitor's `info qtree`.
+    libvirt marks a domain 'tainted' (custom-monitor) when this is used, so it never runs by default."""
+    try:
+        p = guards.virsh("qemu-monitor-command", "--hmp", vm, "info qtree", timeout=60)
+    except (OSError, subprocess.SubprocessError) as e:
+        man.record("qemu_devices", "unreadable", f"virsh qemu-monitor-command: {type(e).__name__}")
+        return
+    if p.returncode:
+        man.record("qemu_devices", "unreadable", f"info qtree failed: {p.stderr.strip()[:120]}")
+        return
+    _store(out, man, "qemu_devices", device_types(p.stdout), "info qtree listed no devices")
+
+
 def _collect_live(vm, out, man):
     """The QEMU process of this VM, then file modes. A missing pid file means the VM is not running, which
     explains missing qemu_status / qemu_label; everything else missing is unexplained."""
@@ -626,8 +731,13 @@ def _collect_live(vm, out, man):
     if re.fullmatch(r"[0-9]+", pid):
         copy(f"/proc/{pid}/status", out / "qemu_status", man=man)
         copy(f"/proc/{pid}/attr/current", out / "qemu_label", man=man)
+        raw = read_raw(f"/proc/{pid}/cmdline")
+        if raw is None:
+            man.record("qemu_machine", "unreadable", f"cannot read /proc/{pid}/cmdline")
+        else:
+            _store(out, man, "qemu_machine", machine_type(raw) or "", "no -machine argument on the QEMU command line")
     else:
-        for name in ("qemu_status", "qemu_label"):
+        for name in ("qemu_status", "qemu_label", "qemu_machine"):
             man.record(name, "missing", f"VM {vm} not running (no pid in /run/libvirt/qemu/{vm}.pid)", explained=True)
     rows, skipped = [], man.skipped_items
     for tag, pattern in (("image", "/var/lib/libvirt/images/*"), ("socket", "/run/libvirt/*-sock*")):
@@ -644,11 +754,13 @@ def _collect_live(vm, out, man):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else list(argv)
+    qemu_devices = "--qemu-devices" in argv
+    argv = [a for a in argv if a != "--qemu-devices"]
     if len(argv) != 2:
         print(__doc__, file=sys.stderr)
         return 2
     try:
-        out, man = _run(argv[0], argv[1])
+        out, man = _run(argv[0], argv[1], qemu_devices=qemu_devices)
     except (ValueError, RuntimeError, OSError) as e:  # VirshNotFound is a RuntimeError
         print(f"error: {e}", file=sys.stderr)
         return 2
